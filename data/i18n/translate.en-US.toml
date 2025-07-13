@@ -1,0 +1,1545 @@
+[AssignUserToOrganizationError]
+description = "Error"
+hash = "sha1-41edbabd96af8a20560feb509d117cc59c5bfa53"
+other = "Organization user assignment failed"
+
+[AuthLogoutError]
+description = "Error"
+hash = "sha1-948b372bde20b271f861ca06ac5d87c817a40470"
+other = "Server error on user exit"
+
+[BeginTelegramRegistration]
+description = "Сообщение"
+hash = "sha1-46dfc26e4085b51ba44b01b19f4ffd3b328b40f8"
+other = "We are registering you in Meltory, one minute please..."
+
+[BodyParamInvalidError]
+description = "Error"
+hash = "sha1-acce3fb14ef42607c0af98c05debf0f336503399"
+other = "Incorrect value of parameter {{.Name}} from request body, maybe {{.Values}}"
+
+[BodyParamMissingError]
+description = "Error"
+hash = "sha1-535329365474a781857c7267804b2d79c497ba4a"
+other = "The required value of the {{.Name}} parameter from the request body was not set"
+
+[BrokerNotFoundError]
+description = "Error"
+hash = "sha1-d59589589679c8ac53579d4b4e3262a9e23849bf"
+other = "Broker not found"
+
+[BrokerServerNotFoundError]
+description = "Error"
+hash = "sha1-d61132e6ee6147b93c5924efcef697e86802d825"
+other = "Broker server not found"
+
+[CannotLaunchUserSignalError]
+description = "Error"
+hash = "sha1-d8c89e8d37200dfc1398a19585b24283fc9004ce"
+other = "The user signal cannot be started because it is not in a valid state."
+
+[CannotLaunchUserSubscriptionError]
+description = "Error"
+hash = "sha1-21db0ddad2891a70f4f2b22364ceb18481ae9903"
+other = "The user&#39;s subscription cannot be started because it is not in a valid state."
+
+[CheckAuthTokenError]
+description = "Error"
+hash = "sha1-5b2064e20a716c621be7cf34e74d55383972aa37"
+other = "Authorization token validation error"
+
+[CheckBrokerServerAccountError]
+description = "Error"
+hash = "sha1-c51abd5587c6b20c241f95ef0c34965b6c5e24c5"
+other = "Broker account verification error"
+
+[CheckDomainAvailabilityError]
+description = "Error"
+hash = "sha1-12a1534edd5a209b7519ea8eddf141f33f6c086f"
+other = "Error checking white label domain availability"
+
+[CheckPaymentLinkError]
+description = "Error"
+hash = "sha1-b1454eb02693f3e445629099c4e93f6a4783f8c7"
+other = "Error checking the link for the payment service"
+
+[CheckPaymentServiceError]
+description = "Error"
+hash = "sha1-1614de98a69af4bf6c44417af64518d9dc0ca651"
+other = "Error using user payment service"
+
+[ConvertPricesError]
+description = "Error"
+hash = "sha1-4b03201dc4bd298c91deecb6d94d871c1020582d"
+other = "Price conversion error"
+
+[CorruptValidationData]
+description = "Error"
+hash = "sha1-fa7b2c4746df1039179137e1fd65b6e3a9fc8b0f"
+other = "Corrupted WebApp User Validation Data"
+
+[CreateAuth0TelegramUser]
+description = "Error"
+hash = "sha1-f42e413bcf4630945b3d607d93711c6a29c20a5d"
+other = "Error creating Telegram user"
+
+[CreateAuthTokenError]
+description = "Error"
+hash = "sha1-1239f96a822ba5d612550b0b2f79772eace3c7de"
+other = "Server error creating a new authorization token"
+
+[CreatePaymentLinkError]
+description = "Error"
+hash = "sha1-bf6d5bee2063fede2d4164e7a6cf75616814f5ae"
+other = "Error creating a link to accept payment on an invoice"
+
+[CreatePaymentServiceError]
+description = "Error"
+hash = "sha1-02d5310cfa36fc08612d345d251a6141f3a90879"
+other = "Error creating payment service"
+
+[CreatePayoutsServiceError]
+description = "Error"
+hash = "sha1-b0ef5f6e2f8957fd4f0d67a80d7f0ede66632a1e"
+other = "Error creating payment"
+
+[CreateServiceError]
+description = "Error"
+hash = "sha1-559c38768bf29fcf61bfa34e0e7068607b476b72"
+other = "Error creating {{.Name}} service"
+
+[CreateTelegramBotError]
+description = "Error"
+hash = "sha1-f2ad7c5c50d2432de7927934f56f1a9f4535aa7a"
+other = "Error creating Telegram user bot"
+
+[CreateUserBillPaymentError]
+description = "Error"
+hash = "sha1-35b178e7b2551125d3ec11f319cb56b6dd6324eb"
+other = "Error creating payment for user account"
+
+[CreateUserBrokerError]
+description = "Error"
+hash = "sha1-0d6256ec84427899272001771422696a9173b831"
+other = "Error creating user broker"
+
+[CreateUserError]
+description = "Error"
+hash = "sha1-6c7d54bde3cf050a719d6aaf806037cd25eeb964"
+other = "Error creating user"
+
+[CreateUserPaymentError]
+description = "Error"
+hash = "sha1-49e27fd386b9ee7440b3706d8898084bcf33c688"
+other = "Error creating invoice payment record"
+
+[CreateUserRegistrationError]
+description = "Error"
+hash = "sha1-31da3196901ec3a247177f342922a47b3a8521a5"
+other = "Server error when linking user to domain/subdomain"
+
+[CreateUserSignalApprovalError]
+description = "Error"
+hash = "sha1-437629a3cc55019eaeaf83871fff2d0c4e8678b0"
+other = "Error creating request to start signal"
+
+[CreateUserSubscriptionApprovalError]
+description = "Error"
+hash = "sha1-6ae78c65fa722b7259f8dbb29788ad05aa833dfd"
+other = "Error creating request to start subscription"
+
+[CreateWhitelabelError]
+description = "Error"
+hash = "sha1-6313e1f3268ba8df50119cc441d7a0a72424db13"
+other = "Error creating Whitelabel domain or sub-domain"
+
+[DataFromBotError]
+description = "Error"
+hash = "sha1-592303135e0199812e63a73c1e5a065f09d9f1e0"
+other = "The message was received from a bot and not a user"
+
+[DateFromAfterOrEqualToError]
+description = "Error"
+hash = "sha1-396ed12df786374540461713d8ee694538dd9858"
+other = "The value of the past date ({{.From}}) is greater than or equal to the future To date ({{.To}})"
+
+[DeleteOTPCodeError]
+description = "Error"
+hash = "sha1-424e2611cc857d67cf969c02f1756e5536490aee"
+other = "Error deleting OTP code from cache"
+
+[DeleteS3FileError]
+description = "Error"
+hash = "sha1-ebab9f37c1fa13444c74e450e49f5d9f85b3a35e"
+other = "Error deleting existing file from storage"
+
+[DeleteTelegramBotError]
+description = "Error"
+hash = "sha1-e91a8a830b530128677b5ba1355d1a05e377ffe0"
+other = "Error deleting user&#39;s Telegram bot"
+
+[DeleteTelegramMessageError]
+description = "Error"
+hash = "sha1-9c22a5b6e65adfea2d99756950353a06642096a2"
+other = "Error deleting message for Telegram bot"
+
+[DeleteUserBillPaymentsError]
+description = "Error"
+hash = "sha1-8a0ea1000ece71d42d03485989bb53acd157565d"
+other = "Error deleting a payment from a user account"
+
+[DeleteUserBrokerError]
+description = "Error"
+hash = "sha1-e10bdc49d3e7021cfb5df29f550464a12cc756fd"
+other = "Error deleting user broker"
+
+[DeleteUserError]
+description = "Error"
+hash = "sha1-17f16b895845f6d801f2b6522f9b583f9a944ae7"
+other = "Server error on user deletion"
+
+[DeleteUserPaymentsError]
+description = "Error"
+hash = "sha1-0994f2ba5401dd6e69654ac11ccf67d594b27819"
+other = "Error deleting payments on user accounts"
+
+[DeleteUserSignalError]
+description = "Error"
+hash = "sha1-802fbc6367b4667b79805c5cab0989d1a0e9ed6d"
+other = "User signal deletion error"
+
+[DeleteUserSignalProcessesError]
+description = "Error"
+hash = "sha1-973111754e2e64704edb908f16df7a264507fb9a"
+other = "Error deleting signal processes"
+
+[DeleteUserSignalServiceError]
+description = "Error"
+hash = "sha1-3e236593060cce5ae7f010e54a7596f6e80bd762"
+other = "User signal deletion error (service)"
+
+[DeleteUserSubscriptionError]
+description = "Error"
+hash = "sha1-a30de494a991fcd7c366654de74bd6326a7769c3"
+other = "Error deleting user subscription"
+
+[DeleteUserSubscriptionServiceError]
+description = "Error"
+hash = "sha1-24660fec6e13c52a7de8c58c238abc7e45ec6a6c"
+other = "Error deleting a user&#39;s subscription via the subscription service"
+
+[DeleteWhitelabelError]
+description = "Error"
+hash = "sha1-88feeec007415af566beddd1ac9ea4093bfd1c6d"
+other = "Error deleting domain/subdomain whitelabel record"
+
+[DomainNotAvailableError]
+description = "Error"
+hash = "sha1-77246f8bd4b38d3d08bec3e773f2d131c64fae11"
+other = "Domain not available"
+
+[DurationInMonths]
+description = "Description"
+hash = "sha1-fed1df820d557d3cebf73bea8ebc1eaed8f96327"
+one = "{{ .Count }} month"
+other = "{{ .Count }} months"
+
+[GeneralTelegramBotsError]
+description = "Error"
+hash = "sha1-6729d1dc447c395fd46f65e7818359debb8ec5bf"
+other = "General Telegram Bot User Error"
+
+[GetAuth0ServiceError]
+description = "Error"
+hash = "sha1-ba87ad506cb20a65b6c351ea6ade8ca054987d6b"
+other = "Error creating authentication service"
+
+[GetAuthTokenError]
+description = "Error"
+hash = "sha1-d52b0b1d4ce7115882c390445df043ca8ba3ce1f"
+other = "Error retrieving authorization token"
+
+[GetBrokerAccountMessage]
+description = "Description"
+hash = "sha1-ea6bfee7aaed542c44d233e4d933c2f21612470c"
+other = "Get a trading account with a broker"
+
+[GetBrokerError]
+description = "Error"
+hash = "sha1-fa2b5e70ca00e724c2e440d42b95e0f757823e2a"
+other = "Broker extraction error"
+
+[GetBrokerServerError]
+description = "Error"
+hash = "sha1-55b60712eb5a171015884789e09c75bdade39ffc"
+other = "Broker server retrieval error"
+
+[GetBrokerServerSymbolsError]
+description = "Error"
+hash = "sha1-c38e01b75a145d421bf7e474e06ef9544cb8b4a2"
+other = "Error receiving trading pairs from broker"
+
+[GetBrokerServersCountError]
+description = "Error"
+hash = "sha1-05c265d13f8345ea3b897fda904b02f72ca5c3de"
+other = "Error retrieving the number of broker servers"
+
+[GetBrokerServersError]
+description = "Error"
+hash = "sha1-3be728331251d74c7507d03e1e2a62f1c0c43a04"
+other = "Error extracting broker servers"
+
+[GetBrokerServersServiceError]
+description = "Error"
+hash = "sha1-3be728331251d74c7507d03e1e2a62f1c0c43a04"
+other = "Error extracting broker servers"
+
+[GetBrokersError]
+description = "Error"
+hash = "sha1-3d1cf0aef2919d5e7f4741164ba5d46bf738dc9c"
+other = "Error retrieving brokers"
+
+[GetBrokersServiceError]
+description = "Error"
+hash = "sha1-3d1cf0aef2919d5e7f4741164ba5d46bf738dc9c"
+other = "Error retrieving brokers"
+
+[GetCurrencyByNameError]
+description = "Error"
+hash = "sha1-16d918d2cfe778f81065da02c2edf5f68df2cbc1"
+other = "Error retrieving currency with given name"
+
+[GetDomainByClientError]
+description = "Error"
+hash = "sha1-8aa4081b800383edf6e7f14496ffbfda67c4e96a"
+other = "Error retrieving domain by key"
+
+[GetExchangeRateError]
+description = "Error"
+hash = "sha1-f3edcfdce473b58ff8dfba3fa6d3f0300207e4ad"
+other = "Error retrieving currency exchange data on {{ .Date }} from {{ .From }} to {{ .To }}"
+
+[GetFileBufferError]
+description = "Error"
+hash = "sha1-93f4b636b13acc3b383cec5ef2d1d0e3d406d1ad"
+other = "Error creating buffer to read loaded file"
+
+[GetInstructionsMessage]
+description = "Description"
+hash = "sha1-78f943eebf5dd5f12199691d3cded18f3c08de99"
+other = "Instructions"
+
+[GetOriginDomainError]
+description = "Error"
+hash = "sha1-9e5c171d86307796725cdb08e5e6c74aa138abb0"
+other = "Error extracting Origin domain from request"
+
+[GetOriginError]
+description = "Error"
+hash = "sha1-f289749d27e95046e68ccbc48be3b888cad928dd"
+other = "Error retrieving the list of whitelabel domains/subdomains"
+
+[GetRecommendedSettingsError]
+description = "Error"
+hash = "sha1-aacd182aec8be084c661ba305ae83a4d694a4a30"
+other = "Error getting recommended settings"
+
+[GetRedisValueError]
+description = "Error"
+hash = "sha1-cd7443706f4466381e6dfa5f05f8bf348b2c73ec"
+other = "Error retrieving value from storage"
+
+[GetSupportMessage]
+description = "Description"
+hash = "sha1-203f0d2684a7553e7ce629abfc763f9e22a93f66"
+other = "Support"
+
+[GetSymbolColorsError]
+description = "Error"
+hash = "sha1-ee3a1f87dd3b06137d6d64c2adccc29fabbf3b83"
+other = "Error retrieving tool color list"
+
+[GetTelegramBotError]
+description = "Error"
+hash = "sha1-4a3c8c583091b63c88326434ee57dc9d07c88a2f"
+other = "Error in user bot, contact technical support"
+
+[GetTelegramBotTokenError]
+description = "Error"
+hash = "sha1-4246f6090924655660a544f2c82eb5a06eb2acfd"
+other = "Error retrieving user bot data, please contact support"
+
+[GetTelegramBotsError]
+description = "Error"
+hash = "sha1-60c076b867780f884d4a2a2a43b5531d37c974f6"
+other = "Error extracting user&#39;s Telegram bots"
+
+[GetTranslationsError]
+description = "Error"
+hash = "sha1-a01757c3a5a13deb962dc2c3707c4e081ea8305c"
+other = "Error creating translation service"
+
+[GetUniqueUIDsError]
+description = "Error"
+hash = "sha1-fddd88379149725cdd0e7a103e1f5cd85d08ab08"
+other = "Error getting unique identifier for user"
+
+[GetUserBillError]
+description = "Error"
+hash = "sha1-d6e201eeb8332b99fcf2e6dbcf70b9247b0aec5a"
+other = "Error retrieving invoice"
+
+[GetUserBillPaymentsError]
+description = "Error"
+hash = "sha1-faedfc611b434cfc62dfddabe6cd0cf8deb72069"
+other = "Error retrieving user account payment records"
+
+[GetUserBillsCountError]
+description = "Error"
+hash = "sha1-3c1e243c0c4223650fcc6211ad5766d0b91b898d"
+other = "Error retrieving number of user accounts"
+
+[GetUserBillsError]
+description = "Error"
+hash = "sha1-d5c7f78fc47c84c21a38a6ef6260a82bd5018954"
+other = "Error retrieving list of user accounts"
+
+[GetUserBrokerError]
+description = "Error"
+hash = "sha1-e6c1998de461cb51c600dc96e6c5fe0dc0595645"
+other = "Error retrieving user broker"
+
+[GetUserBrokerOrdersError]
+description = "Error"
+hash = "sha1-bf7658d0bf49c9fec111b1dac1d8ba06a0eb60a4"
+other = "Error receiving orders from your broker"
+
+[GetUserBrokerSymbolsError]
+description = "Error"
+hash = "sha1-4b3216153d7f344db8f54ce1dd7492285a986692"
+other = "Error getting trading pairs from your broker"
+
+[GetUserBrokersError]
+description = "Error"
+hash = "sha1-60199c718ca0c2720cb84b59e2d36691451ca679"
+other = "Error retrieving user brokers"
+
+[GetUserByIDError]
+description = "Error"
+hash = "sha1-b65e3b0f494e2fefc21cb931c24a2993953e47ac"
+other = "Server error retrieving user with ID"
+
+[GetUserError]
+description = "Error"
+hash = "sha1-e5710232e6fa278ed9f01187d3e85e2e0d9c939d"
+other = "Server Error Retrieving User"
+
+[GetUserPaymentError]
+description = "Error"
+hash = "sha1-973087e914a5fe291ee45e11a882b16ddfcdc07f"
+other = "Error retrieving payment record"
+
+[GetUserPaymentLinkError]
+description = "Error"
+hash = "sha1-6b7213e5d2f2de971045677aa532f1621dfd5f91"
+other = "The payment link is incorrect, contact support"
+
+[GetUserPaymentUIDError]
+description = "Error"
+hash = "sha1-3af47618956d3c1c3116a8ba2e5700b4b614ef18"
+other = "Error getting unique UID for user bill payment"
+
+[GetUserPaymentsError]
+description = "Error"
+hash = "sha1-59e0108950fb5b593d99bec978f3db78d3d79607"
+other = "Error retrieving list of user account payments"
+
+[GetUserPayoutsCountError]
+description = "Error"
+hash = "sha1-da3d27159ff94b2a835a02152655b8578b7b717f"
+other = "Error retrieving user payout amount"
+
+[GetUserPayoutsError]
+description = "Error"
+hash = "sha1-511d37d1a0e2c829bc780d063b4e2df258f3d523"
+other = "Error retrieving user payouts"
+
+[GetUserPayoutsSumError]
+description = "Error"
+hash = "sha1-9b3fb51c73ab0001841ff88fde347f8e8026d428"
+other = "Error retrieving user payout amount"
+
+[GetUserProfileError]
+description = "Error"
+hash = "sha1-28cf826d06baf454879f5cfd1af8de3642fc3347"
+other = "Error retrieving user profile"
+
+[GetUserRegistrationsError]
+description = "Error"
+hash = "sha1-e8e9598309d12d73479124fd899f0f4bd2f7f9a9"
+other = "Error retrieving user registrations"
+
+[GetUserSignalAllStatsError]
+description = "Error"
+hash = "sha1-2e5a1e11ec59afafd4ff8bc351da493959d4d02e"
+other = "Error in receiving data for all signals"
+
+[GetUserSignalApprovalError]
+description = "Error"
+hash = "sha1-b923e0a889edfe096f90ef38d9e56afd2bd70b30"
+other = "Error receiving request to start signal"
+
+[GetUserSignalError]
+description = "Error"
+hash = "sha1-c563f3178946a16f0484b61a374def116e290b41"
+other = "User signal extraction error"
+
+[GetUserSignalOrdersError]
+description = "Error"
+hash = "sha1-97a0d45536120847082725ea8f9fe5a59f9a7aaa"
+other = "Error retrieving orders from user&#39;s broker"
+
+[GetUserSignalTotalsError]
+description = "Error"
+hash = "sha1-40a21e9f7ef9e1d0c7d7ee6e7df09cc3239f593c"
+other = "Error in receiving general data from user signal"
+
+[GetUserSignalsApprovalsError]
+description = "Error"
+hash = "sha1-3325b42296b04b4236866b82f80e37aacf5f8ef1"
+other = "Error receiving requests to start signal"
+
+[GetUserSignalsError]
+description = "Error"
+hash = "sha1-e0dd639c32cf155d7131826e7d6b1d46869a5fb5"
+other = "Error extracting user signals"
+
+[GetUserSubscriptionApprovalError]
+description = "Error"
+hash = "sha1-363cb49f68031b60a9bee81afb4af2ac94d2353f"
+other = "Error receiving request to start subscription"
+
+[GetUserSubscriptionError]
+description = "Error"
+hash = "sha1-6cc5ec7bab36391d075480def3e94f779a592f9a"
+other = "Error retrieving user subscription"
+
+[GetUserSubscriptionOrdersError]
+description = "Error"
+hash = "sha1-0715ba2953a8a324f138abf13bb20062880e2fcc"
+other = "Error retrieving orders from user subscription"
+
+[GetUserSubscriptionPerformanceError]
+description = "Error"
+hash = "sha1-edf4123afd8ec0d2aacf8c10d62885aee1888ce4"
+other = "Error retrieving operational metrics for a user&#39;s subscription"
+
+[GetUserSubscriptionRequirementsError]
+description = "Error"
+hash = "sha1-40e0c96f8200e706cb07312b75a35492163ad527"
+other = "Error retrieving prerequisites for user subscription"
+
+[GetUserSubscriptionTotalsError]
+description = "Error"
+hash = "sha1-5efc67c515c1270aa9b98d85096e61de4946429a"
+other = "Error retrieving total metrics for a user&#39;s subscription"
+
+[GetUserSubscriptionsApprovalsError]
+description = "Error"
+hash = "sha1-6216003fc3ffedbf37b9d916809e529014d6a075"
+other = "Error receiving requests to start subscriptions"
+
+[GetUserSubscriptionsCountError]
+description = "Error"
+hash = "sha1-deaa00185897508fccc04c72dddc4cf306a82fc1"
+other = "Server error getting number of subscriptions"
+
+[GetUserSubscriptionsError]
+description = "Error"
+hash = "sha1-cc42cc6571f878d6598ed9040c0e50a8cb614ae5"
+other = "Error retrieving list of user subscriptions"
+
+[GetUserTokenError]
+description = "Error"
+hash = "sha1-55bd6c807c6263a7d78e7bc74128432a06e57b5a"
+other = "Server error getting token for user"
+
+[GetUserUniqueIdentifierError]
+description = "Error"
+hash = "sha1-fddd88379149725cdd0e7a103e1f5cd85d08ab08"
+other = "Error getting unique identifier for user"
+
+[GetWhitelabelError]
+description = "Error"
+hash = "sha1-3778e370f948ed8402a7ec5ff1053c02767fac02"
+other = "Error extracting Whitelabel data, please contact technical support"
+
+[GetWhitelabelUsers]
+description = "Error"
+hash = "sha1-157120459e3005da5abe8270aa1a7fb455dc040f"
+other = "Error extracting Whitelabel users"
+
+[GetWhitelabelsCountError]
+description = "Error"
+hash = "sha1-8dda58ca294b69a34e1d8852cc409ebdfae6ef8d"
+other = "Error retrieving whitelabel count from user"
+
+[GetWhitelabelsError]
+description = "Error"
+hash = "sha1-4b8b6f5cfb0fa9bcddf5c963106ea08890d958bc"
+other = "Error retrieving Whitelabel domains or sub-domains of the user"
+
+[HeleketStateCanceled]
+description = "Description"
+hash = "sha1-ac8fb64892f58917afd4cb4ec69f18363317fefb"
+other = "Payment cancelled, customer did not pay"
+
+[HeleketStateCheck]
+description = "Description"
+hash = "sha1-357b1f445ab71736c78edc31fd8a4e1611f79e5a"
+other = "Payment confirmed"
+
+[HeleketStateConfirmCheck]
+description = "Description"
+hash = "sha1-f416c8123ebd2709bd566ba6a4cf453cd8650dfd"
+other = "We have seen the transaction in the blockchain and are waiting for the required number of network confirmations."
+
+[HeleketStateCreated]
+description = "Description"
+hash = "sha1-0dad98bc42d3520ddb172b8112f1a0f62c405a89"
+other = "Payment created"
+
+[HeleketStateFail]
+description = "Description"
+hash = "sha1-bf07f032d9d09dd8cff42a4373ad7e9ae001ae50"
+other = "Payment error"
+
+[HeleketStateLocked]
+description = "Description"
+hash = "sha1-6e4b7a9a95cf18a828883e534ee1284aaefdef8b"
+other = "Funds blocked due to AML procedure"
+
+[HeleketStatePaid]
+description = "Description"
+hash = "sha1-cedadd0ce130cf31e51c45e348a31f6543dd2e3b"
+other = "The payment was successful and the client paid exactly as required."
+
+[HeleketStatePaidOver]
+description = "Description"
+hash = "sha1-a1f82ed69c159eef726918ea2fb13738a8b12d87"
+other = "The payment was successful and client paid more than required"
+
+[HeleketStateProcess]
+description = "Description"
+hash = "sha1-40b9807509bdb1acde644187efc6677db0451b26"
+other = "Payment is being processed"
+
+[HeleketStateRefundFailed]
+description = "Description"
+hash = "sha1-7c2463ac663914eeb029d0614c63ff42d19c3dd4"
+other = "An error occurred while returning"
+
+[HeleketStateRefundPaid]
+description = "Description"
+hash = "sha1-fef742225754f450242db9a3d898dad9b83c1885"
+other = "The return was successful."
+
+[HeleketStateRefundProcess]
+description = "Description"
+hash = "sha1-cc10505809792afd1e12358f3a8cdfed153ea86b"
+other = "Return in Processing"
+
+[HeleketStateSystemFail]
+description = "Description"
+hash = "sha1-61d29e44c133a93957d495d43570c778b50da781"
+other = "A system error has occurred"
+
+[HeleketStateWrongAmount]
+description = "Description"
+hash = "sha1-ab1e9c38a4ee2da313436f5f23cae9a31098bf32"
+other = "The client paid less than required"
+
+[HeleketStateWrongAmountWaiting]
+description = "Description"
+hash = "sha1-570a86a22d085a6ea3d4fcaec5168e05df34d893"
+other = "The client paid less than required, with the possibility of additional payment"
+
+[InsufficientUserBrokerBalance]
+description = "Error"
+hash = "sha1-7ae23efefb715b5087fc90d2f0b0b4cd186039fd"
+other = "Not enough balance to connect the account ({{ .CurrentBalance }} &lt; {{ .RequiredBalance }})"
+
+[InsufficientUserBrokerBalanceError]
+description = "Error"
+hash = "sha1-5906c6a871e14b6b9ed79557d1bfef7a22454497"
+other = "There is not enough balance on the account to start"
+
+[InvalidDateFormatError]
+description = "Error"
+hash = "sha1-3bc98855dfd97460eed57049f3f0da3ebbf814ac"
+other = "Invalid date format {{.Name}}"
+
+[InvalidDomainError]
+description = "Error"
+hash = "sha1-85ea38eeef172cdb1d24828aa18caaa5f1676f75"
+other = "Invalid domain name format"
+
+[InvalidImageFormatError]
+description = "Error"
+hash = "sha1-d739672dab235ff2f6860460e7984345f32c5f7e"
+other = "The uploaded file format is incorrect, should be PNG/JPG/SVG"
+
+[InvalidOTPCodeError]
+description = "Error"
+hash = "sha1-7f972a53b6a19d9184365356436dac1cc7ffd75c"
+other = "OTP code does not exist"
+
+[InvalidSubdomainError]
+description = "Error"
+hash = "sha1-3849c310be9ed056a0f1c86c5b966cb54df67944"
+other = "Incorrect subdomain name format"
+
+[InvalidUserSignalStateError]
+description = "Error"
+hash = "sha1-6daaaf8599fdfbbd6621b4f113ba1ee24eb656f0"
+other = "The signal cannot be removed in this state"
+
+[InvalidUserSubscriptionStateError]
+description = "Error"
+hash = "sha1-5009f4157b4e435ae2944fa8e3ba11c14c7ef07d"
+other = "The subscription cannot be deleted in this state"
+
+[InvalidValidationData]
+description = "Error"
+hash = "sha1-f683a87a296533359a49a44c534b0a822ed37f18"
+other = "Incorrect data for WebApp user validation"
+
+[InvestorAccountPasswordError]
+description = "Error"
+hash = "sha1-5721f6800ca870e45e56ba2f2eb572f890bfd557"
+other = "Use a regular, non-investor password"
+
+[LaunchUserSignalError]
+description = "Error"
+hash = "sha1-97773178b782520f15ea70ff61b2b066de988bc1"
+other = "Error starting user signal"
+
+[LaunchUserSubscriptionError]
+description = "Error"
+hash = "sha1-38dedd177846341c9659baa6cf5ec7de7683656c"
+other = "Error starting user subscription"
+
+[LoginAuth0TelegramUserError]
+description = "Error"
+hash = "sha1-983896dc27a01f7c71beb37fbb3a2cfda7008c68"
+other = "Telegram user login error"
+
+[MapUserPaymentStateError]
+description = "Error"
+hash = "sha1-775873663f2ac4d2b4e99e40e5f4f7a502fa4fda"
+other = "Error getting user payment status"
+
+[MarshalError]
+description = "Error"
+hash = "sha1-15d384faf2d58bb757e1c5bf0a9e566513caf51a"
+other = "Data serialization error"
+
+[MismatchingCurrencyError]
+description = "Error"
+hash = "sha1-73a140850805ee8b874ef1d191a224ae21b39d75"
+other = "The signal account currency ({{ .SignalCurrency }}) is different from the subscription account currency ({{ .SubscriptionCurrency }})"
+
+[MissingDateBaseCurrencies]
+description = "Error"
+hash = "sha1-7e485de74501b229e821772c2cc1dde848bb5462"
+other = "No currency conversion rates found for dates {{.Date}}"
+
+[MissingExchangeRateError]
+description = "Error"
+hash = "sha1-96fc94a816b9b1ca205b5dfa4d5320c459409d0c"
+other = "no currency exchange data available for {{ .Date }} from {{ .From }} to {{ .To }}"
+
+[MissingOTPCodeError]
+description = "Error"
+hash = "sha1-e0fee6768133e6ee04b2c5d0169f370d2545da29"
+other = "The OTP code value is not specified"
+
+[MissingOrderMapEntriesError]
+description = "Error"
+hash = "sha1-c04b10b1e0b7fd16351c67d68f38da49799efc70"
+other = "Order data missing"
+
+[MissingTelegramBotError]
+description = "Error"
+hash = "sha1-444cc09e9575c7a8093ea8e4a142eebaf9ce5aa5"
+other = "Bot is not registered"
+
+[MissingToCurrency]
+description = "Error"
+hash = "sha1-ba47a45be30500bfa6b1f6a1cbf8ea15bcc57d8c"
+other = "Target currency not found {{.Name}}"
+
+[MissingWhitelabelError]
+description = "Error"
+hash = "sha1-f47c6b8f721d73e6afb3548d6a3e3dbdc2a1258e"
+other = "User does not have whitelabel"
+
+[Month_April]
+description = "Description"
+hash = "sha1-941f75059c8c800ac51098823d500f4dcbf26195"
+other = "April"
+
+[Month_August]
+description = "Description"
+hash = "sha1-fe56bdfdc0b1110e8af076cb49f4fe453c6cab6c"
+other = "August"
+
+[Month_December]
+description = "Description"
+hash = "sha1-2147b67fa145ee2ac24c7486de64f51aac5225c8"
+other = "December"
+
+[Month_February]
+description = "Description"
+hash = "sha1-8de7a19859fe128cc4df0c7208234549657fbab0"
+other = "February"
+
+[Month_January]
+description = "Description"
+hash = "sha1-c08a5c759ebb46abb146812713c42b634f2535d8"
+other = "January"
+
+[Month_July]
+description = "Description"
+hash = "sha1-0a9c8ba75e549eb84c2968d08fc02fdfcb35c499"
+other = "July"
+
+[Month_June]
+description = "Description"
+hash = "sha1-97edfd88c012cd677477ce25472399f216ac7c14"
+other = "June"
+
+[Month_March]
+description = "Description"
+hash = "sha1-e07c0ef8a73f545bc2050d3faa55b90f121716da"
+other = "March"
+
+[Month_May]
+description = "Description"
+hash = "sha1-7257d87a54c29c886e60f7e72099783d32b81b2e"
+other = "Maybe"
+
+[Month_November]
+description = "Description"
+hash = "sha1-fd16e0b1b405ba6ed6caa4fd0ecea84aff29e8f3"
+other = "November"
+
+[Month_October]
+description = "Description"
+hash = "sha1-99b2013051a14ff496c89a895f4374394deabfda"
+other = "October"
+
+[Month_September]
+description = "Description"
+hash = "sha1-0ec92bf61c6c85a79a260e9811bf1142376cc1ed"
+other = "September"
+
+[MoreThanOnePairMappedError]
+description = "Error"
+hash = "sha1-f2a39176861bbf783713d3b3974987f1231ce1ed"
+other = "More than one pair is assigned to the symbol {{.Symbol}}"
+
+[NonHedgingUserBrokerAccountError]
+description = "Error"
+hash = "sha1-0e5872773a09e810f276e82f84513c4b1d0d5b91"
+other = "Error connecting a non-hedging broker account"
+
+[NonZeroPriceAndCommissionError]
+description = "Error"
+hash = "sha1-be59c2ab3469dd88f433ab7d3678a57c1be8e56d"
+other = "Non-zero cost and commission percentage at the same time"
+
+[OpenUploadedFileError]
+description = "Error"
+hash = "sha1-763bcfcd418833a9bbf6e2d60e573870773d8ea7"
+other = "Error opening downloaded file"
+
+[ParseOTPCodeError]
+description = "Error"
+hash = "sha1-0b87ac49dbf4bcbf86a46b7971d02982eab6ae0f"
+other = "OTP code conversion error"
+
+[ParseParamError]
+description = "Error"
+hash = "sha1-bf07af31082d279fa38676af8825ccf3ee1b6bc9"
+other = "Error reading parameters"
+
+[ParsePaymentAmountError]
+description = "Error"
+hash = "sha1-0afc9ee7bbeeab1675b374f3b77f190b147005bb"
+other = "Error converting payment amount from line"
+
+[PaymentCanceled]
+description = "Description"
+hash = "sha1-f48887076159abeb64b963dfe5b7579e19aaaa48"
+other = "Payment canceled"
+
+[PaymentCompleted]
+description = "Description"
+hash = "sha1-bc87a67aee36ccfa34a04ac153f5d85b54e82f59"
+other = "Paid"
+
+[PaymentCreated]
+description = "Description"
+hash = "sha1-89ee8a0a9563845f3b2d3bcaea03ba96c4a819a5"
+other = "Ready for payment"
+
+[PaymentError]
+description = "Description"
+hash = "sha1-bf07f032d9d09dd8cff42a4373ad7e9ae001ae50"
+other = "Payment error"
+
+[PaymentInProgress]
+description = "Description"
+hash = "sha1-581adb1964cbe48a2e9736e7b0d3a7a3b5a2d181"
+other = "Payment in progress"
+
+[PaymentPartial]
+description = "Description"
+hash = "sha1-0f436010fd09e9dae68ff94beb20ffe26490b441"
+other = "Not paid in full"
+
+[PerformPayoutsServiceError]
+description = "Error"
+hash = "sha1-622495300072a1856b30e1c7d00754d27aaec74e"
+other = "Error making payment to user"
+
+[QueryParamInvalidError]
+description = "Error"
+hash = "sha1-767898de09220aa4ad2df7e67ce0da0f107dcce6"
+other = "Incorrect value of parameter {{.Name}} from address bar, maybe {{.Values}}"
+
+[QueryParamMissingError]
+description = "Error"
+hash = "sha1-7952fe94d3e0045f35857ad9a05a7f19ebe2cf22"
+other = "The required value of the {{.Name}} parameter from the address bar was not set"
+
+[ReadUploadedFileError]
+description = "Error"
+hash = "sha1-b84150fc7a9660195f602e230066039286dc4dbd"
+other = "Error reading data from uploaded file"
+
+[RefreshHeleketPaymentLinksError]
+description = "Error"
+hash = "sha1-32ccc69ae7f45d347c8c445044d0f0013906045f"
+other = "Error updating payment service links"
+
+[RequestAccessDenied]
+description = "Error"
+hash = "sha1-c0509f4189c11e9288df8c37312b589c83249284"
+other = "Access is denied"
+
+[RequestBodyMappingError]
+description = "Error"
+hash = "sha1-09069695e282ff8a12144e58d0e5afcedafd3baf"
+other = "Request body mapping error"
+
+[RequestQueryMappingError]
+description = "Error"
+hash = "sha1-4ebc45529f0ebd0ef78b6409ddc0fb6ebb6531fc"
+other = "Error mapping values in address bar"
+
+[RequestURIMappingError]
+description = "Error"
+hash = "sha1-a0762f6dcf1df23f6b1cc14d8c2f6b9ee9fc4bc1"
+other = "Error mapping address bar parameters"
+
+[RequestValidationError]
+description = "Error"
+hash = "sha1-bb7f3c04b7f29a259eded37c30d01db0e2d65c65"
+other = "Request body data validation error"
+
+[ReservedSubdomainError]
+description = "Error"
+hash = "sha1-51523974331463fd8e0832e30281c7d94cd8ccb7"
+other = "This name is reserved, please choose another"
+
+[SaveFileToS3Error]
+description = "Error"
+hash = "sha1-5611289b2c0915cd8cb906dca65ae80bb3e606c2"
+other = "Error saving uploaded file to storage"
+
+[SignalAlreadyExistsError]
+description = "Error"
+hash = "sha1-51bce81fecfaeeae162830a3aefc176788376d59"
+other = "A signal with the same name already exists"
+
+[SignalPriceLessThanRequiredError]
+description = "Error"
+hash = "sha1-4a326e82ce1d504dad38f30703126ae5cbac4d75"
+other = "The cost of the signal is less than the minimum required"
+
+[TelegramBotEncryptError]
+description = "Error"
+hash = "sha1-f98499122d56a48dea29086c28788b4f326a84ca"
+other = "Telegram bot user data encryption error"
+
+[TelegramBotNotRegisteredError]
+description = "Error"
+hash = "sha1-c3fc81c49dbc4e74845f17f45796fa440f76daaa"
+other = "Telegram bot is not registered, please contact technical support"
+
+[TelegramGetMeError]
+description = "Error"
+hash = "sha1-2858c3f14f3a17486474fa2edc75ad7759de0d6a"
+other = "Internal Telegram bot error, please contact technical support"
+
+[TelegramInternalError]
+description = "Error"
+hash = "sha1-dc51f0508adb7420d7a4b5e15cfe1641f404ce91"
+other = "Telegram bot internal error, contact support (support@meltory.com)"
+
+[TelegramLoginLink]
+description = "Сообщение"
+hash = "sha1-65edb705c2844c8db5f0c0d9cdc33cde7445cbc4"
+other = "Authorization was successful and now you can start working ✅\n\nBrowser - {{.URL}}/confirm?domain={{.URL}}&code={{.OTP}}"
+
+[UnmarshalError]
+description = "Error"
+hash = "sha1-cc06a563ce8bb63a5fd2524fcac3c91ccf93df5d"
+other = "Data deserialization error"
+
+[UnsupportedCurrencyError]
+description = "Error"
+hash = "sha1-d160926e4fbce314eb11108acb04fec684fb426e"
+other = "Unsupported currency with name {{.Name}}"
+
+[UpdateTelegramBotError]
+description = "Error"
+hash = "sha1-25425801b5a45faa6b5a85242140cfb661e2caff"
+other = "Telegram bot user update error"
+
+[UpdateUserBillError]
+description = "Error"
+hash = "sha1-b0758cf9c6719002b2028d6128531fe47dc00813"
+other = "Error updating user account"
+
+[UpdateUserBrokerError]
+description = "Error"
+hash = "sha1-a1b8064a328db59734f23a0217e417430336a4cf"
+other = "User Broker Update Error"
+
+[UpdateUserError]
+description = "Error"
+hash = "sha1-782d72fc900960f0e8421b5240dfa98553a1a11d"
+other = "Server error updating user"
+
+[UpdateUserPaymentError]
+description = "Error"
+hash = "sha1-638e621092200c3b85416fa156d36d8fd2d3ca94"
+other = "Error updating invoice payment record"
+
+[UpdateUserProfileError]
+description = "Error"
+hash = "sha1-7bbc7e1fc7f418af7973f3148297d9e7577a5035"
+other = "Error updating user profile"
+
+[UpdateUserSignalApprovalError]
+description = "Error"
+hash = "sha1-b2076518ff3fe44ae11a27c60df336b570af90e5"
+other = "Error updating signal start request"
+
+[UpdateUserSignalError]
+description = "Error"
+hash = "sha1-32ff55ffecd0e86cc25b5c9b82391bc87b7d0ea8"
+other = "User Signal Update Error"
+
+[UpdateUserSignalStateError]
+description = "Error"
+hash = "sha1-3ece2eeb12bb4c6837346efeca833caf62187b18"
+other = "User signal state change error"
+
+[UpdateUserSubscriptionApprovalError]
+description = "Error"
+hash = "sha1-ead2e060fd6d936735841f3e73a628ae91be66aa"
+other = "Error updating request to start subscription"
+
+[UpdateUserSubscriptionError]
+description = "Error"
+hash = "sha1-32ff55ffecd0e86cc25b5c9b82391bc87b7d0ea8"
+other = "Error updating user signal"
+
+[UpdateUserSubscriptionStateError]
+description = "Error"
+hash = "sha1-c71a407c172b3e3ac411f8765bd0147bbd148e0d"
+other = "Error changing user subscription state"
+
+[UpdateWhitelabelError]
+description = "Error"
+hash = "sha1-c75b8f4dc0dd92c0cce094a8831f798abeb835ef"
+other = "Error updating data on Whitelabel domain or sub-domain"
+
+[UpsertUserSignalStatsError]
+description = "Error"
+hash = "sha1-d33fc51bd852c06df9b5f11962f1a461f2a7ee0b"
+other = "Error creating statistics based on user signal"
+
+[UserAlreadyHasDomainError]
+description = "Error"
+hash = "sha1-29ca75f1a19d526314c3d8cf44b1ee2a08ac3c4b"
+other = "You already have a whitelabel domain/sub-domain"
+
+[UserAlreadyHasWhitelabelError]
+description = "Error"
+hash = "sha1-d8e784b96b4b3d35e1eb6e94816bb2586d03c46e"
+other = "The user already has a whitelabel"
+
+[UserBillCanceledError]
+description = "Error"
+hash = "sha1-08ca016d387334df6742a906c75d1342187066d7"
+other = "User account canceled"
+
+[UserBillDifferentCurrenciesError]
+description = "Error"
+hash = "sha1-0ad33026543b051ee3949713f34d9415142322e2"
+other = "The currencies for the selected user accounts do not match"
+
+[UserBillPaidError]
+description = "Error"
+hash = "sha1-8b23546812f1ef71498bf8585fcba3e7a8cf18fd"
+other = "User account has already been paid"
+
+[UserBillProblemError]
+description = "Error"
+hash = "sha1-4ad52bd890801b3d698d5aed61f7302b24b05e07"
+other = "User account in error state, contact support"
+
+[UserBill_SignalDescription]
+description = "Description"
+hash = "sha1-30bd63f2f2151cbe9262704e783c8b6e6dc4045e"
+other = "Signal bill for {{ .Month }} {{ .Year }}"
+
+[UserBill_SubscriptionDescription]
+description = "Description"
+hash = "sha1-3129fc2c8136e29436a8c6721a8fec793288cdca"
+other = "Subscription invoice for {{ .Month }} {{ .Year }}"
+
+[UserBill_WhitelabelDescription]
+description = "Description"
+hash = "sha1-2c877a3b4b7f731ddefdecab377cd28bdcae2e47"
+other = "Whitelabel invoice for {{ .Month }} {{ .Year }}"
+
+[UserBrokerAlreadyExistsError]
+description = "Error"
+hash = "sha1-fbfab5feb1f77ffb4c37aef74e9bedcc945c26ff"
+other = "The broker already exists for the user"
+
+[UserBrokerAlreadyUsedError]
+description = "Error"
+hash = "sha1-b34bbfce5d74c8011f0f2232db58292a9818a2f0"
+other = "Error, the broker is already connected and in use"
+
+[UserBrokerConnectError]
+description = "Error"
+hash = "sha1-b599e4a587bc386ac2468fb2e7923a02e80928ff"
+other = "Error connecting to user broker"
+
+[UserBrokerMinimumLeverageError]
+description = "Error"
+hash = "sha1-f3580fbb97dec92522cc0341c6fc5e67448f4da9"
+other = "Insufficient leverage on the user&#39;s broker account"
+
+[UserEmailAlreadyExistsError]
+description = "Error"
+hash = "sha1-0a9743645174c7d84b074c0900cd2c785d80d84b"
+other = "A user with this email already exists"
+
+[UserHasSignalsError]
+description = "Error"
+hash = "sha1-5d6a90dbe8f47902634622ee723501ad12667654"
+other = "All signals must be removed before deleting a user."
+
+[UserHasSubscriptionsError]
+description = "Error"
+hash = "sha1-208e346d084896b421d50b0a011f9f9bf2f905d6"
+other = "You must remove all subscriptions before deleting a user."
+
+[UserNicknameAlreadyExistsError]
+description = "Error"
+hash = "sha1-d5874b2fe5a1808cd5738ce775f7032254065065"
+other = "A user with the same nickname already exists"
+
+[UserNotRegisteredOnDomainError]
+description = "Error"
+hash = "sha1-f0fbeb7bf6d3f9ffdafdbd1fe42d44f577633c85"
+other = "The user is not registered on this domain/sub-domain"
+
+[UserOnDomainError]
+description = "Error"
+hash = "sha1-d06de0ae14a049c85323b2a77b71c0277a1e8362"
+other = "Error verifying user registration on domain/subdomain"
+
+[UserPayoutState_Canceled]
+description = "Description"
+hash = "sha1-d78d7884e63ffebf251b804706287a75ef679ede"
+other = "Payment request cancelled"
+
+[UserPayoutState_Completed]
+description = "Description"
+hash = "sha1-80452d883c49443fc502c67aeb2b0b6aee3f5883"
+other = "The payment request has been successfully completed."
+
+[UserPayoutState_Created]
+description = "Description"
+hash = "sha1-a5840003b8783c240be82bd1792737a4a92c70e9"
+other = "Payment request created"
+
+[UserPayoutState_InProgress]
+description = "Description"
+hash = "sha1-d22918878eb631e99425aaf218b8fc0e50b419dc"
+other = "Payment request is being processed"
+
+[UserPayoutVia_Crypto]
+description = "Description"
+hash = "sha1-66088572c6425046e9259687f31f461bf0d2a573"
+other = "Cryptocurrency"
+
+[UserPayoutVia_Fiat]
+description = "Description"
+hash = "sha1-f963a1b903771b1d889105fdb2d625ff90fb83b6"
+other = "Fiat"
+
+[UserSignalApproval_Approved]
+description = "Description"
+hash = "sha1-8d85516958beba7d8500ed119a12a962b32fb741"
+other = "Confirmed"
+
+[UserSignalApproval_Rejected]
+description = "Description"
+hash = "sha1-f50c78c6cf6c4329a1ef10eb02bd0243f0f2a111"
+other = "Denied"
+
+[UserSignalApproval_Requested]
+description = "Description"
+hash = "sha1-77635164fc1862f95487fa0d379c51d0238a5002"
+other = "invited"
+
+[UserSignalNotRegisteredOnDomainError]
+description = "Error"
+hash = "sha1-b58bf617980b2fae591beb5e65e4dfb0ea136150"
+other = "Signal not found on this domain/sub-domain"
+
+[UserSignalState_Configured]
+description = "Description"
+hash = "sha1-e7c42662cacc71ef2bedf6cba76a3ed7155a885f"
+other = "The signal is in the process of being configured."
+
+[UserSignalState_Deployed]
+description = "Description"
+hash = "sha1-53c97df37751fbb55a4496e1ffb960d869679d57"
+other = "The signal is in the process of being launched."
+
+[UserSignalState_Enabled]
+description = "Description"
+hash = "sha1-435567b2bd4c6e71ff43e3e576074ca81ca2e51b"
+other = "The signal is launched and operates in normal mode."
+
+[UserSignalState_Error]
+description = "Description"
+hash = "sha1-749aaa3670258f0dffd5d30598cd9d0813e1849d"
+other = "Error starting or stopping signal"
+
+[UserSignalState_Graceful]
+description = "Description"
+hash = "sha1-85721cfbd5315fb91e91f71d4966f6ec17d4f5ff"
+other = "The signal is started and works in stop mode"
+
+[UserSignalState_Initial]
+description = "Description"
+hash = "sha1-18f2309887f4f308bb7aef38b9f57cf372324b65"
+other = "The signal is in the process of being created."
+
+[UserSignalState_Requested]
+description = "Description"
+hash = "sha1-9be72a77ecea186382a4099f58230963451e0829"
+other = "Waiting for launch confirmation"
+
+[UserSignalState_Restarting]
+description = "Description"
+hash = "sha1-55517cbefd3c5b5a1a5abb045cd2dec061e68965"
+other = "The signal is in the process of rebooting"
+
+[UserSignalState_Terminated]
+description = "Description"
+hash = "sha1-0794382a2a3f74a06100b1c2c9fce6129ee5d242"
+other = "The signal has stopped"
+
+[UserSignalState_Terminating]
+description = "Description"
+hash = "sha1-27585d3c7fcb917744020651de90050740fd7581"
+other = "The signal is in the process of stopping"
+
+[UserSignalState_Unknown]
+description = "Description"
+hash = "sha1-3774005c0ff78b3550a7afd1205646e0d12c08f9"
+other = "The signal is in an undefined state"
+
+[UserSignalStatusDescription_AwaitingApproval]
+description = "Description"
+hash = "sha1-956f4d4d6d3e73a7bf3dcca1b81739c120064593"
+other = "Signal awaiting confirmation of launch"
+
+[UserSignalStatusDescription_DataProcessing]
+description = "Description"
+hash = "sha1-0be648e5e98b0a30f54a98e4e922949aca75c832"
+other = "Error in receiving data from signal, please contact technical support"
+
+[UserSignalStatusDescription_IncorrectPassword]
+description = "Description"
+hash = "sha1-000162b4c957fb5be1e39c0eca7981e8ac941f11"
+other = "There is no connection with your account, perhaps you have changed its password. Update it in the signal settings, or change it in the broker&#39;s personal account, and then in the signal settings to resume work."
+
+[UserSignalStatusDescription_MainLoop]
+description = "Description"
+hash = "sha1-5f723c84d07a907d1ffe5b0244b6d32b433c760b"
+other = "There is an error in the signal, please contact technical support"
+
+[UserSignalStatusDescription_Working]
+description = "Description"
+hash = "sha1-e50070c3b4a4a1c49069483f0dbfb2314a055979"
+other = "The signal works fine without any problems."
+
+[UserSignalStatus_AwaitingApproval]
+description = "Description"
+hash = "sha1-4a42035a2b2ddaa1a2c307e1f2a7accf14757a48"
+other = "Awaiting confirmation"
+
+[UserSignalStatus_DataProcessing]
+description = "Description"
+hash = "sha1-77f12db1381e649c1fa66877835b779de0c2f713"
+other = "Error receiving data from signal, please contact technical support"
+
+[UserSignalStatus_IncorrectPassword]
+description = "Description"
+hash = "sha1-0b91ef55ebe81e367b7d7b3fafb360af0ae313c8"
+other = "No access to account"
+
+[UserSignalStatus_MainLoop]
+description = "Description"
+hash = "sha1-ae5e1f15c4b940453c84f166f64fc1094309e576"
+other = "Signal error, please contact technical support"
+
+[UserSignalStatus_Working]
+description = "Description"
+hash = "sha1-7c859bc3870968b93296f233b13051c249a7b6ee"
+other = "It works fine"
+
+[UserSignal_ApprovalRequired]
+description = "Description"
+hash = "sha1-2b838f49d84d8fd73bd6290a5cf7d6f097326177"
+other = "Thank you for your request, your request to start the signal will be processed soon."
+
+[UserSignal_CannotLaunchOrCopy]
+description = "Description"
+hash = "sha1-8a3c46fa6ff9506deeeecfd35f5d2826db0882c9"
+other = "Thank you for your request, but the launch of new signals has been suspended."
+
+[UserSubscriptionApproval_Approved]
+description = "Description"
+hash = "sha1-8d85516958beba7d8500ed119a12a962b32fb741"
+other = "Confirmed"
+
+[UserSubscriptionApproval_Rejected]
+description = "Description"
+hash = "sha1-f50c78c6cf6c4329a1ef10eb02bd0243f0f2a111"
+other = "Denied"
+
+[UserSubscriptionApproval_Requested]
+description = "Description"
+hash = "sha1-77635164fc1862f95487fa0d379c51d0238a5002"
+other = "invited"
+
+[UserSubscriptionState_Configured]
+description = "Description"
+hash = "sha1-ed6415847070d4b954fcd103d21d63f9ec122ede"
+other = "Subscription is in the process of being set up"
+
+[UserSubscriptionState_Deployed]
+description = "Description"
+hash = "sha1-de570be1d29e5bb5b7e4ac72931d948f8560638d"
+other = "Subscription is in the process of launching"
+
+[UserSubscriptionState_Enabled]
+description = "Description"
+hash = "sha1-d09194f5855be7f8805afbb2dc996cea8f0da977"
+other = "The subscription has been launched and is operating normally."
+
+[UserSubscriptionState_Error]
+description = "Description"
+hash = "sha1-6a7a553832ac9d9f169121ecef81347329cc1928"
+other = "Error starting or stopping subscription"
+
+[UserSubscriptionState_Graceful]
+description = "Description"
+hash = "sha1-ddb949d43ffcba00475d8b91017b4b8f5d635a48"
+other = "Subscription has been started and is running in stop mode"
+
+[UserSubscriptionState_Initial]
+description = "Description"
+hash = "sha1-16093b42c0068fd1227ea58a961ded8d9161b6f5"
+other = "Subscription is in the process of being created"
+
+[UserSubscriptionState_Requested]
+description = "Description"
+hash = "sha1-0634312fc2425c5e6cc693e5d8a0f77ad4520666"
+other = "Waiting for launch confirmation from signal owner"
+
+[UserSubscriptionState_Restarting]
+description = "Description"
+hash = "sha1-290f10e79dc0a440f124dddcaddf04b183e6f9ff"
+other = "Subscription is in the process of being rebooted"
+
+[UserSubscriptionState_Terminated]
+description = "Description"
+hash = "sha1-f02b70dba102bf494a99326e784b996a5b0a3ecc"
+other = "Subscription stopped"
+
+[UserSubscriptionState_Terminating]
+description = "Description"
+hash = "sha1-893f4679068667512cbea956724d725637c5a8bb"
+other = "Subscription is in the process of being stopped"
+
+[UserSubscriptionStatusDescription_AwaitingApproval]
+description = "Description"
+hash = "sha1-5847c135c72576b073af10de54c66b2aa1b07832"
+other = "Subscription is awaiting confirmation of launch from the signal owner"
+
+[UserSubscriptionStatusDescription_DataProcessing]
+description = "Description"
+hash = "sha1-6b7062fe90fabaaa3edc340eba46280b2dff28de"
+other = "Error in receiving subscription data, please contact technical support"
+
+[UserSubscriptionStatusDescription_IncorrectPassword]
+description = "Description"
+hash = "sha1-82d2d09fb5dd171d97a9fcf3b2b25fd93513e8b7"
+other = "There is no connection with your account, perhaps you have changed its password. Update it in the subscription settings, or change it in the broker&#39;s personal account, and then in the subscription settings to resume work."
+
+[UserSubscriptionStatusDescription_MainLoop]
+description = "Description"
+hash = "sha1-24bbabb78e3995b7be5e48eb42b507a6d94b4587"
+other = "There is an error with your subscription, please contact technical support"
+
+[UserSubscriptionStatusDescription_SignalDeleted]
+description = "Description"
+hash = "sha1-084e0aa18e8a7a56de5034065819c97b1ff1d3bd"
+other = "The signal has been deleted and is no longer available for copying, please manually close open orders via the MetaTrader terminal or in your broker&#39;s personal account."
+
+[UserSubscriptionStatusDescription_SignalDisconnected]
+description = "Description"
+hash = "sha1-5c5a7305909b1d3e4ee19b2f18f3c7f6d94a0850"
+other = "The signal is no longer available for copying, you need to manually close open orders through the MetaTrader terminal or in your broker&#39;s personal account."
+
+[UserSubscriptionStatusDescription_SignalIncorrectPassword]
+description = "Description"
+hash = "sha1-4de8591037063baeb3ccb1c4fd5b430953c8c834"
+other = "The signal owner has no connection to his account - perhaps he changed his password. You may have to manually close orders via the MetaTrader terminal or in your broker&#39;s personal account if the problem persists."
+
+[UserSubscriptionStatusDescription_SignalNotFound]
+description = "Description"
+hash = "sha1-957a253f70f7c7451fb665e837c6b0a09e7fe61c"
+other = "The signal was not found in the system and is no longer available for copying, manually close open orders through the MetaTrader terminal or in your broker&#39;s personal account."
+
+[UserSubscriptionStatusDescription_Working]
+description = "Description"
+hash = "sha1-5cb2ea994998621d5df887587e2450cab5e0b8eb"
+other = "The subscription works fine without any problems."
+
+[UserSubscriptionStatus_AwaitingApproval]
+description = "Description"
+hash = "sha1-4a42035a2b2ddaa1a2c307e1f2a7accf14757a48"
+other = "Awaiting confirmation"
+
+[UserSubscriptionStatus_DataProcessing]
+description = "Description"
+hash = "sha1-ce701540f4fea1a8c7900fd695223d28316ecacf"
+other = "Error in receiving subscription data, please contact technical support"
+
+[UserSubscriptionStatus_IncorrectPassword]
+description = "Description"
+hash = "sha1-945fe643660169b0c4d849efb66c1f3c41074423"
+other = "No access to subscription account"
+
+[UserSubscriptionStatus_MainLoop]
+description = "Description"
+hash = "sha1-abc28d3db322d4adaacdda9625f435d7588c3c8a"
+other = "There is an error with your subscription, please contact technical support"
+
+[UserSubscriptionStatus_SignalDisconnected]
+description = "Description"
+hash = "sha1-6bd5e8f37789a6277a23fce0cb96cd0a771812a4"
+other = "Signal not available"
+
+[UserSubscriptionStatus_SignalIncorrectPassword]
+description = "Description"
+hash = "sha1-58de829b765e1c6661527771841036979ade2856"
+other = "No access to signal account"
+
+[UserSubscriptionStatus_Working]
+description = "Description"
+hash = "sha1-7c859bc3870968b93296f233b13051c249a7b6ee"
+other = "It works fine"
+
+[UserSubscription_ApprovalRequired]
+description = "Description"
+hash = "sha1-b00ee668aa9d55b51fcf526c2214107ba448d8fb"
+other = "Thank you for your request, your request to start a subscription has been forwarded to the signal owner."
+
+[UserSubscription_CannotLaunchOrCopy]
+description = "Description"
+hash = "sha1-9b8430b0543326ee29b8310173ec30cd6da54263"
+other = "Thank you for your request, but the launch of new subscriptions has been suspended by the signal owner"
+
+[ValidateBrokerServerAccountError]
+description = "Error"
+hash = "sha1-ebb0277edad186a39670f7b86f447fefd5cad5b0"
+other = "Broker server account verification error"
+
+[ValidationError]
+description = "Error"
+hash = "sha1-9ef9cd81f55649e124f54b7dd2c54a400103c127"
+other = "Data validation error"
+
+[WhiteLabelRunError]
+description = "Error"
+hash = "sha1-f5d1bf4810e32eefac12b9dc975a087d36456ca7"
+other = "Error creating whitelabel domain or user subdomain"
+
+[WhitelabelDeleteError]
+description = "Error"
+hash = "sha1-575e1d23ce75eeae016ae02f02271ded9f47e20d"
+other = "Error deleting whitelabel domain/subdomain"
+
+[WhitelabelNotFoundError]
+description = "Error"
+hash = "sha1-c79a0bf19fdd6aade36d48fc4d290d42e628a1c8"
+other = "Whitelabel not found with this domain or sub-domain name"
+
+[WhitelabelServiceError]
+description = "Error"
+hash = "sha1-6321cca229979eb0fdce28fea802afdaf1264b2f"
+other = "Error creating whitelabel service"
+
+[WhitelabelSetupError]
+description = "Error"
+hash = "sha1-082f7bbb01b9a7f206cb958abe41a4ea2e62860b"
+other = "Error setting up domain whitelabel"
+
+[ZeroPriceAndCommissionError]
+description = "Error"
+hash = "sha1-ff09682940823197f638b01c7be8a85ba0ffd21a"
+other = "Zero cost and commission percentage at the same time"
+
+[ZeroTargetCurrencyError]
+description = "Error"
+hash = "sha1-813662f7d1e56b121e38293f9114fcf0e77bfda6"
+other = "Zero currency value {{.Name}} for target conversion for {{.Date}}"

@@ -1,0 +1,199 @@
+version: '3'
+
+tasks:
+  all:
+    cmds:
+      - task: build
+      - task: i18n
+      - task: docs
+  build:
+    cmds:
+      - go build -ldflags "-s -w" -o bin/api ./cmd/api/ && echo "API built successfully"
+  swag-api-parse:
+    cmds:
+      - ~/go/bin/swag init -g ./api/routers.go --parseInternal -o ./docs/api --exclude admin
+    silent: false
+  i18n-en-US:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge -sourceLanguage en active.en.toml ./data/i18n/translate.en-US.toml
+      - mv active.en-US.toml ./data/i18n/translate.en-US.toml
+    silent: true
+  i18n-bn-BD:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.bn-BD.toml
+      - test -e active.bn-BD.toml && mv active.bn-BD.toml ./data/i18n/translate.bn-BD.toml || echo "No new translations for bn-BD, skipping"
+      - sed -i 's/"Ошибка"/"ত্রুটি"/g' ./data/i18n/translate.bn-BD.toml && sed -i 's/"Описание"/"বর্ণনা"/g' ./data/i18n/translate.bn-BD.toml
+      - test -e translate.bn-BD.toml && mv translate.bn-BD.toml ./data/i18n/todo/todo.bn-BD.toml || echo "No new translations for bn-BD, skipping"
+      - test -e ./data/i18n/todo/todo.bn-BD.toml && sed -i 's/"Ошибка"/"ত্রুটি"/g' ./data/i18n/todo/todo.bn-BD.toml && sed -i 's/"Описание"/"বর্ণনা"/g' ./data/i18n/todo/todo.bn-BD.toml || echo "No new translations for bn-BD"
+    silent: true
+  i18n-nl-NL:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.nl-NL.toml
+      - test -e active.nl-NL.toml && mv active.nl-NL.toml ./data/i18n/translate.nl-NL.toml || echo "No new translations for nl-NL, skipping"
+      - sed -i 's/"Ошибка"/"Fout"/g' ./data/i18n/translate.nl-NL.toml && sed -i 's/"Описание"/"Beschrijving"/g' ./data/i18n/translate.nl-NL.toml
+      - test -e translate.nl-NL.toml && mv translate.nl-NL.toml ./data/i18n/todo/todo.nl-NL.toml || echo "No new translations for nl-NL, skipping"
+      - test -e ./data/i18n/todo/todo.nl-NL.toml && sed -i 's/"Ошибка"/"Fout"/g' ./data/i18n/todo/todo.nl-NL.toml && sed -i 's/"Описание"/"Beschrijving"/g' ./data/i18n/todo/todo.nl-NL.toml || echo "No new translations for nl-NL"
+    silent: true
+  i18n-de-DE:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.de-DE.toml
+      - test -e active.de-DE.toml && mv active.de-DE.toml ./data/i18n/translate.de-DE.toml || echo "No new translations for de-DE, skipping"
+      - sed -i 's/"Ошибка"/"Fehler"/g' ./data/i18n/translate.de-DE.toml && sed -i 's/"Описание"/"Beschreibung"/g' ./data/i18n/translate.de-DE.toml
+      - test -e translate.de-DE.toml && mv translate.de-DE.toml ./data/i18n/todo/todo.de-DE.toml || echo "No new translations for de-DE, skipping"
+      - test -e ./data/i18n/todo/todo.de-DE.toml && sed -i 's/"Ошибка"/"Fehler"/g' ./data/i18n/todo/todo.de-DE.toml && sed -i 's/"Описание"/"Beschreibung"/g' ./data/i18n/todo/todo.de-DE.toml || echo "No new translations for de-DE"
+    silent: true
+  i18n-hi-IN:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.hi-IN.toml
+      - test -e active.hi-IN.toml && mv active.hi-IN.toml ./data/i18n/translate.hi-IN.toml || echo "No new translations for hi-IN, skipping"
+      - sed -i 's/"Ошибка"/"गलती"/g' ./data/i18n/translate.hi-IN.toml && sed -i 's/"Описание"/"विवरण"/g' ./data/i18n/translate.hi-IN.toml
+      - test -e translate.hi-IN.toml && mv translate.hi-IN.toml ./data/i18n/todo/todo.hi-IN.toml || echo "No new translations for hi-IN, skipping"
+      - test -e ./data/i18n/todo/todo.hi-IN.toml && sed -i 's/"Ошибка"/"गलती"/g' ./data/i18n/todo/todo.hi-IN.toml && sed -i 's/"Описание"/"विवरण"/g' ./data/i18n/todo/todo.hi-IN.toml || echo "No new translations for hi-IN"
+    silent: true
+  i18n-id-ID:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.id-ID.toml
+      - test -e active.id-ID.toml && mv active.id-ID.toml ./data/i18n/translate.id-ID.toml || echo "No new translations for id-ID, skipping"
+      - sed -i 's/"Ошибка"/"Kesalahan"/g' ./data/i18n/translate.id-ID.toml && sed -i 's/"Описание"/"Keterangan"/g' ./data/i18n/translate.id-ID.toml
+      - test -e translate.id-ID.toml && mv translate.id-ID.toml ./data/i18n/todo/todo.id-ID.toml || echo "No new translations for id-ID, skipping"
+      - test -e ./data/i18n/todo/todo.id-ID.toml && sed -i 's/"Ошибка"/"Kesalahan"/g' ./data/i18n/todo/todo.id-ID.toml && sed -i 's/"Описание"/"Keterangan"/g' ./data/i18n/todo/todo.id-ID.toml || echo "No new translations for id-ID"
+    silent: true
+  i18n-it-IT:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.it-IT.toml
+      - test -e active.it-IT.toml && mv active.it-IT.toml ./data/i18n/translate.it-IT.toml || echo "No new translations for it-IT, skipping"
+      - sed -i 's/"Ошибка"/"Errore"/g' ./data/i18n/translate.it-IT.toml && sed -i 's/"Описание"/"Descrizione"/g' ./data/i18n/translate.it-IT.toml
+      - test -e translate.it-IT.toml && mv translate.it-IT.toml ./data/i18n/todo/todo.it-IT.toml || echo "No new translations for it-IT, skipping"
+      - test -e ./data/i18n/todo/todo.it-IT.toml && sed -i 's/"Ошибка"/"Errore"/g' ./data/i18n/todo/todo.it-IT.toml && sed -i 's/"Описание"/"Descrizione"/g' ./data/i18n/todo/todo.it-IT.toml || echo "No new translations for it-IT"
+    silent: true
+  i18n-ja-JP:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.ja-JP.toml
+      - test -e active.ja-JP.toml && mv active.ja-JP.toml ./data/i18n/translate.ja-JP.toml || echo "No new translations for ja-JP, skipping"
+      - sed -i 's/"Ошибка"/"エラー"/g' ./data/i18n/translate.ja-JP.toml && sed -i 's/"Описание"/"説明"/g' ./data/i18n/translate.ja-JP.toml
+      - test -e translate.ja-JP.toml && mv translate.ja-JP.toml ./data/i18n/todo/todo.ja-JP.toml || echo "No new translations for ja-JP, skipping"
+      - test -e ./data/i18n/todo/todo.ja-JP.toml && sed -i 's/"Ошибка"/"エラー"/g' ./data/i18n/todo/todo.ja-JP.toml && sed -i 's/"Описание"/"説明"/g' ./data/i18n/todo/todo.ja-JP.toml || echo "No new translations for ja-JP"
+    silent: true
+  i18n-ms-MY:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.ms-MY.toml
+      - test -e active.ms-MY.toml && mv active.ms-MY.toml ./data/i18n/translate.ms-MY.toml || echo "No new translations for ms-MY, skipping"
+      - sed -i 's/"Ошибка"/"Ralat"/g' ./data/i18n/translate.ms-MY.toml && sed -i 's/"Описание"/"Penerangan"/g' ./data/i18n/translate.ms-MY.toml
+      - test -e translate.ms-MY.toml && mv translate.ms-MY.toml ./data/i18n/todo/todo.ms-MY.toml || echo "No new translations for ms-MY, skipping"
+      - test -e ./data/i18n/todo/todo.ms-MY.toml && sed -i 's/"Ошибка"/"Ralat"/g' ./data/i18n/todo/todo.ms-MY.toml && sed -i 's/"Описание"/"Penerangan"/g' ./data/i18n/todo/todo.ms-MY.toml || echo "No new translations for ms-MY"
+    silent: true
+  i18n-pl-PL:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.pl-PL.toml
+      - test -e active.pl-PL.toml && mv active.pl-PL.toml ./data/i18n/translate.pl-PL.toml || echo "No new translations for pl-PL, skipping"
+      - sed -i 's/"Ошибка"/"Błąd"/g' ./data/i18n/translate.pl-PL.toml && sed -i 's/"Описание"/"Opis"/g' ./data/i18n/translate.pl-PL.toml
+      - test -e translate.pl-PL.toml && mv translate.pl-PL.toml ./data/i18n/todo/todo.pl-PL.toml || echo "No new translations for pl-PL, skipping"
+      - test -e ./data/i18n/todo/todo.pl-PL.toml && sed -i 's/"Ошибка"/"Błąd"/g' ./data/i18n/todo/todo.pl-PL.toml && sed -i 's/"Описание"/"Opis"/g' ./data/i18n/todo/todo.pl-PL.toml || echo "No new translations for pl-PL"
+    silent: true
+  i18n-pt-BR:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.pt-BR.toml
+      - test -e active.pt-BR.toml && mv active.pt-BR.toml ./data/i18n/translate.pt-BR.toml || echo "No new translations for pt-BR, skipping"
+      - sed -i 's/"Ошибка"/"Erro"/g' ./data/i18n/translate.pt-BR.toml && sed -i 's/"Описание"/"Descrição"/g' ./data/i18n/translate.pt-BR.toml
+      - test -e translate.pt-BR.toml && mv translate.pt-BR.toml ./data/i18n/todo/todo.pt-BR.toml || echo "No new translations for pt-BR, skipping"
+      - test -e ./data/i18n/todo/todo.pt-BR.toml && sed -i 's/"Ошибка"/"Erro"/g' ./data/i18n/todo/todo.pt-BR.toml && sed -i 's/"Описание"/"Descrição"/g' ./data/i18n/todo/todo.pt-BR.toml || echo "No new translations for pt-BR"
+    silent: true
+  i18n-es-ES:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.es-ES.toml
+      - test -e active.es-ES.toml && mv active.es-ES.toml ./data/i18n/translate.es-ES.toml || echo "No new translations for es-ES, skipping"
+      - sed -i 's/"Ошибка"/"Error"/g' ./data/i18n/translate.es-ES.toml && sed -i 's/"Описание"/"Descripción"/g' ./data/i18n/translate.es-ES.toml
+      - test -e translate.es-ES.toml && mv translate.es-ES.toml ./data/i18n/todo/todo.es-ES.toml || echo "No new translations for es-ES, skipping"
+      - test -e ./data/i18n/todo/todo.es-ES.toml && sed -i 's/"Ошибка"/"Error"/g' ./data/i18n/todo/todo.es-ES.toml && sed -i 's/"Описание"/"Descripción"/g' ./data/i18n/todo/todo.es-ES.toml || echo "No new translations for es-ES"
+    silent: true
+  i18n-sv-SE:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.sv-SE.toml
+      - test -e active.sv-SE.toml && mv active.sv-SE.toml ./data/i18n/translate.sv-SE.toml || echo "No new translations for sv-SE, skipping"
+      - sed -i 's/"Ошибка"/"Fel"/g' ./data/i18n/translate.sv-SE.toml && sed -i 's/"Описание"/"Beskrivning"/g' ./data/i18n/translate.sv-SE.toml
+      - test -e translate.sv-SE.toml && mv translate.sv-SE.toml ./data/i18n/todo/todo.sv-SE.toml || echo "No new translations for sv-SE, skipping"
+      - test -e ./data/i18n/todo/todo.sv-SE.toml && sed -i 's/"Ошибка"/"Fel"/g' ./data/i18n/todo/todo.sv-SE.toml && sed -i 's/"Описание"/"Beskrivning"/g' ./data/i18n/todo/todo.sv-SE.toml || echo "No new translations for sv-SE"
+    silent: true
+  i18n-fil-PH:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.fil-PH.toml
+      - test -e active.fil-PH.toml && mv active.fil-PH.toml ./data/i18n/translate.fil-PH.toml || echo "No new translations for fil-PH, skipping"
+      - sed -i 's/"Ошибка"/"Error"/g' ./data/i18n/translate.fil-PH.toml && sed -i 's/"Описание"/"Paglalarawan"/g' ./data/i18n/translate.fil-PH.toml
+      - test -e translate.fil-PH.toml && mv translate.fil-PH.toml ./data/i18n/todo/todo.fil-PH.toml || echo "No new translations for fil-PH, skipping"
+      - test -e ./data/i18n/todo/todo.fil-PH.toml && sed -i 's/"Ошибка"/"Error"/g' ./data/i18n/todo/todo.fil-PH.toml && sed -i 's/"Описание"/"Paglalarawan"/g' ./data/i18n/todo/todo.fil-PH.toml || echo "No new translations for fil-PH"
+    silent: true
+  i18n-th-TH:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.th-TH.toml
+      - test -e active.th-TH.toml && mv active.th-TH.toml ./data/i18n/translate.th-TH.toml || echo "No new translations for th-TH, skipping"
+      - sed -i 's/"Ошибка"/"ข้อผิดพลาด"/g' ./data/i18n/translate.th-TH.toml && sed -i 's/"Описание"/"คำอธิบาย"/g' ./data/i18n/translate.th-TH.toml
+      - test -e translate.th-TH.toml && mv translate.th-TH.toml ./data/i18n/todo/todo.th-TH.toml || echo "No new translations for th-TH, skipping"
+      - test -e ./data/i18n/todo/todo.th-TH.toml && sed -i 's/"Ошибка"/"ข้อผิดพลาด"/g' ./data/i18n/todo/todo.th-TH.toml && sed -i 's/"Описание"/"คำอธิบาย"/g' ./data/i18n/todo/todo.th-TH.toml || echo "No new translations for th-TH"
+    silent: true
+  i18n-tr-TR:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.tr-TR.toml
+      - test -e active.tr-TR.toml && mv active.tr-TR.toml ./data/i18n/translate.tr-TR.toml || echo "No new translations for tr-TR, skipping"
+      - sed -i 's/"Ошибка"/"Hata"/g' ./data/i18n/translate.tr-TR.toml && sed -i 's/"Описание"/"Tanım"/g' ./data/i18n/translate.tr-TR.toml
+      - test -e translate.tr-TR.toml && mv translate.tr-TR.toml ./data/i18n/todo/todo.tr-TR.toml || echo "No new translations for tr-TR, skipping"
+      - test -e ./data/i18n/todo/todo.tr-TR.toml && sed -i 's/"Ошибка"/"Hata"/g' ./data/i18n/todo/todo.tr-TR.toml && sed -i 's/"Описание"/"Tanım"/g' ./data/i18n/todo/todo.tr-TR.toml || echo "No new translations for tr-TR"
+    silent: true
+  i18n-ur-IN:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.ur-IN.toml
+      - test -e active.ur-IN.toml && mv active.ur-IN.toml ./data/i18n/translate.ur-IN.toml || echo "No new translations for ur-IN, skipping"
+      - sed -i 's/"Ошибка"/"خرابی"/g' ./data/i18n/translate.ur-IN.toml && sed -i 's/"Описание"/"تفصیل"/g' ./data/i18n/translate.ur-IN.toml
+      - test -e translate.ur-IN.toml && mv translate.ur-IN.toml ./data/i18n/todo/todo.ur-IN.toml || echo "No new translations for ur-IN, skipping"
+      - test -e ./data/i18n/todo/todo.ur-IN.toml && sed -i 's/"Ошибка"/"خرابی"/g' ./data/i18n/todo/todo.ur-IN.toml && sed -i 's/"Описание"/"تفصیل"/g' ./data/i18n/todo/todo.ur-IN.toml || echo "No new translations for ur-IN"
+    silent: true
+  i18n-vi-VN:
+    cmds:
+      - ~/go/bin/goi18n extract
+      - ~/go/bin/goi18n merge active.en.toml ./data/i18n/translate.vi-VN.toml
+      - test -e active.vi-VN.toml && mv active.vi-VN.toml ./data/i18n/translate.vi-VN.toml || echo "No new translations for vi-VN, skipping"
+      - sed -i 's/"Ошибка"/"Lỗi"/g' ./data/i18n/translate.vi-VN.toml && sed -i 's/"Описание"/"Sự miêu tả"/g' ./data/i18n/translate.vi-VN.toml
+      - test -e translate.vi-VN.toml && mv translate.vi-VN.toml ./data/i18n/todo/todo.vi-VN.toml || echo "No new translations for vi-VN, skipping"
+      - test -e ./data/i18n/todo/todo.vi-VN.toml && sed -i 's/"Ошибка"/"Lỗi"/g' ./data/i18n/todo/todo.vi-VN.toml && sed -i 's/"Описание"/"Sự miêu tả"/g' ./data/i18n/todo/todo.vi-VN.toml || echo "No new translations for vi-VN"
+    silent: true
+  i18n:
+    cmds:
+      - task: i18n-en-US
+      - task: i18n-bn-BD
+      - task: i18n-nl-NL
+      - task: i18n-de-DE
+      - task: i18n-hi-IN
+      - task: i18n-id-ID
+      - task: i18n-it-IT
+      - task: i18n-ja-JP
+      - task: i18n-ms-MY
+      - task: i18n-pl-PL
+      - task: i18n-pt-BR
+      - task: i18n-es-ES
+      - task: i18n-sv-SE
+      - task: i18n-fil-PH
+      - task: i18n-th-TH
+      - task: i18n-tr-TR
+      - task: i18n-ur-IN
+      - task: i18n-vi-VN
+      - go run cmd/translation/main.go
+  docs:
+    cmds:
+      - task: swag-api-parse
+
