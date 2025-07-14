@@ -7,7 +7,9 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 	"hideout/config"
+	"hideout/internal/common/secrets"
 	"hideout/internal/translations"
+	"hideout/structs"
 	"log"
 )
 
@@ -52,4 +54,6 @@ func Init(ctx context.Context) {
 			ShortName: config.GetEnv("ENVIRONMENT_SHORT", "dev"),
 		},
 	}
+
+	structs.Secrets = make(map[string]secrets.Secret)
 }
