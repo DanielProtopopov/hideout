@@ -1,14 +1,12 @@
 package translations
 
-// Этот файл нигде не используется
-
 import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 )
 
 func _() string {
-	return i18n.NewLocalizer(i18n.NewBundle(language.Russian), "ru").MustLocalize(&i18n.LocalizeConfig{
+	return i18n.NewLocalizer(i18n.NewBundle(language.English), "ru").MustLocalize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:          "RequestBodyMappingError",
 			Description: "Error",
@@ -18,7 +16,7 @@ func _() string {
 }
 
 func _() string {
-	return i18n.NewLocalizer(i18n.NewBundle(language.Russian), "ru").MustLocalize(&i18n.LocalizeConfig{
+	return i18n.NewLocalizer(i18n.NewBundle(language.English), "ru").MustLocalize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:          "RequestQueryMappingError",
 			Description: "Error",
@@ -28,7 +26,7 @@ func _() string {
 }
 
 func _() string {
-	return i18n.NewLocalizer(i18n.NewBundle(language.Russian), "ru").MustLocalize(&i18n.LocalizeConfig{
+	return i18n.NewLocalizer(i18n.NewBundle(language.English), "ru").MustLocalize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:          "RequestURIMappingError",
 			Description: "Error",
@@ -38,7 +36,7 @@ func _() string {
 }
 
 func _() string {
-	return i18n.NewLocalizer(i18n.NewBundle(language.Russian), "ru").MustLocalize(&i18n.LocalizeConfig{
+	return i18n.NewLocalizer(i18n.NewBundle(language.English), "ru").MustLocalize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:          "QueryParamMissingError",
 			Description: "Error",
@@ -48,7 +46,7 @@ func _() string {
 }
 
 func _() string {
-	return i18n.NewLocalizer(i18n.NewBundle(language.Russian), "ru").MustLocalize(&i18n.LocalizeConfig{
+	return i18n.NewLocalizer(i18n.NewBundle(language.English), "ru").MustLocalize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:          "QueryParamInvalidError",
 			Description: "Error",
@@ -58,7 +56,7 @@ func _() string {
 }
 
 func _() string {
-	return i18n.NewLocalizer(i18n.NewBundle(language.Russian), "ru").MustLocalize(&i18n.LocalizeConfig{
+	return i18n.NewLocalizer(i18n.NewBundle(language.English), "ru").MustLocalize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:          "BodyParamMissingError",
 			Description: "Error",
@@ -68,7 +66,7 @@ func _() string {
 }
 
 func _() string {
-	return i18n.NewLocalizer(i18n.NewBundle(language.Russian), "ru").MustLocalize(&i18n.LocalizeConfig{
+	return i18n.NewLocalizer(i18n.NewBundle(language.English), "ru").MustLocalize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:          "BodyParamInvalidError",
 			Description: "Error",
@@ -78,7 +76,7 @@ func _() string {
 }
 
 func _() string {
-	return i18n.NewLocalizer(i18n.NewBundle(language.Russian), "ru").MustLocalize(&i18n.LocalizeConfig{
+	return i18n.NewLocalizer(i18n.NewBundle(language.English), "ru").MustLocalize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:          "RequestValidationError",
 			Description: "Error",

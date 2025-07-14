@@ -1,0 +1,21 @@
+basePath: /api/v1
+host: api.hideout.local
+info:
+  contact:
+    email: support@hideout.com
+    name: API Support
+    url: https://www.swagger.io/support
+  description: API for working with secrets
+  license:
+    name: Private
+  termsOfService: https://swagger.io/terms/
+  title: Hideout API
+  version: "1.0"
+paths: {}
+securityDefinitions:
+  ApiKeyAuth:
+    description: Description for what is this security definition being used
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

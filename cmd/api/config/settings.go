@@ -22,12 +22,12 @@ type Config struct {
 var Settings *Config
 
 func Init(ctx context.Context) {
-	bundle := i18n.NewBundle(language.Russian)
+	bundle := i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
 	for _, lang := range translations.Languages {
 		_, errLoadLang := bundle.LoadMessageFile(fmt.Sprintf("%s/translate.%s.toml", "data/i18n", lang))
 		if errLoadLang != nil {
-			log.Panicf("Ошибка загрузки переводов для языка %s: %s", lang, errLoadLang.Error())
+			log.Panicf("Error loading translations for language %s: %s", lang, errLoadLang.Error())
 			return
 		}
 	}
@@ -44,8 +44,8 @@ func Init(ctx context.Context) {
 		Debug:  config.GetEnvAsBool("DEBUG", true),
 		Server: config.ServerConfig{
 			Host:   config.GetEnv("SERVER_HOST", "0.0.0.0"),
-			Port:   config.GetEnvAsInt("SERVER_PORT", 81),
-			Domain: config.GetEnv("SERVER_DOMAIN", "https://webapi.dev.hideout.com"),
+			Port:   config.GetEnvAsInt("SERVER_PORT", 80),
+			Domain: config.GetEnv("SERVER_DOMAIN", "localhost"),
 		},
 		Environment: config.EnvironmentConfig{
 			FullName:  config.GetEnv("ENVIRONMENT_FULL", "development"),
