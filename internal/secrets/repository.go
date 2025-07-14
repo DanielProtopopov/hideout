@@ -7,10 +7,10 @@ import (
 )
 
 type Repository struct {
-	conn *map[string]secrets.Secret
+	conn map[string]secrets.Secret
 }
 
-func NewRepository(conn *map[string]secrets.Secret) *Repository {
+func NewRepository(conn map[string]secrets.Secret) *Repository {
 	return &Repository{conn: conn}
 }
 
@@ -32,14 +32,13 @@ func (m Repository) Update(ctx context.Context, secret *secrets.Secret, value st
 
 func (m Repository) Create(ctx context.Context, secret secrets.Secret, path string, ignoreExisting bool) (secrets.Secret, error) {
 	if !ignoreExisting {
-		_, exists := (*m.conn)[path]
+		_, exists := m.conn[path]
 		if exists {
 			return secrets.Secret{}, error2.ErrAlreadyExists
 		}
 	}
 
-	tMap := *m.conn
-	tMap[path] = secret
+	m.conn[path] = secret
 	return secret, nil
 }
 
