@@ -55,5 +55,5 @@ func Init(ctx context.Context) {
 		},
 	}
 
-	structs.Secrets = make(map[string]secrets.Secret)
+	structs.Secrets = make(map[string]map[string]secrets.Secret)
 }
