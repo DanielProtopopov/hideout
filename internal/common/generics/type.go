@@ -1,6 +1,7 @@
 package generics
 
 import (
+	"hideout/internal/common/ordering"
 	"hideout/internal/common/pagination"
 	"time"
 )
@@ -19,7 +20,7 @@ type (
 		// * 2 - model.No
 		// * 3 - model.YesOrNo
 		Deleted   uint
-		Order     map[string]bool
+		Order     []ordering.OrderRQ
 		CreatedAt FromTo[time.Time]
 		UpdatedAt FromTo[time.Time]
 		DeletedAt FromTo[time.Time]

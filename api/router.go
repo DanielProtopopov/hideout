@@ -5,6 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"hideout/api/group/public"
+	"hideout/api/group/secrets"
 	"hideout/api/middleware"
 	apiconfig "hideout/cmd/api/config"
 	"log"
@@ -41,6 +43,14 @@ func Serve() {
 	*/
 	// use ginSwagger middleware to serve the API docs
 	route.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	v1Public := route.Group("/api/v1/public")
+	v1Secrets := route.Group("/api/v1/secrets")
+
+	v1Public.GET("/sitemap/", public.GetSitemapHandler)
+
+	v1Secrets.POST("/", secrets.GetSecretsHandler)
+	v1Secrets.GET("/:UID", secrets.GetSecretByIDHandler)
 
 	errRun := route.Run(fmt.Sprintf("%s:%d", apiconfig.Settings.Server.Host, apiconfig.Settings.Server.Port))
 	log.Panic(errRun)

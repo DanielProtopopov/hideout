@@ -7,7 +7,7 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 	"hideout/config"
-	"hideout/internal/common/secrets"
+	"hideout/internal/secrets"
 	"hideout/internal/translations"
 	"hideout/structs"
 	"log"

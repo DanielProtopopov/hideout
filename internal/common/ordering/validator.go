@@ -1,8 +1,11 @@
 package ordering
 
-import "context"
+import (
+	"context"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+)
 
-func (rq *OrderRQ) Validate(ctx context.Context) error {
+func (rq *OrderRQ) Validate(ctx context.Context, Localizer *i18n.Localizer) error {
 	if rq.OrderBy != "" {
 		// @TODO Validation
 	} else {

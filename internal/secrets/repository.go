@@ -3,7 +3,6 @@ package secrets
 import (
 	"context"
 	"github.com/brianvoe/gofakeit/v7"
-	"hideout/internal/common/secrets"
 	error2 "hideout/internal/pkg/error"
 	"maps"
 	pathPkg "path"
@@ -13,10 +12,10 @@ import (
 )
 
 type Repository struct {
-	conn map[string]map[string]secrets.Secret
+	conn map[string]map[string]Secret
 }
 
-func NewRepository(conn map[string]map[string]secrets.Secret) *Repository {
+func NewRepository(conn map[string]map[string]Secret) *Repository {
 	return &Repository{conn: conn}
 }
 
@@ -30,8 +29,8 @@ func (m Repository) GetPaths(ctx context.Context) (paths []string, err error) {
 	return paths, nil
 }
 
-func (m Repository) Get(ctx context.Context, path string, name string) (map[string]secrets.Secret, error) {
-	pathSecrets := make(map[string]map[string]secrets.Secret)
+func (m Repository) Get(ctx context.Context, path string, name string) (map[string]Secret, error) {
+	pathSecrets := make(map[string]map[string]Secret)
 	for pathVal, secret := range m.conn {
 		matched, errPathMatch := pathPkg.Match(path, pathVal)
 		if errPathMatch != nil {
@@ -42,7 +41,7 @@ func (m Repository) Get(ctx context.Context, path string, name string) (map[stri
 		}
 	}
 
-	nameSecrets := make(map[string]secrets.Secret)
+	nameSecrets := make(map[string]Secret)
 	for pathVal, secretsEntry := range pathSecrets {
 		for _, secret := range secretsEntry {
 			if strings.Contains(secret.Name, name) {
@@ -54,7 +53,7 @@ func (m Repository) Get(ctx context.Context, path string, name string) (map[stri
 	return nameSecrets, nil
 }
 
-func (m Repository) GetByUID(ctx context.Context, uid string) (secrets.Secret, error) {
+func (m Repository) GetByUID(ctx context.Context, uid string) (Secret, error) {
 	for _, uidSecrets := range m.conn {
 		for secretUid, secret := range uidSecrets {
 			if secretUid == uid {
@@ -63,33 +62,33 @@ func (m Repository) GetByUID(ctx context.Context, uid string) (secrets.Secret, e
 		}
 	}
 
-	return secrets.Secret{}, error2.ErrRecordNotFound
+	return Secret{}, error2.ErrRecordNotFound
 }
 
-func (m Repository) Update(ctx context.Context, uid string, value string) (secrets.Secret, error) {
-	return secrets.Secret{}, nil
+func (m Repository) Update(ctx context.Context, uid string, value string) (Secret, error) {
+	return Secret{}, nil
 }
 
-func (m Repository) Create(ctx context.Context, path string, name string, value string) (secrets.Secret, error) {
+func (m Repository) Create(ctx context.Context, path string, name string, value string) (Secret, error) {
 	uidSecrets, pathExists := m.conn[path]
 	if !pathExists {
-		m.conn[path] = make(map[string]secrets.Secret)
+		m.conn[path] = make(map[string]Secret)
 	}
 
 	for _, secretEntry := range uidSecrets {
 		if secretEntry.Name == name {
-			return secrets.Secret{}, error2.ErrAlreadyExists
+			return Secret{}, error2.ErrAlreadyExists
 		}
 	}
 
-	newSecret := secrets.Secret{Name: name, Value: value}
+	newSecret := Secret{Name: name, Value: value}
 	m.conn[path][gofakeit.UUID()] = newSecret
 	return newSecret, nil
 }
 
 func (m Repository) Count(ctx context.Context, path string, name string) (uint, error) {
 	pathSecretsCount := uint(0)
-	pathSecrets := make(map[string]map[string]secrets.Secret)
+	pathSecrets := make(map[string]map[string]Secret)
 	if path != "" {
 		for pathVal, secret := range m.conn {
 			matched, errPathMatch := pathPkg.Match(path, pathVal)

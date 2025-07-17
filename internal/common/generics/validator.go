@@ -3,12 +3,13 @@ package generics
 import (
 	"context"
 	"github.com/shopspring/decimal"
+	"hideout/internal/common/apperror"
 	"time"
 )
 
 func (p FromTo[T]) Validate(ctx context.Context) error {
 	if !p.Valid() {
-		return error.ErrInvalidParameter
+		return apperror.ErrInvalidParameter
 	}
 
 	return nil
