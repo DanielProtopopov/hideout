@@ -50,7 +50,9 @@ func Serve() {
 	v1Public.GET("/sitemap/", public.GetSitemapHandler)
 
 	v1Secrets.POST("/", secrets.GetSecretsHandler)
-	v1Secrets.GET("/:UID", secrets.GetSecretByIDHandler)
+	v1Secrets.PUT("/", secrets.CreateSecretsHandler)
+	v1Secrets.PATCH("/", secrets.UpdateSecretsHandler)
+	v1Secrets.DELETE("/", secrets.DeleteSecretsHandler)
 
 	errRun := route.Run(fmt.Sprintf("%s:%d", apiconfig.Settings.Server.Host, apiconfig.Settings.Server.Port))
 	log.Panic(errRun)

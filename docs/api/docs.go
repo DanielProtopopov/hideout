@@ -22,7 +22,460 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {},
+    "paths": {
+        "/public/sitemap/": {
+            "get": {
+                "description": "Получение sitemap",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Общедоступные методы"
+                ],
+                "summary": "Получение sitemap",
+                "operationId": "public-get-sitemap",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": ""
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": ""
+                        }
+                    }
+                }
+            }
+        },
+        "/secrets/": {
+            "put": {
+                "description": "Create secrets",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secrets"
+                ],
+                "summary": "Create secrets",
+                "operationId": "create-secrets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.CreateSecretsRS"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.CreateSecretsRS"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.CreateSecretsRS"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.CreateSecretsRS"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete secrets",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secrets"
+                ],
+                "summary": "Delete secrets",
+                "operationId": "delete-secrets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.DeleteSecretsRS"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.DeleteSecretsRS"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.DeleteSecretsRS"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.DeleteSecretsRS"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update secrets",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secrets"
+                ],
+                "summary": "Update secrets",
+                "operationId": "update-secrets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.UpdateSecretsRS"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.UpdateSecretsRS"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.UpdateSecretsRS"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.UpdateSecretsRS"
+                        }
+                    }
+                }
+            }
+        },
+        "/secrets/list/": {
+            "post": {
+                "description": "Getting secrets list",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Брокеры"
+                ],
+                "summary": "Getting secrets list",
+                "operationId": "list-secrets",
+                "parameters": [
+                    {
+                        "description": "Secrets data",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/secrets.GetSecretsRQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.GetSecretsRS"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.GetSecretsRS"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.GetSecretsRS"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.GetSecretsRS"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api_group_secrets.Secret": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "type": "string",
+                    "example": "DEBUG"
+                },
+                "ParentUID": {
+                    "type": "string",
+                    "example": "abc-def-ghi"
+                },
+                "Path": {
+                    "type": "string",
+                    "example": "/"
+                },
+                "Type": {
+                    "type": "string",
+                    "example": "int"
+                },
+                "UID": {
+                    "type": "string",
+                    "example": "abc-def-ghi"
+                },
+                "Value": {
+                    "type": "string",
+                    "example": "Test"
+                }
+            }
+        },
+        "ordering.OrderRQ": {
+            "type": "object",
+            "properties": {
+                "Order": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "OrderBy": {
+                    "type": "string",
+                    "example": "ID"
+                }
+            }
+        },
+        "pagination.PaginationRQ": {
+            "type": "object",
+            "properties": {
+                "Page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "PerPage": {
+                    "type": "integer",
+                    "example": 10
+                }
+            }
+        },
+        "rqrs.Error": {
+            "type": "object",
+            "properties": {
+                "Code": {
+                    "type": "integer",
+                    "example": 511
+                },
+                "Description": {
+                    "type": "string",
+                    "example": "Description"
+                },
+                "Message": {
+                    "type": "string",
+                    "example": "Message"
+                }
+            }
+        },
+        "secrets.CreateSecretsRS": {
+            "type": "object",
+            "properties": {
+                "Data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api_group_secrets.Secret"
+                    }
+                },
+                "Errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rqrs.Error"
+                    }
+                },
+                "Pages": {
+                    "type": "integer",
+                    "example": 14
+                },
+                "PerPage": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "Total": {
+                    "type": "integer",
+                    "example": 280
+                }
+            }
+        },
+        "secrets.DeleteSecretsRS": {
+            "type": "object",
+            "properties": {
+                "Errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rqrs.Error"
+                    }
+                },
+                "Pages": {
+                    "type": "integer",
+                    "example": 14
+                },
+                "PerPage": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "Total": {
+                    "type": "integer",
+                    "example": 280
+                }
+            }
+        },
+        "secrets.GetSecretsRQ": {
+            "type": "object",
+            "properties": {
+                "Ordering": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ordering.OrderRQ"
+                    }
+                },
+                "Pagination": {
+                    "$ref": "#/definitions/pagination.PaginationRQ"
+                },
+                "Path": {
+                    "type": "string",
+                    "example": "/"
+                }
+            }
+        },
+        "secrets.GetSecretsRS": {
+            "type": "object",
+            "properties": {
+                "Data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api_group_secrets.Secret"
+                    }
+                },
+                "Errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rqrs.Error"
+                    }
+                },
+                "Pages": {
+                    "type": "integer",
+                    "example": 14
+                },
+                "PerPage": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "Total": {
+                    "type": "integer",
+                    "example": 280
+                }
+            }
+        },
+        "secrets.UpdateSecretsRS": {
+            "type": "object",
+            "properties": {
+                "Data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api_group_secrets.Secret"
+                    }
+                },
+                "Errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rqrs.Error"
+                    }
+                },
+                "Pages": {
+                    "type": "integer",
+                    "example": 14
+                },
+                "PerPage": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "Total": {
+                    "type": "integer",
+                    "example": 280
+                }
+            }
+        }
+    },
     "securityDefinitions": {
         "ApiKeyAuth": {
             "description": "Description for what is this security definition being used",

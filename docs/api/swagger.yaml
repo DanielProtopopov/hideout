@@ -1,4 +1,144 @@
 basePath: /api/v1
+definitions:
+  api_group_secrets.Secret:
+    properties:
+      Name:
+        example: DEBUG
+        type: string
+      ParentUID:
+        example: abc-def-ghi
+        type: string
+      Path:
+        example: /
+        type: string
+      Type:
+        example: int
+        type: string
+      UID:
+        example: abc-def-ghi
+        type: string
+      Value:
+        example: Test
+        type: string
+    type: object
+  ordering.OrderRQ:
+    properties:
+      Order:
+        example: true
+        type: boolean
+      OrderBy:
+        example: ID
+        type: string
+    type: object
+  pagination.PaginationRQ:
+    properties:
+      Page:
+        example: 1
+        type: integer
+      PerPage:
+        example: 10
+        type: integer
+    type: object
+  rqrs.Error:
+    properties:
+      Code:
+        example: 511
+        type: integer
+      Description:
+        example: Description
+        type: string
+      Message:
+        example: Message
+        type: string
+    type: object
+  secrets.CreateSecretsRS:
+    properties:
+      Data:
+        items:
+          $ref: '#/definitions/api_group_secrets.Secret'
+        type: array
+      Errors:
+        items:
+          $ref: '#/definitions/rqrs.Error'
+        type: array
+      Pages:
+        example: 14
+        type: integer
+      PerPage:
+        example: 20
+        type: integer
+      Total:
+        example: 280
+        type: integer
+    type: object
+  secrets.DeleteSecretsRS:
+    properties:
+      Errors:
+        items:
+          $ref: '#/definitions/rqrs.Error'
+        type: array
+      Pages:
+        example: 14
+        type: integer
+      PerPage:
+        example: 20
+        type: integer
+      Total:
+        example: 280
+        type: integer
+    type: object
+  secrets.GetSecretsRQ:
+    properties:
+      Ordering:
+        items:
+          $ref: '#/definitions/ordering.OrderRQ'
+        type: array
+      Pagination:
+        $ref: '#/definitions/pagination.PaginationRQ'
+      Path:
+        example: /
+        type: string
+    type: object
+  secrets.GetSecretsRS:
+    properties:
+      Data:
+        items:
+          $ref: '#/definitions/api_group_secrets.Secret'
+        type: array
+      Errors:
+        items:
+          $ref: '#/definitions/rqrs.Error'
+        type: array
+      Pages:
+        example: 14
+        type: integer
+      PerPage:
+        example: 20
+        type: integer
+      Total:
+        example: 280
+        type: integer
+    type: object
+  secrets.UpdateSecretsRS:
+    properties:
+      Data:
+        items:
+          $ref: '#/definitions/api_group_secrets.Secret'
+        type: array
+      Errors:
+        items:
+          $ref: '#/definitions/rqrs.Error'
+        type: array
+      Pages:
+        example: 14
+        type: integer
+      PerPage:
+        example: 20
+        type: integer
+      Total:
+        example: 280
+        type: integer
+    type: object
 host: api.hideout.local
 info:
   contact:
@@ -11,7 +151,174 @@ info:
   termsOfService: https://swagger.io/terms/
   title: Hideout API
   version: "1.0"
-paths: {}
+paths:
+  /public/sitemap/:
+    get:
+      description: Получение sitemap
+      operationId: public-get-sitemap
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: ""
+        "404":
+          description: Not Found
+          schema:
+            type: ""
+        "500":
+          description: Internal Server Error
+          schema:
+            type: ""
+      summary: Получение sitemap
+      tags:
+      - Общедоступные методы
+  /secrets/:
+    delete:
+      description: Delete secrets
+      operationId: delete-secrets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/secrets.DeleteSecretsRS'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/secrets.DeleteSecretsRS'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/secrets.DeleteSecretsRS'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/secrets.DeleteSecretsRS'
+      summary: Delete secrets
+      tags:
+      - Secrets
+    patch:
+      description: Update secrets
+      operationId: update-secrets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/secrets.UpdateSecretsRS'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/secrets.UpdateSecretsRS'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/secrets.UpdateSecretsRS'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/secrets.UpdateSecretsRS'
+      summary: Update secrets
+      tags:
+      - Secrets
+    put:
+      description: Create secrets
+      operationId: create-secrets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/secrets.CreateSecretsRS'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/secrets.CreateSecretsRS'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/secrets.CreateSecretsRS'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/secrets.CreateSecretsRS'
+      summary: Create secrets
+      tags:
+      - Secrets
+  /secrets/list/:
+    post:
+      description: Getting secrets list
+      operationId: list-secrets
+      parameters:
+      - description: Secrets data
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/secrets.GetSecretsRQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/secrets.GetSecretsRS'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/secrets.GetSecretsRS'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/secrets.GetSecretsRS'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/secrets.GetSecretsRS'
+      summary: Getting secrets list
+      tags:
+      - Брокеры
 securityDefinitions:
   ApiKeyAuth:
     description: Description for what is this security definition being used

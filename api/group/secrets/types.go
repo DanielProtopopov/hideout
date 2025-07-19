@@ -8,11 +8,20 @@ import (
 
 type (
 	Secret struct {
-		UID   string `json:"UID" description:"Secondary unique identifier" example:"abc-def-ghi"`
-		Path  string `json:"Path" description:"Folder path" example:"/"`
-		Name  string `json:"Name" description:"Secret name" example:"DEBUG"`
-		Value string `json:"Value" description:"Secret value" example:"Test"`
-		Type  string `json:"Type" description:"Secret value type" example:"int"`
+		UID       string `json:"UID" description:"Secondary unique identifier" example:"abc-def-ghi"`
+		ParentUID string `json:"ParentUID" description:"Parent unique identifier" example:"abc-def-ghi"`
+		Path      string `json:"Path" description:"Folder path" example:"/"`
+		Name      string `json:"Name" description:"Secret name" example:"DEBUG"`
+		Value     string `json:"Value" description:"Secret value" example:"Test"`
+		Type      string `json:"Type" description:"Secret value type" example:"int"`
+	}
+
+	CreateSecret struct {
+		ParentUID string `json:"ParentUID" description:"Parent unique identifier" example:"abc-def-ghi"`
+		Path      string `json:"Path" description:"Folder path" example:"/"`
+		Name      string `json:"Name" description:"Secret name" example:"DEBUG"`
+		Value     string `json:"Value" description:"Secret value" example:"Test"`
+		Type      string `json:"Type" description:"Secret value type" example:"int"`
 	}
 
 	GetSecretsRQ struct {
@@ -26,9 +35,30 @@ type (
 		rqrs.ResponseListRS
 	}
 
-	GetSecretRS struct {
-		Data Secret `json:"Data"`
-		rqrs.ResponseRS
+	CreateSecretsRQ struct {
+		Data []CreateSecret `json:"Data"`
+	}
+
+	CreateSecretsRS struct {
+		Data []Secret `json:"Data"`
+		rqrs.ResponseListRS
+	}
+
+	UpdateSecretsRQ struct {
+		Data []Secret `json:"Data"`
+	}
+
+	UpdateSecretsRS struct {
+		Data []Secret `json:"Data"`
+		rqrs.ResponseListRS
+	}
+
+	DeleteSecretsRQ struct {
+		UIDs []string `json:"UIDs"`
+	}
+
+	DeleteSecretsRS struct {
+		rqrs.ResponseListRS
 	}
 
 	ListSecretParams struct {
