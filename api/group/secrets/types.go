@@ -26,6 +26,9 @@ type (
 
 	GetSecretsRQ struct {
 		Path       string                  `json:"Path" description:"Folder path" example:"/"`
+		Name       string                  `json:"Name" description:"Secret name" example:"DEBUG"`
+		Value      string                  `json:"Value" description:"Secret value" example:"Test"`
+		Types      []string                `json:"Types" description:"Secret type" example:"int"`
 		Pagination pagination.PaginationRQ `json:"Pagination"`
 		Ordering   []ordering.OrderRQ      `json:"Ordering"`
 	}

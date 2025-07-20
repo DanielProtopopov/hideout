@@ -6,7 +6,13 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	apiconfig "hideout/cmd/api/config"
+	"hideout/internal/common/generics"
+	"hideout/internal/common/model"
+	"hideout/internal/common/pagination"
 	"hideout/internal/common/rqrs"
+	"hideout/internal/pkg/extra"
+	"hideout/internal/secrets"
+	"hideout/structs"
 	"log"
 	"net/http"
 )
@@ -60,7 +66,51 @@ func GetSecretsHandler(c *gin.Context) {
 	}
 	validationSpan.Finish()
 
-	// @TODO Implement retrieval of secrets
+	inMemoryRepository := secrets.NewInMemoryRepository(structs.Secrets)
+	secretResults, errGetSecrets := inMemoryRepository.GetMapByUID(rqContext, secrets.ListSecretParams{
+		ListParams: generics.ListParams{Deleted: model.No}, Path: request.Path, Name: request.Name, Types: request.Types,
+	})
+	if errGetSecrets != nil {
+		log.Printf("Error fetching secrets: %s", errGetSecrets.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretsError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetSecrets.Error(), Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	var parentIDs []uint
+	for _, secret := range secretResults {
+		if secret.ParentID != 0 {
+			parentIDs = append(parentIDs, secret.ParentID)
+		}
+	}
+	if len(parentIDs) > 0 {
+		parentIDs = extra.UniqueUint(parentIDs)
+	}
+	parentSecretsMap, errGetParentSecrets := inMemoryRepository.GetMapByID(rqContext, secrets.ListSecretParams{
+		ListParams: generics.ListParams{Deleted: model.No, Order: request.Ordering, Pagination: pagination.Pagination{
+			PerPage: request.Pagination.PerPage, Page: request.Pagination.Page,
+		}}, Path: request.Path, Name: request.Name, Types: request.Types,
+	})
+	if errGetParentSecrets != nil {
+		log.Printf("Error fetching parent secrets: %s", errGetParentSecrets.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretsError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetParentSecrets.Error(), Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	for _, secret := range secretResults {
+		secretEntry := Secret{
+			UID: secret.UID, ParentUID: "", Path: secret.Path, Name: secret.Name, Value: secret.Value, Type: secret.Type,
+		}
+		if secret.ParentID != 0 {
+			parentSecret, exists := parentSecretsMap[secret.ParentID]
+			if exists {
+				secretEntry.ParentUID = parentSecret.UID
+			}
+		}
+		response.Data = append(response.Data, secretEntry)
+	}
 
 	c.JSON(http.StatusOK, response)
 }

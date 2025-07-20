@@ -1,6 +1,9 @@
 package secrets
 
-import "hideout/internal/common/generics"
+import (
+	"context"
+	"hideout/internal/common/generics"
+)
 
 type (
 	Secret struct {
@@ -13,10 +16,23 @@ type (
 		Type     string `json:"Type" db:"type" gorm:"column:type" description:"Secret value type" example:"int"`
 	}
 
+	Repository interface {
+		NewRepository() *Repository
+		GetPaths(ctx context.Context) ([]string, error)
+		Get(ctx context.Context, params ListSecretParams) (map[string]*Secret, error)
+		GetMap(ctx context.Context, params ListSecretParams) (map[string][]*Secret, error)
+		GetMapByPath(ctx context.Context, params ListSecretParams) (map[string][]*Secret, error)
+		GetMapByUID(ctx context.Context, params ListSecretParams) (map[string][]*Secret, error)
+		GetByUID(ctx context.Context, uid string) (*Secret, error)
+		Update(ctx context.Context, uid string, columnsMap map[string]interface{}) (*Secret, error)
+		Create(ctx context.Context, columnsMap map[string]interface{}) (*Secret, error)
+		Delete(ctx context.Context, uid string) error
+	}
+
 	ListSecretParams struct {
 		generics.ListParams
 		Path  string
 		Name  string
-		Types []uint
+		Types []string
 	}
 )
