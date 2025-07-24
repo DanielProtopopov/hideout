@@ -23,5 +23,14 @@ func main() {
 		}
 	}()
 
+	/*
+		secretsRep := secrets2.NewRepository(structs.Secrets)
+		pathsRep := paths.NewRepository(structs.Paths)
+		_, errCreateService := secrets.NewService(secrets.Config{}, structs.Paths, structs.Secrets, secretsRep, pathsRep)
+		if errCreateService != nil {
+			log.Fatal(errCreateService)
+		}
+	*/
+
 	api.Serve()
 }

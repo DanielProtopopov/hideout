@@ -1,7 +1,11 @@
 package structs
 
-import "hideout/internal/common/secrets"
+import (
+	"hideout/internal/paths"
+	"hideout/internal/secrets"
+)
 
 var (
-	Secrets map[string]map[string]secrets.Secret // Secret path map
+	Paths   []paths.Path
+	Secrets []secrets.Secret // Secret path map
 )

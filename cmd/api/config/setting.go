@@ -7,7 +7,8 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 	"hideout/config"
-	"hideout/internal/common/secrets"
+	"hideout/internal/paths"
+	"hideout/internal/secrets"
 	"hideout/internal/translations"
 	"hideout/structs"
 	"log"
@@ -55,5 +56,6 @@ func Init(ctx context.Context) {
 		},
 	}
 
-	structs.Secrets = make(map[string]map[string]secrets.Secret)
+	structs.Secrets = []secrets.Secret{}
+	structs.Paths = []paths.Path{}
 }
