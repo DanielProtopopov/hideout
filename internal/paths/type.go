@@ -21,7 +21,7 @@ type (
 		GetByID(ctx context.Context, id uint) (*Path, error)
 		Update(ctx context.Context, id uint, value string) (*Path, error)
 		Create(ctx context.Context, parentPathID uint, name string) (*Path, error)
-		//Delete(ctx context.Context, id uint) error
+		Delete(ctx context.Context, id uint) error
 	}
 
 	ListPathParams struct {

@@ -24,7 +24,7 @@ func main() {
 	}()
 
 	/*
-		secretsSvc, errCreateService := secrets.NewService(secrets.Config{}, structs.Paths, structs.Secrets)
+		secretsSvc, errCreateService := secrets.NewService(secrets.Config{}, &structs.Paths, &structs.Secrets)
 		if errCreateService != nil {
 			log.Fatal(errCreateService)
 		}
@@ -49,6 +49,11 @@ func main() {
 			log.Fatal(errMarshal)
 		}
 		log.Println(string(jsonResult))
+
+		errDelete := secretsSvc.DeleteSecret(ctx, rootSecret.ID)
+		if errDelete != nil {
+			log.Fatal(errDelete)
+		}
 
 		_, _, errCopy := secretsSvc.Copy(ctx, []*paths.Path{testPath}, []*secrets2.Secret{rootSecret},
 			rootPath.ID, anotherTestPath.ID)
@@ -84,5 +89,6 @@ func main() {
 		}
 		log.Println(string(jsonResult))
 	*/
+
 	api.Serve()
 }

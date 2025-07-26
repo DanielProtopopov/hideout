@@ -22,7 +22,11 @@ type SecretsService struct {
 // NewService Creation of the service
 func NewService(config Config, pathsList *[]paths.Path, secretsList *[]secrets.Secret) (*SecretsService, error) {
 	return &SecretsService{config: &config, paths: pathsList, secrets: secretsList,
-		secretsRepository: secrets.NewRepository(structs.Secrets), pathsRepository: paths.NewRepository(structs.Paths)}, nil
+		secretsRepository: secrets.NewRepository(&structs.Secrets), pathsRepository: paths.NewRepository(&structs.Paths)}, nil
+}
+
+func (s *SecretsService) DeleteSecret(ctx context.Context, secretID uint) error {
+	return s.secretsRepository.Delete(ctx, secretID)
 }
 
 func (s *SecretsService) CreateSecret(ctx context.Context, pathID uint, name string, value string, valueType string) (*secrets.Secret, error) {

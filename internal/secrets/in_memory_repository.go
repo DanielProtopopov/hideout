@@ -155,15 +155,13 @@ func (m InMemoryRepository) Count(ctx context.Context, pathID uint, name string)
 	return totalCount, nil
 }
 
-/*
 func (m InMemoryRepository) Delete(ctx context.Context, id uint) error {
 	for secretIndex, secretEntry := range *m.conn {
 		if secretEntry.ID == id {
-			*m.conn = append(*m.conn[:secretIndex], *m.conn[secretIndex+1:]...)
+			*m.conn = slices.Delete(*m.conn, secretIndex, secretIndex+1)
 			return nil
 		}
 	}
 
 	return error2.ErrRecordNotFound
 }
-*/

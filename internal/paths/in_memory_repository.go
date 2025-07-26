@@ -5,6 +5,7 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	error2 "hideout/internal/pkg/error"
 	pathPkg "path"
+	"slices"
 	"strings"
 )
 
@@ -123,15 +124,13 @@ func (m InMemoryRepository) Count(ctx context.Context, name string) (uint, error
 	return totalCount, nil
 }
 
-/*
 func (m InMemoryRepository) Delete(ctx context.Context, id uint) error {
-	for pathIndex, pathEntry := range m.conn {
+	for pathIndex, pathEntry := range *m.conn {
 		if pathEntry.ID == id {
-			m.conn = append(m.conn[:pathIndex], m.conn[pathIndex+1:]...)
+			*m.conn = slices.Delete(*m.conn, pathIndex, pathIndex+1)
 			return nil
 		}
 	}
 
 	return error2.ErrRecordNotFound
 }
-*/
