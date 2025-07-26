@@ -148,15 +148,17 @@ _For more examples, please refer to the [Documentation](https://github.com/Danie
 <!-- ROADMAP -->
 ## Roadmap
 
+- [X] Add in-memory storage adapter
+- [X] Add copy-paste secrets mechanism
 - [ ] Add file storage adapter
 - [ ] Add virtual filesystem adapter
 - [ ] Add redis storage adapter
 - [ ] Add database storage adapter
-- [ ] Add references (linking) mechanism for secrets
-- [ ] Add copy-paste secrets mechanism
+- [ ] Add references (linking) mechanism for secrets (multi-level)
 - [ ] Add authentication mechanism
 - [ ] Add dynamic secrets via risor-io
 - [ ] Add access control mechanisms via Casbin
+- [ ] Add zero-knowledge secrets mechanism (encryption/decryption)
 
 See the [open issues](https://github.com/DanielProtopopov/hideout/issues) for a full list of proposed features (and known issues).
 
