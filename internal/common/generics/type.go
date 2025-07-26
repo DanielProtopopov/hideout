@@ -1,6 +1,7 @@
 package generics
 
 import (
+	"hideout/internal/common/ordering"
 	"hideout/internal/common/pagination"
 	"time"
 )
@@ -12,14 +13,15 @@ type (
 	}
 
 	ListParams struct {
-		*pagination.Pagination
-		IDs []uint
+		IDs  []uint
+		UIDs []string
 		// Deleted values:
 		// * 1 - model.No
 		// * 2 - model.No
 		// * 3 - model.YesOrNo
-		Deleted   uint
-		Order     map[string]bool
+		Deleted uint
+		pagination.Pagination
+		Order     []ordering.OrderRQ
 		CreatedAt FromTo[time.Time]
 		UpdatedAt FromTo[time.Time]
 		DeletedAt FromTo[time.Time]
