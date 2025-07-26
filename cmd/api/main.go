@@ -50,11 +50,6 @@ func main() {
 		}
 		log.Println(string(jsonResult))
 
-		errDelete := secretsSvc.DeleteSecret(ctx, rootSecret.ID)
-		if errDelete != nil {
-			log.Fatal(errDelete)
-		}
-
 		_, _, errCopy := secretsSvc.Copy(ctx, []*paths.Path{testPath}, []*secrets2.Secret{rootSecret},
 			rootPath.ID, anotherTestPath.ID)
 		if errCopy != nil {
@@ -76,6 +71,22 @@ func main() {
 			rootPath.ID, yetAnotherTestPath.ID)
 		if errCopy != nil {
 			log.Fatal(errCopy)
+		}
+
+		tree, errGetTree = secretsSvc.Tree(ctx, rootPath.ID)
+		if errGetTree != nil {
+			log.Fatal(errGetTree)
+		}
+
+		jsonResult, errMarshal = json.Marshal(tree)
+		if errMarshal != nil {
+			log.Fatal(errMarshal)
+		}
+		log.Println(string(jsonResult))
+
+		_, _, errDelete := secretsSvc.Delete(ctx, []*paths.Path{anotherTestPath}, nil, rootPath.ID)
+		if errDelete != nil {
+			log.Fatal(errDelete)
 		}
 
 		tree, errGetTree = secretsSvc.Tree(ctx, rootPath.ID)

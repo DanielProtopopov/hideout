@@ -72,6 +72,54 @@ func (s *SecretsService) Tree(ctx context.Context, pathID uint) (TreeNode, error
 	return result, nil
 }
 
+func (s *SecretsService) Delete(ctx context.Context, existingPaths []*paths.Path, existingSecrets []*secrets.Secret, pathIDFrom uint) ([]*paths.Path, []*secrets.Secret, error) {
+	var deletedPaths []*paths.Path
+	var deletedSecrets []*secrets.Secret
+
+	_, errGetPathFrom := s.pathsRepository.GetByID(ctx, pathIDFrom)
+	if errGetPathFrom != nil {
+		return nil, nil, errGetPathFrom
+	}
+
+	// This deletes secrets From designed path
+	for _, existingSecret := range existingSecrets {
+		errDeleteSecret := s.secretsRepository.Delete(ctx, existingSecret.ID)
+		if errDeleteSecret != nil {
+			return nil, nil, errDeleteSecret
+		}
+		deletedSecrets = append(deletedSecrets, existingSecret)
+	}
+
+	// This recursively deletes paths and their secrets from sub-paths
+	for _, existingPath := range existingPaths {
+		existingPathPaths, errGetExistingPathPaths := s.getPathsByPath(ctx, existingPath.ID)
+		if errGetExistingPathPaths != nil {
+			return nil, nil, errGetExistingPathPaths
+		}
+		existingPathSecrets, errGetExistingPathSecrets := s.getSecretsByPath(ctx, existingPath.ID)
+		if errGetExistingPathSecrets != nil {
+			return nil, nil, errGetExistingPathSecrets
+		}
+
+		// Delete paths & secrets from an existing path
+		deletedPathPaths, deletedPathSecrets, errDelete := s.Delete(ctx, existingPathPaths, existingPathSecrets, existingPath.ID)
+		if errDelete != nil {
+			return nil, nil, errDelete
+		}
+
+		errDeletePath := s.pathsRepository.Delete(ctx, existingPath.ID)
+		if errDeletePath != nil {
+			return nil, nil, errDeletePath
+		}
+		deletedPaths = append(deletedPaths, existingPath)
+
+		deletedPaths = append(deletedPaths, deletedPathPaths...)
+		deletedSecrets = append(deletedSecrets, deletedPathSecrets...)
+	}
+
+	return deletedPaths, deletedSecrets, nil
+}
+
 func (s *SecretsService) Copy(ctx context.Context, existingPaths []*paths.Path, existingSecrets []*secrets.Secret, pathIDFrom uint, pathIDTo uint) ([]*paths.Path, []*secrets.Secret, error) {
 	var newSecrets []*secrets.Secret
 	var newPaths []*paths.Path
