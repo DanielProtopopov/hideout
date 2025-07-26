@@ -9,16 +9,16 @@ import (
 )
 
 type InMemoryRepository struct {
-	conn []Path
+	conn *[]Path
 }
 
-func NewRepository(conn []Path) Repository {
+func NewRepository(conn *[]Path) Repository {
 	return InMemoryRepository{conn: conn}
 }
 
 func (m InMemoryRepository) getID() uint {
 	id := uint(0)
-	for _, pathEntry := range m.conn {
+	for _, pathEntry := range *m.conn {
 		if pathEntry.ID > id {
 			id = pathEntry.ID
 		}
@@ -56,7 +56,7 @@ func (m InMemoryRepository) GetMapByUID(ctx context.Context, params ListPathPara
 func (m InMemoryRepository) Get(ctx context.Context, params ListPathParams) ([]*Path, error) {
 
 	var nameResults []*Path
-	for _, pathResult := range m.conn {
+	for _, pathResult := range *m.conn {
 		matched, errPathMatch := pathPkg.Match(params.Name, pathResult.Name)
 		if errPathMatch != nil {
 			return nil, errPathMatch
@@ -70,7 +70,7 @@ func (m InMemoryRepository) Get(ctx context.Context, params ListPathParams) ([]*
 }
 
 func (m InMemoryRepository) GetByID(ctx context.Context, id uint) (*Path, error) {
-	for _, uidPath := range m.conn {
+	for _, uidPath := range *m.conn {
 		if uidPath.ID == id {
 			return &uidPath, nil
 		}
@@ -80,7 +80,7 @@ func (m InMemoryRepository) GetByID(ctx context.Context, id uint) (*Path, error)
 }
 
 func (m InMemoryRepository) GetByUID(ctx context.Context, uid string) (*Path, error) {
-	for _, uidPath := range m.conn {
+	for _, uidPath := range *m.conn {
 		if uidPath.UID == uid {
 			return &uidPath, nil
 		}
@@ -90,7 +90,7 @@ func (m InMemoryRepository) GetByUID(ctx context.Context, uid string) (*Path, er
 }
 
 func (m InMemoryRepository) Update(ctx context.Context, id uint, name string) (*Path, error) {
-	for _, pathEntry := range m.conn {
+	for _, pathEntry := range *m.conn {
 		if pathEntry.ID == id {
 			pathEntry.Name = name
 			return &pathEntry, nil
@@ -100,21 +100,21 @@ func (m InMemoryRepository) Update(ctx context.Context, id uint, name string) (*
 	return nil, error2.ErrRecordNotFound
 }
 
-func (m InMemoryRepository) Create(ctx context.Context, pathID uint, name string) (*Path, error) {
-	for _, pathEntry := range m.conn {
-		if pathEntry.Name == name && pathEntry.ID == pathID {
+func (m InMemoryRepository) Create(ctx context.Context, parentPathID uint, name string) (*Path, error) {
+	for _, pathEntry := range *m.conn {
+		if pathEntry.Name == name && pathEntry.ID == parentPathID {
 			return nil, error2.ErrAlreadyExists
 		}
 	}
 
-	newPath := Path{ID: m.getID(), UID: gofakeit.UUID(), Name: name}
-	m.conn = append(m.conn, newPath)
+	newPath := Path{ID: m.getID(), UID: gofakeit.UUID(), ParentID: parentPathID, Name: name}
+	*m.conn = append(*m.conn, newPath)
 	return &newPath, nil
 }
 
 func (m InMemoryRepository) Count(ctx context.Context, name string) (uint, error) {
 	totalCount := uint(0)
-	for _, pathEntry := range m.conn {
+	for _, pathEntry := range *m.conn {
 		if strings.Contains(pathEntry.Name, name) {
 			totalCount++
 		}
@@ -123,6 +123,7 @@ func (m InMemoryRepository) Count(ctx context.Context, name string) (uint, error
 	return totalCount, nil
 }
 
+/*
 func (m InMemoryRepository) Delete(ctx context.Context, id uint) error {
 	for pathIndex, pathEntry := range m.conn {
 		if pathEntry.ID == id {
@@ -133,3 +134,4 @@ func (m InMemoryRepository) Delete(ctx context.Context, id uint) error {
 
 	return error2.ErrRecordNotFound
 }
+*/

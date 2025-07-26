@@ -10,16 +10,16 @@ import (
 )
 
 type InMemoryRepository struct {
-	conn []Secret
+	conn *[]Secret
 }
 
-func NewRepository(conn []Secret) Repository {
+func NewRepository(conn *[]Secret) Repository {
 	return InMemoryRepository{conn: conn}
 }
 
 func (m InMemoryRepository) getID() uint {
 	id := uint(0)
-	for _, secretEntry := range m.conn {
+	for _, secretEntry := range *m.conn {
 		if secretEntry.ID > id {
 			id = secretEntry.ID
 		}
@@ -56,7 +56,7 @@ func (m InMemoryRepository) GetMapByUID(ctx context.Context, params ListSecretPa
 
 func (m InMemoryRepository) Get(ctx context.Context, params ListSecretParams) ([]*Secret, error) {
 	var pathResults []*Secret
-	for _, secretEntry := range m.conn {
+	for _, secretEntry := range *m.conn {
 		if slices.Contains(params.PathIDs, secretEntry.ID) {
 			pathResults = append(pathResults, &secretEntry)
 		}
@@ -102,7 +102,7 @@ func (m InMemoryRepository) GetMapByPath(ctx context.Context, params ListSecretP
 }
 
 func (m InMemoryRepository) GetByID(ctx context.Context, id uint) (*Secret, error) {
-	for _, uidSecret := range m.conn {
+	for _, uidSecret := range *m.conn {
 		if uidSecret.ID == id {
 			return &uidSecret, nil
 		}
@@ -112,7 +112,7 @@ func (m InMemoryRepository) GetByID(ctx context.Context, id uint) (*Secret, erro
 }
 
 func (m InMemoryRepository) GetByUID(ctx context.Context, uid string) (*Secret, error) {
-	for _, uidSecret := range m.conn {
+	for _, uidSecret := range *m.conn {
 		if uidSecret.UID == uid {
 			return &uidSecret, nil
 		}
@@ -122,7 +122,7 @@ func (m InMemoryRepository) GetByUID(ctx context.Context, uid string) (*Secret, 
 }
 
 func (m InMemoryRepository) Update(ctx context.Context, id uint, value string) (*Secret, error) {
-	for _, secretEntry := range m.conn {
+	for _, secretEntry := range *m.conn {
 		if secretEntry.ID == id {
 			secretEntry.Value = value
 			return &secretEntry, nil
@@ -133,20 +133,20 @@ func (m InMemoryRepository) Update(ctx context.Context, id uint, value string) (
 }
 
 func (m InMemoryRepository) Create(ctx context.Context, pathID uint, name string, value string, valueType string) (*Secret, error) {
-	for _, secretEntry := range m.conn {
+	for _, secretEntry := range *m.conn {
 		if secretEntry.Name == name && secretEntry.PathID == pathID {
 			return nil, error2.ErrAlreadyExists
 		}
 	}
 
 	newSecret := Secret{ID: m.getID(), PathID: pathID, UID: gofakeit.UUID(), Name: name, Value: value, Type: valueType}
-	m.conn = append(m.conn, newSecret)
+	*m.conn = append(*m.conn, newSecret)
 	return &newSecret, nil
 }
 
 func (m InMemoryRepository) Count(ctx context.Context, pathID uint, name string) (uint, error) {
 	totalCount := uint(0)
-	for _, secretEntry := range m.conn {
+	for _, secretEntry := range *m.conn {
 		if pathID == secretEntry.PathID && strings.Contains(secretEntry.Name, name) {
 			totalCount++
 		}
@@ -155,13 +155,15 @@ func (m InMemoryRepository) Count(ctx context.Context, pathID uint, name string)
 	return totalCount, nil
 }
 
+/*
 func (m InMemoryRepository) Delete(ctx context.Context, id uint) error {
-	for secretIndex, secretEntry := range m.conn {
+	for secretIndex, secretEntry := range *m.conn {
 		if secretEntry.ID == id {
-			m.conn = append(m.conn[:secretIndex], m.conn[secretIndex+1:]...)
+			*m.conn = append(*m.conn[:secretIndex], *m.conn[secretIndex+1:]...)
 			return nil
 		}
 	}
 
 	return error2.ErrRecordNotFound
 }
+*/

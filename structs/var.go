@@ -6,6 +6,6 @@ import (
 )
 
 var (
-	Paths   []paths.Path
-	Secrets []secrets.Secret // Secret path map
+	Paths   *[]paths.Path
+	Secrets *[]secrets.Secret // Secret path map
 )

@@ -20,12 +20,13 @@ type (
 		GetByUID(ctx context.Context, uid string) (*Path, error)
 		GetByID(ctx context.Context, id uint) (*Path, error)
 		Update(ctx context.Context, id uint, value string) (*Path, error)
-		Create(ctx context.Context, pathID uint, name string) (*Path, error)
-		Delete(ctx context.Context, id uint) error
+		Create(ctx context.Context, parentPathID uint, name string) (*Path, error)
+		//Delete(ctx context.Context, id uint) error
 	}
 
 	ListPathParams struct {
 		generics.ListParams
-		Name string
+		Name         string
+		ParentPathID uint
 	}
 )

@@ -24,7 +24,7 @@ type (
 		GetByID(ctx context.Context, id uint) (*Secret, error)
 		Update(ctx context.Context, id uint, value string) (*Secret, error)
 		Create(ctx context.Context, pathID uint, name string, value string, valueType string) (*Secret, error)
-		Delete(ctx context.Context, id uint) error
+		// Delete(ctx context.Context, id uint) error
 	}
 
 	ListSecretParams struct {

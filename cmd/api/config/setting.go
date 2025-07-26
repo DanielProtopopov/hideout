@@ -56,6 +56,6 @@ func Init(ctx context.Context) {
 		},
 	}
 
-	structs.Secrets = []secrets.Secret{}
-	structs.Paths = []paths.Path{}
+	structs.Secrets = &[]secrets.Secret{}
+	structs.Paths = &[]paths.Path{}
 }
