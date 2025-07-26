@@ -2,7 +2,10 @@ package secrets
 
 import (
 	"context"
+	"hideout/internal/common/generics"
+	"hideout/internal/common/model"
 	"hideout/internal/paths"
+	error2 "hideout/internal/pkg/error"
 	"hideout/internal/secrets"
 )
 
@@ -24,7 +27,41 @@ func NewService(config Config, pathsList []paths.Path, secretsList []secrets.Sec
 		SecretsRepository: secretsRep, PathsRepository: pathsRep}, nil
 }
 
-func (s *SecretsService) GetSecretsByPath(ctx context.Context, pathUID string) ([]*secrets.Secret, error) {
+func (s *SecretsService) Copy(ctx context.Context, pathIDs []uint, secretIDs []uint, pathIDFrom uint, pathIDTo uint) ([]*paths.Path, []*secrets.Secret, error) {
+	return nil, nil, error2.ErrNotImplemented
+}
+
+func (s *SecretsService) copyPaths(ctx context.Context, pathIDs []uint, pathIDFrom uint, pathIDTo uint) ([]*secrets.Secret, error) {
+	return nil, error2.ErrNotImplemented
+}
+
+func (s *SecretsService) copySecrets(ctx context.Context, secretIDs []uint, pathIDFrom uint, pathIDTo uint) ([]*secrets.Secret, error) {
+	fromPath, errGetFromPath := s.PathsRepository.GetByID(ctx, pathIDFrom)
+	if errGetFromPath != nil {
+		return nil, errGetFromPath
+	}
+	toPath, errGetToPath := s.PathsRepository.GetByID(ctx, pathIDTo)
+	if errGetToPath != nil {
+		return nil, errGetToPath
+	}
+	secretsList, errGetSecrets := s.SecretsRepository.Get(ctx, secrets.ListSecretParams{
+		ListParams: generics.ListParams{Deleted: model.No, IDs: secretIDs}, PathIDs: []uint{fromPath.ID},
+	})
+	if errGetSecrets != nil {
+		return nil, errGetSecrets
+	}
+	var newSecrets []*secrets.Secret
+	for _, secret := range secretsList {
+		newSecret, errCreateSecret := s.SecretsRepository.Create(ctx, toPath.ID, secret.Name, secret.Value, secret.Type)
+		if errCreateSecret != nil {
+			return nil, errCreateSecret
+		}
+		newSecrets = append(newSecrets, newSecret)
+	}
+	return newSecrets, nil
+}
+
+func (s *SecretsService) getSecretsByPath(ctx context.Context, pathUID string) ([]*secrets.Secret, error) {
 	var results []*secrets.Secret
 	pathByUID, errGetPath := s.PathsRepository.GetByUID(ctx, pathUID)
 	if errGetPath != nil {
@@ -40,7 +77,7 @@ func (s *SecretsService) GetSecretsByPath(ctx context.Context, pathUID string) (
 	return results, nil
 }
 
-func (s *SecretsService) GetPathsByPath(ctx context.Context, parentPathID uint) ([]*paths.Path, error) {
+func (s *SecretsService) getPathsByPath(ctx context.Context, parentPathID uint) ([]*paths.Path, error) {
 	var results []*paths.Path
 	for _, path := range s.Paths {
 		if path.ParentID == parentPathID {
