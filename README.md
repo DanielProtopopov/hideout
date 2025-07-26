@@ -102,33 +102,31 @@ To get a local copy up and running follow these simple example steps.
 ### Prerequisites
 
 This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+* go - Read official instructions on [installing Go](https://go.dev/doc/install) on your machine
 
 ### Installation
 
 _Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
 
-1. Get a free API Key at [https://github.com/DanielProtopopov/hideout](https://github.com/DanielProtopopov/hideout)
-2. Clone the repo
+1. Clone the repo
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   git clone https://github.com/DanielProtopopov/hideout.git
    ```
-3. Install NPM packages
+2. Install Go packages
    ```sh
-   npm install
+   go mod vendor
    ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
-5. Change git remote url to avoid accidental pushes to base project
+3. Set up additional tools (optional)
+   Install taskfile binary to run tasks in Taskfile.yaml by checking out [installation instructions](https://taskfile.dev/installation)
+
+4. Build the project and create Swagger docs for API
    ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
+      task build && task docs
    ```
+5. Set up environment variables in .env file from example `.env.example`
+
+6. Run the project
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

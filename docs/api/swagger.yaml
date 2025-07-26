@@ -5,10 +5,7 @@ definitions:
       Name:
         example: DEBUG
         type: string
-      ParentUID:
-        example: abc-def-ghi
-        type: string
-      Path:
+      PathUID:
         example: /
         type: string
       Type:
@@ -89,22 +86,18 @@ definitions:
     type: object
   secrets.GetSecretsRQ:
     properties:
-      Ordering:
+      Order:
         items:
           $ref: '#/definitions/ordering.OrderRQ'
         type: array
       Pagination:
         $ref: '#/definitions/pagination.PaginationRQ'
-      Path:
-        example: /
+      PathUID:
+        example: abc-def-ghi
         type: string
     type: object
   secrets.GetSecretsRS:
     properties:
-      Data:
-        items:
-          $ref: '#/definitions/api_group_secrets.Secret'
-        type: array
       Errors:
         items:
           $ref: '#/definitions/rqrs.Error'
@@ -112,12 +105,32 @@ definitions:
       Pages:
         example: 14
         type: integer
+      Paths:
+        items:
+          $ref: '#/definitions/secrets.Path'
+        type: array
       PerPage:
         example: 20
         type: integer
+      Secrets:
+        items:
+          $ref: '#/definitions/api_group_secrets.Secret'
+        type: array
       Total:
         example: 280
         type: integer
+    type: object
+  secrets.Path:
+    properties:
+      Name:
+        example: 'Folder #1'
+        type: string
+      ParentUID:
+        example: abc-def-ghi
+        type: string
+      UID:
+        example: abc-def-ghi
+        type: string
     type: object
   secrets.UpdateSecretsRS:
     properties:

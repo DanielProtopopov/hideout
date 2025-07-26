@@ -2,6 +2,8 @@ package secrets
 
 import (
 	"context"
+	"hideout/internal/common/generics"
+	"hideout/internal/common/model"
 	"hideout/internal/paths"
 	"hideout/internal/secrets"
 	"hideout/structs"
@@ -23,6 +25,22 @@ type SecretsService struct {
 func NewService(config Config, pathsList *[]paths.Path, secretsList *[]secrets.Secret) (*SecretsService, error) {
 	return &SecretsService{config: &config, paths: pathsList, secrets: secretsList,
 		secretsRepository: secrets.NewRepository(&structs.Secrets), pathsRepository: paths.NewRepository(&structs.Paths)}, nil
+}
+
+func (s *SecretsService) GetPathByUID(ctx context.Context, pathUID string) (*paths.Path, error) {
+	return s.pathsRepository.GetByUID(ctx, pathUID)
+}
+
+func (s *SecretsService) GetPaths(ctx context.Context, pathID uint) ([]*paths.Path, error) {
+	return s.pathsRepository.Get(ctx, paths.ListPathParams{
+		ListParams: generics.ListParams{Deleted: model.No}, ParentPathID: pathID,
+	})
+}
+
+func (s *SecretsService) GetSecrets(ctx context.Context, pathID uint) ([]*secrets.Secret, error) {
+	return s.secretsRepository.Get(ctx, secrets.ListSecretParams{
+		ListParams: generics.ListParams{Deleted: model.No}, PathIDs: []uint{pathID},
+	})
 }
 
 func (s *SecretsService) DeleteSecret(ctx context.Context, secretID uint) error {

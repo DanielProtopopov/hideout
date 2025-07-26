@@ -8,33 +8,35 @@ import (
 
 type (
 	Secret struct {
+		UID     string `json:"UID" description:"Secondary unique identifier" example:"abc-def-ghi"`
+		PathUID string `json:"PathUID" description:"Path unique identifier" example:"/"`
+		Name    string `json:"Name" description:"Secret name" example:"DEBUG"`
+		Value   string `json:"Value" description:"Secret value" example:"Test"`
+		Type    string `json:"Type" description:"Secret value type" example:"int"`
+	}
+
+	Path struct {
 		UID       string `json:"UID" description:"Secondary unique identifier" example:"abc-def-ghi"`
-		ParentUID string `json:"ParentUID" description:"Parent unique identifier" example:"abc-def-ghi"`
-		Path      string `json:"Path" description:"Folder path" example:"/"`
-		Name      string `json:"Name" description:"Secret name" example:"DEBUG"`
-		Value     string `json:"Value" description:"Secret value" example:"Test"`
-		Type      string `json:"Type" description:"Secret value type" example:"int"`
+		ParentUID string `json:"ParentUID" description:"Secondary unique identifier" example:"abc-def-ghi"`
+		Name      string `json:"Name" description:"Path name" example:"Folder #1"`
 	}
 
 	CreateSecret struct {
-		ParentUID string `json:"ParentUID" description:"Parent unique identifier" example:"abc-def-ghi"`
-		Path      string `json:"Path" description:"Folder path" example:"/"`
-		Name      string `json:"Name" description:"Secret name" example:"DEBUG"`
-		Value     string `json:"Value" description:"Secret value" example:"Test"`
-		Type      string `json:"Type" description:"Secret value type" example:"int"`
+		PathUID string `json:"PathUID" description:"Path unique identifier" example:"/"`
+		Name    string `json:"Name" description:"Secret name" example:"DEBUG"`
+		Value   string `json:"Value" description:"Secret value" example:"Test"`
+		Type    string `json:"Type" description:"Secret value type" example:"int"`
 	}
 
 	GetSecretsRQ struct {
-		Path       string                  `json:"Path" description:"Folder path" example:"/"`
-		Name       string                  `json:"Name" description:"Secret name" example:"DEBUG"`
-		Value      string                  `json:"Value" description:"Secret value" example:"Test"`
-		Types      []string                `json:"Types" description:"Secret type" example:"int"`
-		Pagination pagination.PaginationRQ `json:"Pagination"`
-		Ordering   []ordering.OrderRQ      `json:"Ordering"`
+		PathUID    string                  `json:"PathUID" description:"Folder unique identifier" example:"abc-def-ghi"`
+		Pagination pagination.PaginationRQ `json:"Pagination" description:"Pagination"`
+		Order      []ordering.OrderRQ      `json:"Order" description:"Order"`
 	}
 
 	GetSecretsRS struct {
-		Data []Secret `json:"Data"`
+		Secrets []Secret `json:"Secrets"`
+		Paths   []Path   `json:"Paths"`
 		rqrs.ResponseListRS
 	}
 
@@ -66,6 +68,6 @@ type (
 
 	ListSecretParams struct {
 		Pagination pagination.PaginationRQ
-		Ordering   map[string]bool
+		Order      []ordering.OrderRQ
 	}
 )

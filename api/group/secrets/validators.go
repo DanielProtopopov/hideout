@@ -12,7 +12,7 @@ func (rq GetSecretsRQ) Validate(ctx context.Context, Localizer *i18n.Localizer) 
 		return errors.Wrap(errPagination, "Pagination validation failed")
 	}
 
-	for _, orderVal := range rq.Ordering {
+	for _, orderVal := range rq.Order {
 		errOrdering := orderVal.Validate(ctx, Localizer)
 		if errOrdering != nil {
 			return errors.Wrap(errOrdering, "Order validation failed")

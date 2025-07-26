@@ -282,11 +282,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "DEBUG"
                 },
-                "ParentUID": {
-                    "type": "string",
-                    "example": "abc-def-ghi"
-                },
-                "Path": {
+                "PathUID": {
                     "type": "string",
                     "example": "/"
                 },
@@ -402,7 +398,7 @@ const docTemplate = `{
         "secrets.GetSecretsRQ": {
             "type": "object",
             "properties": {
-                "Ordering": {
+                "Order": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ordering.OrderRQ"
@@ -411,21 +407,15 @@ const docTemplate = `{
                 "Pagination": {
                     "$ref": "#/definitions/pagination.PaginationRQ"
                 },
-                "Path": {
+                "PathUID": {
                     "type": "string",
-                    "example": "/"
+                    "example": "abc-def-ghi"
                 }
             }
         },
         "secrets.GetSecretsRS": {
             "type": "object",
             "properties": {
-                "Data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/api_group_secrets.Secret"
-                    }
-                },
                 "Errors": {
                     "type": "array",
                     "items": {
@@ -436,13 +426,42 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 14
                 },
+                "Paths": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/secrets.Path"
+                    }
+                },
                 "PerPage": {
                     "type": "integer",
                     "example": 20
                 },
+                "Secrets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api_group_secrets.Secret"
+                    }
+                },
                 "Total": {
                     "type": "integer",
                     "example": 280
+                }
+            }
+        },
+        "secrets.Path": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "type": "string",
+                    "example": "Folder #1"
+                },
+                "ParentUID": {
+                    "type": "string",
+                    "example": "abc-def-ghi"
+                },
+                "UID": {
+                    "type": "string",
+                    "example": "abc-def-ghi"
                 }
             }
         },

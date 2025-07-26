@@ -1,17 +1,15 @@
 package secrets
 
 import (
+	"errors"
 	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	apiconfig "hideout/cmd/api/config"
-	"hideout/internal/common/generics"
-	"hideout/internal/common/model"
-	"hideout/internal/common/pagination"
+	"hideout/internal/common/apperror"
 	"hideout/internal/common/rqrs"
-	"hideout/internal/pkg/extra"
-	"hideout/internal/secrets"
+	"hideout/services/secrets"
 	"hideout/structs"
 	"log"
 	"net/http"
@@ -46,7 +44,7 @@ func GetSecretsHandler(c *gin.Context) {
 	validationSpan.Description = "rq.validate"
 
 	var request GetSecretsRQ
-	response := GetSecretsRS{Data: []Secret{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
+	response := GetSecretsRS{Secrets: []Secret{}, Paths: []Path{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
 	errBindBody := c.ShouldBindBodyWith(&request, binding.JSON)
 	if errBindBody != nil {
@@ -66,50 +64,57 @@ func GetSecretsHandler(c *gin.Context) {
 	}
 	validationSpan.Finish()
 
-	inMemoryRepository := secrets.NewInMemoryRepository(structs.Secrets)
-	secretResults, errGetSecrets := inMemoryRepository.GetMapByUID(rqContext, secrets.ListSecretParams{
-		ListParams: generics.ListParams{Deleted: model.No}, Path: request.Path, Name: request.Name, Types: request.Types,
-	})
-	if errGetSecrets != nil {
-		log.Printf("Error fetching secrets: %s", errGetSecrets.Error())
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretsError"}})
-		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetSecrets.Error(), Code: 0})
+	secretsSvc, errCreateService := secrets.NewService(secrets.Config{}, &structs.Paths, &structs.Secrets)
+	if errCreateService != nil {
+		log.Printf("Error creating secrets service: %s", errCreateService.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errCreateService.Error(), Code: 0})
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
-	var parentIDs []uint
-	for _, secret := range secretResults {
-		if secret.ParentID != 0 {
-			parentIDs = append(parentIDs, secret.ParentID)
+	pathByUID, errGetPath := secretsSvc.GetPathByUID(rqContext, request.PathUID)
+	if errGetPath != nil {
+		if errors.Is(errGetPath, apperror.ErrRecordNotFound) {
+			log.Printf("Path with UID of %s was not found", request.PathUID)
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "PathNotFoundError"}})
+			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+			c.JSON(http.StatusNotFound, response)
+			return
 		}
-	}
-	if len(parentIDs) > 0 {
-		parentIDs = extra.UniqueUint(parentIDs)
-	}
-	parentSecretsMap, errGetParentSecrets := inMemoryRepository.GetMapByID(rqContext, secrets.ListSecretParams{
-		ListParams: generics.ListParams{Deleted: model.No, Order: request.Ordering, Pagination: pagination.Pagination{
-			PerPage: request.Pagination.PerPage, Page: request.Pagination.Page,
-		}}, Path: request.Path, Name: request.Name, Types: request.Types,
-	})
-	if errGetParentSecrets != nil {
-		log.Printf("Error fetching parent secrets: %s", errGetParentSecrets.Error())
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretsError"}})
-		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetParentSecrets.Error(), Code: 0})
+		log.Printf("Error fetching path with UID of %s: %s", request.PathUID, errGetPath.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetPathError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetPath.Error(), Code: 0})
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
+
+	secretResults, errGetPathSecrets := secretsSvc.GetSecrets(rqContext, pathByUID.ID)
+	if errGetPathSecrets != nil {
+		log.Printf("Error fetching path secrets: %s", errGetPathSecrets.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretsError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetPathSecrets.Error(), Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	pathResults, errGetPathPaths := secretsSvc.GetPaths(rqContext, pathByUID.ID)
+	if errGetPathPaths != nil {
+		log.Printf("Error fetching path' paths: %s", errGetPathPaths.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetPathsError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetPathPaths.Error(), Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
 	for _, secret := range secretResults {
-		secretEntry := Secret{
-			UID: secret.UID, ParentUID: "", Path: secret.Path, Name: secret.Name, Value: secret.Value, Type: secret.Type,
-		}
-		if secret.ParentID != 0 {
-			parentSecret, exists := parentSecretsMap[secret.ParentID]
-			if exists {
-				secretEntry.ParentUID = parentSecret.UID
-			}
-		}
-		response.Data = append(response.Data, secretEntry)
+		secretEntry := Secret{UID: secret.UID, PathUID: pathByUID.UID, Name: secret.Name, Value: secret.Value, Type: secret.Type}
+		response.Secrets = append(response.Secrets, secretEntry)
+	}
+
+	for _, path := range pathResults {
+		pathEntry := Path{UID: path.UID, Name: path.Name, ParentUID: request.PathUID}
+		response.Paths = append(response.Paths, pathEntry)
 	}
 
 	c.JSON(http.StatusOK, response)
