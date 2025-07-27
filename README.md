@@ -147,11 +147,11 @@ _For more examples, please refer to the [Documentation](https://github.com/Danie
 ## Roadmap
 
 - [X] Add in-memory storage adapter
-- [X] Add copy-paste secrets mechanism
-- [ ] Add file storage adapter
-- [ ] Add virtual filesystem adapter
+- [X] Add copy-paste secrets & paths mechanism
 - [ ] Add redis storage adapter
 - [ ] Add database storage adapter
+- [ ] Add file storage adapter
+- [ ] Add virtual filesystem adapter
 - [ ] Add references (linking) mechanism for secrets (multi-level)
 - [ ] Add authentication mechanism
 - [ ] Add dynamic secrets via risor-io
@@ -231,11 +231,11 @@ Use this space to list resources you find helpful and would like to give credit 
 [stars-url]: https://github.com/DanielProtopopov/hideout/stargazers
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/DanielProtopopov/hideout/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/DanielProtopopov/hideout/blob/master/LICENSE.txt
+[license-shield]: http://img.shields.io/badge/license-MIT-green.svg?style=flat
+[license-url]: https://raw.githubusercontent.com/DanielProtopopov/hideout/main/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/danielprotopopov
-[Golang]: https://img.shields.io/badge/golang-000000?style=for-the-badge&logo=golang&logoColor=white
+[Golang]: https://img.shields.io/badge/Go-00ADD8?logo=Go&logoColor=white&style=for-the-badge
 [Golang-url]: https://go.dev/
 [go-i18n]: https://img.shields.io/badge/golang-000000?style=for-the-badge&logo=golang&logoColor=white
 [go-i18n-url]: https://github.com/nicksnyder/go-i18n
