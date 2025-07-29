@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/text/language"
 	"hideout/config"
 	"hideout/internal/paths"
@@ -12,6 +13,7 @@ import (
 	"hideout/internal/translations"
 	"hideout/structs"
 	"log"
+	"time"
 )
 
 type Config struct {
@@ -19,6 +21,7 @@ type Config struct {
 	Environment config.EnvironmentConfig // Server environment configuration
 	Bundle      *i18n.Bundle             // I18n bundle instance (localization)
 	I18n        *i18n.Localizer          // I18n configuration (i18n)
+	Redis       config.RedisConfig       // Redis configuration
 	Debug       bool                     // Debugging flag
 }
 
@@ -54,7 +57,25 @@ func Init(ctx context.Context) {
 			FullName:  config.GetEnv("ENVIRONMENT_FULL", "development"),
 			ShortName: config.GetEnv("ENVIRONMENT_SHORT", "dev"),
 		},
+		Redis: config.RedisConfig{
+			Host:     config.GetEnv("REDIS_HOST", "localhost"),
+			Port:     config.GetEnvAsInt("REDIS_PORT", 6379),
+			Password: config.GetEnv("REDIS_PASSWORD", ""),
+			DB:       config.GetEnvAsInt("REDIS_DB", 0),
+			Proto:    config.GetEnv("REDIS_PROTOCOL", "tcp"),
+		},
 	}
+
+	client := redis.NewClient(&redis.Options{
+		Network: Settings.Redis.Proto, Addr: fmt.Sprintf("%s:%d", Settings.Redis.Host, Settings.Redis.Port),
+		Password: Settings.Redis.Password, DB: Settings.Redis.DB, ConnMaxIdleTime: 5 * time.Minute, MaxRetries: 3,
+	})
+	if errPing := client.Ping(ctx).Err(); errPing != nil {
+		log.Panicf("Error pinging redis: %s", errPing)
+	} else {
+		log.Println("Redis was pinged successfully")
+	}
+	structs.Redis = client
 
 	structs.Secrets = []secrets.Secret{}
 	structs.Paths = []paths.Path{}

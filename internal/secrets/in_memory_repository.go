@@ -13,7 +13,7 @@ type InMemoryRepository struct {
 	conn *[]Secret
 }
 
-func NewRepository(conn *[]Secret) Repository {
+func NewInMemoryRepository(conn *[]Secret) InMemoryRepository {
 	return InMemoryRepository{conn: conn}
 }
 

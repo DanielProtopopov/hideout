@@ -2,6 +2,7 @@ package secrets
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
 	"hideout/internal/paths"
@@ -22,9 +23,31 @@ type SecretsService struct {
 }
 
 // NewService Creation of the service
-func NewService(config Config, pathsList *[]paths.Path, secretsList *[]secrets.Secret) (*SecretsService, error) {
-	return &SecretsService{config: &config, paths: pathsList, secrets: secretsList,
-		secretsRepository: secrets.NewRepository(&structs.Secrets), pathsRepository: paths.NewRepository(&structs.Paths)}, nil
+func NewService(ctx context.Context, config Config, pathsList *[]paths.Path, secretsList *[]secrets.Secret, repositoryType uint, preloadIntoMemoryCache bool) (*SecretsService, error) {
+	switch repositoryType {
+	case secrets.RepositoryType_InMemory:
+		return &SecretsService{config: &config, paths: pathsList, secrets: secretsList,
+			secretsRepository: secrets.NewInMemoryRepository(&structs.Secrets), pathsRepository: paths.NewInMemoryRepository(&structs.Paths)}, nil
+	case secrets.RepositoryType_Redis:
+		secretsRep := secrets.NewRedisRepository(structs.Redis, secrets.NewInMemoryRepository(&structs.Secrets))
+		pathsRep := paths.NewRedisRepository(structs.Redis, paths.NewInMemoryRepository(&structs.Paths))
+		if preloadIntoMemoryCache {
+			loadedSecrets, errLoadSecrets := secretsRep.Load(ctx)
+			if errLoadSecrets != nil {
+				return nil, errors.Wrap(errLoadSecrets, "Error preloading secrets into in-memory storage from Redis")
+			}
+			structs.Secrets = loadedSecrets
+			loadedPaths, errLoadPaths := pathsRep.Load(ctx)
+			if errLoadPaths != nil {
+				return nil, errors.Wrap(errLoadPaths, "Error preloading paths into in-memory storage from Redis")
+			}
+			structs.Paths = loadedPaths
+		}
+		return &SecretsService{config: &config, paths: pathsList, secrets: secretsList,
+			secretsRepository: secretsRep, pathsRepository: pathsRep}, nil
+	}
+
+	return nil, errors.New("invalid repository type")
 }
 
 func (s *SecretsService) GetPathByUID(ctx context.Context, pathUID string) (*paths.Path, error) {

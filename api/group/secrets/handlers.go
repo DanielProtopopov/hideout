@@ -9,6 +9,7 @@ import (
 	apiconfig "hideout/cmd/api/config"
 	"hideout/internal/common/apperror"
 	"hideout/internal/common/rqrs"
+	secrets2 "hideout/internal/secrets"
 	"hideout/services/secrets"
 	"hideout/structs"
 	"log"
@@ -64,7 +65,7 @@ func GetSecretsHandler(c *gin.Context) {
 	}
 	validationSpan.Finish()
 
-	secretsSvc, errCreateService := secrets.NewService(secrets.Config{}, &structs.Paths, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, secrets.Config{}, &structs.Paths, &structs.Secrets, secrets2.RepositoryType_Redis, false)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
