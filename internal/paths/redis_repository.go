@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
+	"hideout/internal/common/model"
 )
 
 type RedisRepository struct {
@@ -75,7 +76,7 @@ func (m RedisRepository) Update(ctx context.Context, id uint, name string) (*Pat
 	}
 	var existingPathName = existingPath.Name
 	var updatedPathEntry = Path{
-		ID: existingPath.ID, ParentID: existingPath.ParentID, UID: existingPath.UID, Name: name,
+		Model: model.Model{ID: existingPath.ID}, ParentID: existingPath.ParentID, UID: existingPath.UID, Name: name,
 	}
 	updatedPathVal, errMarshal := json.Marshal(updatedPathEntry)
 	if errMarshal != nil {
@@ -109,7 +110,7 @@ func (m RedisRepository) Create(ctx context.Context, parentPathID uint, name str
 
 	_, errCreate := m.conn.Set(ctx, fmt.Sprintf("path:%d", newPath.ID), newPathVal, 0).Result()
 	if errCreate != nil && !errors.Is(errCreate, redis.Nil) {
-		_ = m.inMemoryRepository.Delete(ctx, newPath.ID)
+		_ = m.inMemoryRepository.Delete(ctx, newPath.ID, true)
 		return nil, errors.Wrapf(errCreate, "Error creating path with ID of %d", newPath.ID)
 	}
 
@@ -120,11 +121,11 @@ func (m RedisRepository) Count(ctx context.Context, name string) (uint, error) {
 	return m.inMemoryRepository.Count(ctx, name)
 }
 
-func (m RedisRepository) Delete(ctx context.Context, id uint) error {
+func (m RedisRepository) Delete(ctx context.Context, id uint, forceDelete bool) error {
 	_, errDelete := m.conn.Del(ctx, fmt.Sprintf("path:%d", id)).Result()
 	if errDelete != nil && !errors.Is(errDelete, redis.Nil) {
 		return errors.Wrapf(errDelete, "Error deleting path with ID of %d", id)
 	}
 
-	return m.inMemoryRepository.Delete(ctx, id)
+	return m.inMemoryRepository.Delete(ctx, id, true)
 }

@@ -3,11 +3,12 @@ package secrets
 import (
 	"context"
 	"hideout/internal/common/generics"
+	"hideout/internal/common/model"
 )
 
 type (
 	Secret struct {
-		ID     uint   `json:"ID" db:"id" gorm:"column:id;primaryKey;autoIncrement" description:"Primary unique identifier" example:"1"`
+		model.Model
 		PathID uint   `json:"PathID" db:"path_id" gorm:"column:parent_id" description:"Path unique identifier (link)" example:"0"`
 		UID    string `json:"UID" db:"uid" gorm:"column:uid;unique" description:"Secondary unique identifier" example:"abc-def-ghi"`
 		Name   string `json:"Name" db:"name" gorm:"column:name" description:"Secret name" example:"DEBUG"`
@@ -24,7 +25,7 @@ type (
 		GetByID(ctx context.Context, id uint) (*Secret, error)
 		Update(ctx context.Context, id uint, value string) (*Secret, error)
 		Create(ctx context.Context, pathID uint, name string, value string, valueType string) (*Secret, error)
-		Delete(ctx context.Context, id uint) error
+		Delete(ctx context.Context, id uint, forceDelete bool) error
 	}
 
 	ListSecretParams struct {

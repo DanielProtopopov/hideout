@@ -1,5 +1,10 @@
 version: '3'
 
+env:
+  ENV: dev
+
+dotenv: ['.env']
+
 tasks:
   all:
     cmds:
@@ -12,6 +17,27 @@ tasks:
   swag-api-parse:
     cmds:
       - ~/go/bin/swag init -g ./api/routers.go --parseInternal -o ./docs/api --exclude admin
+    silent: false
+  migration-init:
+    cmds:
+      - migrate create -ext sql -dir ./data/migrations -seq init
+    silent:
+      false
+  migration-create:
+    cmds:
+      - migrate create -ext sql -dir ./data/migrations -seq {{.NAME}}
+    silent: false
+  migration-drop-db:
+    cmds:
+      - migrate -database "{{.DB_TYPE}}://{{.DB_USERNAME}}:{{.DB_PASSWORD}}@{{.DB_HOST}}:{{.DB_PORT}}/{{.DB_DATABASE}}?sslmode={{.DB_SSL_MODE}}" -path ./data/migrations drop -f
+    silent: false
+  migration-up:
+    cmds:
+      - migrate -database "{{.DB_TYPE}}://{{.DB_USERNAME}}:{{.DB_PASSWORD}}@{{.DB_HOST}}:{{.DB_PORT}}/{{.DB_DATABASE}}?sslmode={{.DB_SSL_MODE}}" -path ./data/migrations up
+    silent: false
+  migration-down:
+    cmds:
+      - migrate -database "{{.DB_TYPE}}://{{.DB_USERNAME}}:{{.DB_PASSWORD}}@{{.DB_HOST}}:{{.DB_PORT}}/{{.DB_DATABASE}}?sslmode={{.DB_SSL_MODE}}" -path ./data/migrations down 1
     silent: false
   i18n-en-US:
     cmds:

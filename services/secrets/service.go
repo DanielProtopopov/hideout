@@ -66,8 +66,8 @@ func (s *SecretsService) GetSecrets(ctx context.Context, pathID uint) ([]*secret
 	})
 }
 
-func (s *SecretsService) DeleteSecret(ctx context.Context, secretID uint) error {
-	return s.secretsRepository.Delete(ctx, secretID)
+func (s *SecretsService) DeleteSecret(ctx context.Context, secretID uint, forceDelete bool) error {
+	return s.secretsRepository.Delete(ctx, secretID, forceDelete)
 }
 
 func (s *SecretsService) CreateSecret(ctx context.Context, pathID uint, name string, value string, valueType string) (*secrets.Secret, error) {
@@ -124,7 +124,7 @@ func (s *SecretsService) Delete(ctx context.Context, existingPaths []*paths.Path
 
 	// This deletes secrets From designed path
 	for _, existingSecret := range existingSecrets {
-		errDeleteSecret := s.secretsRepository.Delete(ctx, existingSecret.ID)
+		errDeleteSecret := s.secretsRepository.Delete(ctx, existingSecret.ID, true)
 		if errDeleteSecret != nil {
 			return nil, nil, errDeleteSecret
 		}
@@ -148,7 +148,7 @@ func (s *SecretsService) Delete(ctx context.Context, existingPaths []*paths.Path
 			return nil, nil, errDelete
 		}
 
-		errDeletePath := s.pathsRepository.Delete(ctx, existingPath.ID)
+		errDeletePath := s.pathsRepository.Delete(ctx, existingPath.ID, true)
 		if errDeletePath != nil {
 			return nil, nil, errDeletePath
 		}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
+	"hideout/internal/common/model"
 )
 
 type RedisRepository struct {
@@ -79,7 +80,7 @@ func (m RedisRepository) Update(ctx context.Context, id uint, value string) (*Se
 	}
 	var existingSecretName = existingSecret.Name
 
-	var updatedSecretEntry = Secret{ID: existingSecret.ID, UID: existingSecret.UID, Value: value}
+	var updatedSecretEntry = Secret{Model: model.Model{ID: existingSecret.ID}, UID: existingSecret.UID, Value: value}
 	updatedSecretVal, errMarshal := json.Marshal(updatedSecretEntry)
 	if errMarshal != nil {
 		return nil, errors.Wrapf(errMarshal, "Error serializing secret with ID of %d and name %s", existingSecret.ID, existingSecretName)
@@ -113,7 +114,7 @@ func (m RedisRepository) Create(ctx context.Context, pathID uint, name string, v
 
 	_, errCreate := m.conn.Set(ctx, fmt.Sprintf("secret:%d", newSecret.ID), createdSecretVal, 0).Result()
 	if errCreate != nil && !errors.Is(errCreate, redis.Nil) {
-		_ = m.inMemoryRepository.Delete(ctx, newSecret.ID)
+		_ = m.inMemoryRepository.Delete(ctx, newSecret.ID, true)
 		return nil, errors.Wrapf(errCreate, "Error creating secret with ID of %d", newSecret.ID)
 	}
 
@@ -124,11 +125,11 @@ func (m RedisRepository) Count(ctx context.Context, pathID uint, name string) (u
 	return m.inMemoryRepository.Count(ctx, pathID, name)
 }
 
-func (m RedisRepository) Delete(ctx context.Context, id uint) error {
+func (m RedisRepository) Delete(ctx context.Context, id uint, forceDelete bool) error {
 	_, errDelete := m.conn.Del(ctx, fmt.Sprintf("secret:%d", id)).Result()
 	if errDelete != nil && !errors.Is(errDelete, redis.Nil) {
 		return errors.Wrapf(errDelete, "Error deleting secret with ID of %d", id)
 	}
 
-	return m.inMemoryRepository.Delete(ctx, id)
+	return m.inMemoryRepository.Delete(ctx, id, true)
 }
