@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.paths
     id         SERIAL PRIMARY KEY,
     parent_id  INTEGER      NULL     DEFAULT NULL,
     uid        uuid         NOT NULL UNIQUE,
-    name       VARCHAR(255) NOT NULL DEFAULT '' UNIQUE,
+    name       VARCHAR(255) NOT NULL DEFAULT '',
     created_at TIMESTAMP             DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP             DEFAULT CURRENT_TIMESTAMP NOT NULL,
     deleted_at TIMESTAMP    NULL DEFAULT NULL

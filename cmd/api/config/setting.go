@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/text/language"
@@ -69,14 +70,14 @@ func Init(ctx context.Context) {
 			Proto:    config.GetEnv("REDIS_PROTOCOL", "tcp"),
 		},
 		Database: config.DatabaseConfig{
-			Type:    config.GetEnv("DB_TYPE", "postgresql"),
+			Type:    config.GetEnv("DB_TYPE", "postgres"),
 			Host:    config.GetEnv("DB_HOST", "localhost"),
 			Port:    config.GetEnvAsInt("DB_PORT", 5432),
-			User:    config.GetEnv("DB_USER", "postgres"),
+			User:    config.GetEnv("DB_USERNAME", "postgres"),
 			Pass:    config.GetEnv("DB_PASSWORD", "postgres"),
 			Name:    config.GetEnv("DB_NAME", "hideout"),
 			Proto:   config.GetEnv("DB_PROTOCOL", "postgresql"),
-			SSLMode: config.GetEnv("DB_SSL_MODE", "disable"),
+			SSLMode: config.GetEnvAsBool("DB_SSL_MODE", true),
 		},
 	}
 
@@ -90,7 +91,7 @@ func Init(ctx context.Context) {
 		log.Println("Redis was pinged successfully")
 	}
 
-	conn, errConnectSQL := sqlx.Connect(Settings.Database.Type, Settings.Database.GetDSN())
+	conn, errConnectSQL := sqlx.Connect(Settings.Database.Type, Settings.Database.GetDSN(Settings.Database.Type))
 	if errConnectSQL != nil {
 		log.Panicf("Error connecting database %s on host %s: %s",
 			Settings.Database.Name, Settings.Database.Host, errConnectSQL.Error())
@@ -102,7 +103,7 @@ func Init(ctx context.Context) {
 	conn.SetMaxIdleConns(25)
 	conn.SetConnMaxLifetime(5 * time.Minute)
 
-	grm, errGormOpen := gorm.Open(postgres.New(postgres.Config{DSN: Settings.Database.GetDSN()}))
+	grm, errGormOpen := gorm.Open(postgres.New(postgres.Config{DSN: Settings.Database.GetDSN(Settings.Database.Type)}))
 	if errGormOpen != nil {
 		log.Panicf("Error connecting to the database: %s", errGormOpen.Error())
 	} else {

@@ -10,6 +10,8 @@ require (
 	github.com/getsentry/sentry-go v0.34.1
 	github.com/gin-gonic/gin v1.10.1
 	github.com/jmoiron/sqlx v1.4.0
+	github.com/joho/godotenv v1.5.1
+	github.com/lib/pq v1.10.9
 	github.com/nicksnyder/go-i18n/v2 v2.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.11.0

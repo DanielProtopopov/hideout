@@ -18,8 +18,10 @@ func NewDatabaseRepository(conn *gorm.DB, inMemoryRep InMemoryRepository) Databa
 	return DatabaseRepository{conn: conn, inMemoryRepository: inMemoryRep}
 }
 
-func (m DatabaseRepository) getID() uint {
-	return m.inMemoryRepository.getID()
+func (m DatabaseRepository) GetID(ctx context.Context) (uint, error) {
+	id := uint(0)
+	errScan := m.conn.Table(TableName).Select("COALESCE(MAX(id), 0)").Row().Scan(&id)
+	return id + 1, errScan
 }
 
 func (m DatabaseRepository) Load(ctx context.Context) ([]Path, error) {
@@ -59,7 +61,7 @@ func (m DatabaseRepository) Update(ctx context.Context, id uint, name string) (*
 	}
 	var existingPathName = existingPath.Name
 
-	var updatedPathEntry = Path{Model: model.Model{ID: existingPath.ID}, UID: existingPath.UID, Name: name}
+	var updatedPathEntry = Path{Model: model.Model{ID: existingPath.ID, UpdatedAt: time.Now()}, UID: existingPath.UID, Name: name}
 	errUpdate := m.conn.Table(TableName).Model(&updatedPathEntry).Update("name", name).Error
 
 	// Revert back to old name
@@ -77,21 +79,19 @@ func (m DatabaseRepository) Update(ctx context.Context, id uint, name string) (*
 	return updatedPath, nil
 }
 
-func (m DatabaseRepository) Create(ctx context.Context, parentPathID uint, name string) (*Path, error) {
-	newPath, errCreatePath := m.inMemoryRepository.Create(ctx, parentPathID, name)
+func (m DatabaseRepository) Create(ctx context.Context, id uint, uid string, parentPathID uint, name string) (*Path, error) {
+	newPath := Path{Model: model.Model{ID: id, CreatedAt: time.Now()}, ParentID: parentPathID, UID: uid, Name: name}
+	errCreate := m.conn.Table(TableName).Create(&newPath).Error
+	if errCreate != nil {
+		return nil, errors.Wrapf(errCreate, "Error creating path with ID of %d", newPath.ID)
+	}
+
+	newPathEntry, errCreatePath := m.inMemoryRepository.Create(ctx, newPath.ID, newPath.UID, newPath.ParentID, newPath.Name)
 	if errCreatePath != nil {
 		return nil, errors.Wrapf(errCreatePath, "Error creating path with parent path ID of %d and name %s", parentPathID, name)
 	}
 
-	// @TODO Check
-
-	errCreate := m.conn.Table(TableName).Create(&newPath).Error
-	if errCreate != nil {
-		_ = m.inMemoryRepository.Delete(ctx, newPath.ID, true)
-		return nil, errors.Wrapf(errCreate, "Error creating path with ID of %d", newPath.ID)
-	}
-
-	return newPath, nil
+	return newPathEntry, nil
 }
 
 func (m DatabaseRepository) Count(ctx context.Context, name string) (uint, error) {
@@ -112,5 +112,5 @@ func (m DatabaseRepository) Delete(ctx context.Context, id uint, forceDelete boo
 		}
 	}
 
-	return m.inMemoryRepository.Delete(ctx, id, true)
+	return m.inMemoryRepository.Delete(ctx, id, forceDelete)
 }

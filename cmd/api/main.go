@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"github.com/joho/godotenv"
 	"hideout/api"
 	apiconfig "hideout/cmd/api/config"
 	"hideout/internal/paths"
@@ -16,6 +17,10 @@ import (
 
 func main() {
 	ctx := context.Background()
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("[ERROR] Error loading %s file", ".env")
+	}
 
 	apiconfig.Init(ctx)
 	log.Println("Configuration was successfully loaded")
@@ -29,7 +34,7 @@ func main() {
 	}()
 
 	secretsSvc, errCreateService := secrets.NewService(ctx, secrets.Config{}, &structs.Paths, &structs.Secrets,
-		secrets.RepositoryType_Redis, true)
+		secrets.RepositoryType_Database, true)
 	if errCreateService != nil {
 		log.Fatal(errCreateService)
 	}
@@ -89,7 +94,7 @@ func main() {
 	}
 	log.Println(string(jsonResult))
 
-	_, _, errDelete := secretsSvc.Delete(ctx, []*paths.Path{anotherTestPath}, nil, rootPath.ID)
+	_, _, errDelete := secretsSvc.Delete(ctx, []*paths.Path{anotherTestPath}, nil, rootPath.ID, false)
 	if errDelete != nil {
 		log.Fatal(errDelete)
 	}

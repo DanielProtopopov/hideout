@@ -2,11 +2,13 @@ package secrets
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	"hideout/internal/common/model"
+	"time"
 )
 
 type RedisRepository struct {
@@ -18,8 +20,8 @@ func NewRedisRepository(conn *redis.Client, inMemoryRep InMemoryRepository) Redi
 	return RedisRepository{conn: conn, inMemoryRepository: inMemoryRep}
 }
 
-func (m RedisRepository) getID() uint {
-	return m.inMemoryRepository.getID()
+func (m RedisRepository) GetID(ctx context.Context) (uint, error) {
+	return m.inMemoryRepository.GetID(ctx)
 }
 
 func (m RedisRepository) Load(ctx context.Context) ([]Secret, error) {
@@ -80,7 +82,7 @@ func (m RedisRepository) Update(ctx context.Context, id uint, value string) (*Se
 	}
 	var existingSecretName = existingSecret.Name
 
-	var updatedSecretEntry = Secret{Model: model.Model{ID: existingSecret.ID}, UID: existingSecret.UID, Value: value}
+	var updatedSecretEntry = Secret{Model: model.Model{ID: existingSecret.ID, UpdatedAt: time.Now()}, UID: existingSecret.UID, Value: value}
 	updatedSecretVal, errMarshal := json.Marshal(updatedSecretEntry)
 	if errMarshal != nil {
 		return nil, errors.Wrapf(errMarshal, "Error serializing secret with ID of %d and name %s", existingSecret.ID, existingSecretName)
@@ -102,8 +104,8 @@ func (m RedisRepository) Update(ctx context.Context, id uint, value string) (*Se
 	return updatedSecret, nil
 }
 
-func (m RedisRepository) Create(ctx context.Context, pathID uint, name string, value string, valueType string) (*Secret, error) {
-	newSecret, errCreateSecret := m.inMemoryRepository.Create(ctx, pathID, name, value, valueType)
+func (m RedisRepository) Create(ctx context.Context, id uint, uid string, pathID uint, name string, value string, valueType string) (*Secret, error) {
+	newSecret, errCreateSecret := m.inMemoryRepository.Create(ctx, id, uid, pathID, name, value, valueType)
 	if errCreateSecret != nil {
 		return nil, errors.Wrapf(errCreateSecret, "Error creating secret with path ID of %d and name %s", pathID, name)
 	}
@@ -126,10 +128,26 @@ func (m RedisRepository) Count(ctx context.Context, pathID uint, name string) (u
 }
 
 func (m RedisRepository) Delete(ctx context.Context, id uint, forceDelete bool) error {
-	_, errDelete := m.conn.Del(ctx, fmt.Sprintf("secret:%d", id)).Result()
-	if errDelete != nil && !errors.Is(errDelete, redis.Nil) {
-		return errors.Wrapf(errDelete, "Error deleting secret with ID of %d", id)
+	if forceDelete {
+		_, errDelete := m.conn.Del(ctx, fmt.Sprintf("secret:%d", id)).Result()
+		if errDelete != nil && !errors.Is(errDelete, redis.Nil) {
+			return errors.Wrapf(errDelete, "Error deleting secret with ID of %d", id)
+		}
+	} else {
+		existingSecret, errGetSecret := m.GetByID(ctx, id)
+		if errGetSecret != nil {
+			return errors.Wrapf(errGetSecret, "Failed to retrieve secret with ID of %d", id)
+		}
+		existingSecret.DeletedAt = sql.NullTime{Time: time.Now(), Valid: true}
+		updatedSecretVal, errMarshal := json.Marshal(existingSecret)
+		if errMarshal != nil {
+			return errors.Wrapf(errMarshal, "Error serializing secret with ID of %d and name %s", existingSecret.ID, existingSecret.Name)
+		}
+		_, errUpdate := m.conn.Set(ctx, fmt.Sprintf("secret:%d", id), updatedSecretVal, 0).Result()
+		if errUpdate != nil {
+			return errors.Wrapf(errUpdate, "Failed to update soft-deleted record in Redis")
+		}
 	}
 
-	return m.inMemoryRepository.Delete(ctx, id, true)
+	return m.inMemoryRepository.Delete(ctx, id, forceDelete)
 }

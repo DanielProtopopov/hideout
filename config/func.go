@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/shopspring/decimal"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -67,14 +68,35 @@ func GetEnvAsDuration(key string, defaultVal time.Duration) time.Duration {
 	return defaultVal
 }
 
-func (dc *DatabaseConfig) GetDSN() string {
-	return fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=%s",
-		dc.Proto,
-		dc.User,
-		dc.Pass,
-		dc.Host,
-		dc.Port,
-		dc.Name,
-		dc.SSLMode,
-	)
+func (dc *DatabaseConfig) GetDSN(connectionType string) string {
+	switch connectionType {
+	case "mysql":
+		{
+			return fmt.Sprintf("mysql://%s:%s@%s(%s:%d)/%s?charset=utf8&parseTime=true",
+				url.PathEscape(dc.User),
+				url.PathEscape(dc.Pass),
+				url.PathEscape(dc.Proto),
+				url.PathEscape(dc.Host),
+				dc.Port,
+				url.PathEscape(dc.Name),
+			)
+		}
+	case "postgres", "pgsql", "postgresql":
+		{
+			sslModeEntry := "require"
+			if !dc.SSLMode {
+				sslModeEntry = "disable"
+			}
+			return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+				url.PathEscape(dc.User),
+				url.PathEscape(dc.Pass),
+				url.PathEscape(dc.Host),
+				dc.Port,
+				url.PathEscape(dc.Name),
+				sslModeEntry,
+			)
+		}
+	}
+
+	return ""
 }

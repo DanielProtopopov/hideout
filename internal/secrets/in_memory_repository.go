@@ -3,7 +3,6 @@ package secrets
 import (
 	"context"
 	"database/sql"
-	"github.com/brianvoe/gofakeit/v7"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
 	error2 "hideout/internal/pkg/error"
@@ -21,7 +20,7 @@ func NewInMemoryRepository(conn *[]Secret) InMemoryRepository {
 	return InMemoryRepository{conn: conn}
 }
 
-func (m InMemoryRepository) getID() uint {
+func (m InMemoryRepository) GetID(ctx context.Context) (uint, error) {
 	id := uint(0)
 	for _, secretEntry := range *m.conn {
 		if secretEntry.ID > id {
@@ -29,7 +28,7 @@ func (m InMemoryRepository) getID() uint {
 		}
 	}
 
-	return id + 1
+	return id + 1, nil
 }
 
 func (m InMemoryRepository) GetMapByID(ctx context.Context, params ListSecretParams) (map[uint]*Secret, error) {
@@ -148,14 +147,14 @@ func (m InMemoryRepository) Update(ctx context.Context, id uint, value string) (
 	return nil, error2.ErrRecordNotFound
 }
 
-func (m InMemoryRepository) Create(ctx context.Context, pathID uint, name string, value string, valueType string) (*Secret, error) {
+func (m InMemoryRepository) Create(ctx context.Context, id uint, uid string, pathID uint, name string, value string, valueType string) (*Secret, error) {
 	for _, secretEntry := range *m.conn {
 		if secretEntry.Name == name && secretEntry.PathID == pathID && !secretEntry.DeletedAt.Valid {
 			return nil, error2.ErrAlreadyExists
 		}
 	}
 
-	newSecret := Secret{Model: model.Model{ID: m.getID()}, PathID: pathID, UID: gofakeit.UUID(), Name: name, Value: value, Type: valueType}
+	newSecret := Secret{Model: model.Model{ID: id}, UID: uid, PathID: pathID, Name: name, Value: value, Type: valueType}
 	*m.conn = append(*m.conn, newSecret)
 	return &newSecret, nil
 }

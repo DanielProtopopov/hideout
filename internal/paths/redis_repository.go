@@ -2,11 +2,13 @@ package paths
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	"hideout/internal/common/model"
+	"time"
 )
 
 type RedisRepository struct {
@@ -18,8 +20,8 @@ func NewRedisRepository(conn *redis.Client, inMemoryRep InMemoryRepository) Redi
 	return RedisRepository{conn: conn, inMemoryRepository: inMemoryRep}
 }
 
-func (m RedisRepository) getID() uint {
-	return m.inMemoryRepository.getID()
+func (m RedisRepository) GetID(ctx context.Context) (uint, error) {
+	return m.inMemoryRepository.GetID(ctx)
 }
 
 func (m RedisRepository) Load(ctx context.Context) ([]Path, error) {
@@ -76,7 +78,7 @@ func (m RedisRepository) Update(ctx context.Context, id uint, name string) (*Pat
 	}
 	var existingPathName = existingPath.Name
 	var updatedPathEntry = Path{
-		Model: model.Model{ID: existingPath.ID}, ParentID: existingPath.ParentID, UID: existingPath.UID, Name: name,
+		Model: model.Model{ID: existingPath.ID, UpdatedAt: time.Now()}, ParentID: existingPath.ParentID, UID: existingPath.UID, Name: name,
 	}
 	updatedPathVal, errMarshal := json.Marshal(updatedPathEntry)
 	if errMarshal != nil {
@@ -97,8 +99,8 @@ func (m RedisRepository) Update(ctx context.Context, id uint, name string) (*Pat
 	return updatedPath, nil
 }
 
-func (m RedisRepository) Create(ctx context.Context, parentPathID uint, name string) (*Path, error) {
-	newPath, errCreatePath := m.inMemoryRepository.Create(ctx, parentPathID, name)
+func (m RedisRepository) Create(ctx context.Context, id uint, uid string, parentPathID uint, name string) (*Path, error) {
+	newPath, errCreatePath := m.inMemoryRepository.Create(ctx, id, uid, parentPathID, name)
 	if errCreatePath != nil {
 		return nil, errors.Wrapf(errCreatePath, "Error creating path with parent ID of %d and name %s", parentPathID, name)
 	}
@@ -122,10 +124,26 @@ func (m RedisRepository) Count(ctx context.Context, name string) (uint, error) {
 }
 
 func (m RedisRepository) Delete(ctx context.Context, id uint, forceDelete bool) error {
-	_, errDelete := m.conn.Del(ctx, fmt.Sprintf("path:%d", id)).Result()
-	if errDelete != nil && !errors.Is(errDelete, redis.Nil) {
-		return errors.Wrapf(errDelete, "Error deleting path with ID of %d", id)
+	if forceDelete {
+		_, errDelete := m.conn.Del(ctx, fmt.Sprintf("path:%d", id)).Result()
+		if errDelete != nil && !errors.Is(errDelete, redis.Nil) {
+			return errors.Wrapf(errDelete, "Error deleting path with ID of %d", id)
+		}
+	} else {
+		existingPath, errGetPath := m.GetByID(ctx, id)
+		if errGetPath != nil {
+			return errors.Wrapf(errGetPath, "Failed to retrieve path with ID of %d", id)
+		}
+		existingPath.DeletedAt = sql.NullTime{Time: time.Now(), Valid: true}
+		updatedPathVal, errMarshal := json.Marshal(existingPath)
+		if errMarshal != nil {
+			return errors.Wrapf(errMarshal, "Error serializing path with ID of %d and name %s", existingPath.ID, existingPath.Name)
+		}
+		_, errUpdate := m.conn.Set(ctx, fmt.Sprintf("path:%d", id), updatedPathVal, 0).Result()
+		if errUpdate != nil {
+			return errors.Wrapf(errUpdate, "Failed to update soft-deleted record in Redis")
+		}
 	}
 
-	return m.inMemoryRepository.Delete(ctx, id, true)
+	return m.inMemoryRepository.Delete(ctx, id, forceDelete)
 }

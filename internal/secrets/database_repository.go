@@ -18,8 +18,10 @@ func NewDatabaseRepository(conn *gorm.DB, inMemoryRep InMemoryRepository) Databa
 	return DatabaseRepository{conn: conn, inMemoryRepository: inMemoryRep}
 }
 
-func (m DatabaseRepository) getID() uint {
-	return m.inMemoryRepository.getID()
+func (m DatabaseRepository) GetID(ctx context.Context) (uint, error) {
+	id := uint(0)
+	errScan := m.conn.Table(TableName).Select("COALESCE(MAX(id), 0)").Row().Scan(&id)
+	return id + 1, errScan
 }
 
 func (m DatabaseRepository) Load(ctx context.Context) ([]Secret, error) {
@@ -61,14 +63,12 @@ func (m DatabaseRepository) Update(ctx context.Context, id uint, value string) (
 	if errGetSecret != nil {
 		return nil, errors.Wrapf(errGetSecret, "Failed to retrieve secret with ID of %d", id)
 	}
-	var existingSecretName = existingSecret.Name
 
 	var updatedSecretEntry = Secret{Model: model.Model{ID: existingSecret.ID}, UID: existingSecret.UID, Value: value}
 	errUpdate := m.conn.Table(TableName).Model(&updatedSecretEntry).Update("value", value).Error
 
 	// Revert back to old name
 	if errUpdate != nil {
-		_, _ = m.inMemoryRepository.Update(ctx, id, existingSecretName)
 		return nil, errors.Wrapf(errUpdate, "Error updating secret with ID of %d", id)
 	}
 
@@ -81,21 +81,19 @@ func (m DatabaseRepository) Update(ctx context.Context, id uint, value string) (
 	return updatedSecret, nil
 }
 
-func (m DatabaseRepository) Create(ctx context.Context, pathID uint, name string, value string, valueType string) (*Secret, error) {
-	newSecret, errCreateSecret := m.inMemoryRepository.Create(ctx, pathID, name, value, valueType)
-	if errCreateSecret != nil {
-		return nil, errors.Wrapf(errCreateSecret, "Error creating secret with path ID of %d and name %s", pathID, name)
-	}
-
-	// @TODO Check
-
+func (m DatabaseRepository) Create(ctx context.Context, id uint, uid string, pathID uint, name string, value string, valueType string) (*Secret, error) {
+	newSecret := Secret{Model: model.Model{ID: id}, PathID: pathID, UID: uid, Name: name, Value: value, Type: valueType}
 	errCreate := m.conn.Table(TableName).Create(&newSecret).Error
 	if errCreate != nil {
-		_ = m.inMemoryRepository.Delete(ctx, newSecret.ID, true)
 		return nil, errors.Wrapf(errCreate, "Error creating secret with ID of %d", newSecret.ID)
 	}
 
-	return newSecret, nil
+	newSecretEntry, errCreateSecret := m.inMemoryRepository.Create(ctx, newSecret.ID, newSecret.UID, newSecret.PathID,
+		newSecret.Name, newSecret.Value, newSecret.Type)
+	if errCreateSecret != nil {
+		return nil, errors.Wrapf(errCreateSecret, "Error creating secret with path ID of %d and name %s", pathID, name)
+	}
+	return newSecretEntry, nil
 }
 
 func (m DatabaseRepository) Count(ctx context.Context, pathID uint, name string) (uint, error) {
@@ -116,5 +114,5 @@ func (m DatabaseRepository) Delete(ctx context.Context, id uint, forceDelete boo
 		}
 	}
 
-	return m.inMemoryRepository.Delete(ctx, id, true)
+	return m.inMemoryRepository.Delete(ctx, id, forceDelete)
 }

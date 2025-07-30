@@ -3,7 +3,6 @@ package paths
 import (
 	"context"
 	"database/sql"
-	"github.com/brianvoe/gofakeit/v7"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
 	error2 "hideout/internal/pkg/error"
@@ -21,7 +20,7 @@ func NewInMemoryRepository(conn *[]Path) InMemoryRepository {
 	return InMemoryRepository{conn: conn}
 }
 
-func (m InMemoryRepository) getID() uint {
+func (m InMemoryRepository) GetID(ctx context.Context) (uint, error) {
 	id := uint(0)
 	for _, pathEntry := range *m.conn {
 		if pathEntry.ID > id {
@@ -29,7 +28,7 @@ func (m InMemoryRepository) getID() uint {
 		}
 	}
 
-	return id + 1
+	return id + 1, nil
 }
 
 func (m InMemoryRepository) GetMapByID(ctx context.Context, params ListPathParams) (map[uint]*Path, error) {
@@ -112,6 +111,7 @@ func (m InMemoryRepository) Update(ctx context.Context, id uint, name string) (*
 	for _, pathEntry := range *m.conn {
 		if pathEntry.ID == id && !pathEntry.DeletedAt.Valid {
 			pathEntry.Name = name
+			pathEntry.UpdatedAt = time.Now()
 			return &pathEntry, nil
 		}
 	}
@@ -119,14 +119,14 @@ func (m InMemoryRepository) Update(ctx context.Context, id uint, name string) (*
 	return nil, error2.ErrRecordNotFound
 }
 
-func (m InMemoryRepository) Create(ctx context.Context, parentPathID uint, name string) (*Path, error) {
+func (m InMemoryRepository) Create(ctx context.Context, id uint, uid string, parentPathID uint, name string) (*Path, error) {
 	for _, pathEntry := range *m.conn {
 		if pathEntry.Name == name && pathEntry.ID == parentPathID && !pathEntry.DeletedAt.Valid {
 			return nil, error2.ErrAlreadyExists
 		}
 	}
 
-	newPath := Path{Model: model.Model{ID: m.getID()}, UID: gofakeit.UUID(), ParentID: parentPathID, Name: name}
+	newPath := Path{Model: model.Model{ID: id, CreatedAt: time.Now()}, UID: uid, ParentID: parentPathID, Name: name}
 	*m.conn = append(*m.conn, newPath)
 	return &newPath, nil
 }

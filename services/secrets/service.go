@@ -2,6 +2,7 @@ package secrets
 
 import (
 	"context"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/pkg/errors"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
@@ -56,7 +57,7 @@ func NewService(ctx context.Context, config Config, pathsList *[]paths.Path, sec
 			inMemorySecretsRep := secrets.NewInMemoryRepository(&structs.Secrets)
 			inMemoryPathsRep := paths.NewInMemoryRepository(&structs.Paths)
 			databaseSecretsRep := secrets.NewDatabaseRepository(structs.Gorm, inMemorySecretsRep)
-			databasePathsRep := paths.NewRedisRepository(structs.Redis, inMemoryPathsRep)
+			databasePathsRep := paths.NewDatabaseRepository(structs.Gorm, inMemoryPathsRep)
 			if preloadIntoMemoryCache {
 				loadedSecrets, errLoadSecrets := databaseSecretsRep.Load(ctx)
 				if errLoadSecrets != nil {
@@ -98,11 +99,21 @@ func (s *SecretsService) DeleteSecret(ctx context.Context, secretID uint, forceD
 }
 
 func (s *SecretsService) CreateSecret(ctx context.Context, pathID uint, name string, value string, valueType string) (*secrets.Secret, error) {
-	return s.secretsRepository.Create(ctx, pathID, name, value, valueType)
+	id, errGetID := s.secretsRepository.GetID(ctx)
+	if errGetID != nil {
+		return nil, errGetID
+	}
+	uid := gofakeit.UUID()
+	return s.secretsRepository.Create(ctx, id, uid, pathID, name, value, valueType)
 }
 
 func (s *SecretsService) CreatePath(ctx context.Context, pathID uint, name string) (*paths.Path, error) {
-	return s.pathsRepository.Create(ctx, pathID, name)
+	id, errGetID := s.pathsRepository.GetID(ctx)
+	if errGetID != nil {
+		return nil, errGetID
+	}
+	uid := gofakeit.UUID()
+	return s.pathsRepository.Create(ctx, id, uid, pathID, name)
 }
 
 func (s *SecretsService) Tree(ctx context.Context, pathID uint) (TreeNode, error) {
@@ -140,7 +151,7 @@ func (s *SecretsService) Tree(ctx context.Context, pathID uint) (TreeNode, error
 	return result, nil
 }
 
-func (s *SecretsService) Delete(ctx context.Context, existingPaths []*paths.Path, existingSecrets []*secrets.Secret, pathIDFrom uint) ([]*paths.Path, []*secrets.Secret, error) {
+func (s *SecretsService) Delete(ctx context.Context, existingPaths []*paths.Path, existingSecrets []*secrets.Secret, pathIDFrom uint, forceDelete bool) ([]*paths.Path, []*secrets.Secret, error) {
 	var deletedPaths []*paths.Path
 	var deletedSecrets []*secrets.Secret
 
@@ -151,7 +162,7 @@ func (s *SecretsService) Delete(ctx context.Context, existingPaths []*paths.Path
 
 	// This deletes secrets From designed path
 	for _, existingSecret := range existingSecrets {
-		errDeleteSecret := s.secretsRepository.Delete(ctx, existingSecret.ID, true)
+		errDeleteSecret := s.secretsRepository.Delete(ctx, existingSecret.ID, forceDelete)
 		if errDeleteSecret != nil {
 			return nil, nil, errDeleteSecret
 		}
@@ -170,12 +181,12 @@ func (s *SecretsService) Delete(ctx context.Context, existingPaths []*paths.Path
 		}
 
 		// Delete paths & secrets from an existing path
-		deletedPathPaths, deletedPathSecrets, errDelete := s.Delete(ctx, existingPathPaths, existingPathSecrets, existingPath.ID)
+		deletedPathPaths, deletedPathSecrets, errDelete := s.Delete(ctx, existingPathPaths, existingPathSecrets, existingPath.ID, forceDelete)
 		if errDelete != nil {
 			return nil, nil, errDelete
 		}
 
-		errDeletePath := s.pathsRepository.Delete(ctx, existingPath.ID, true)
+		errDeletePath := s.pathsRepository.Delete(ctx, existingPath.ID, forceDelete)
 		if errDeletePath != nil {
 			return nil, nil, errDeletePath
 		}
@@ -254,7 +265,12 @@ func (s *SecretsService) copyPaths(ctx context.Context, pathsList []*paths.Path,
 		return nil, errGetToPath
 	}
 	for _, path := range pathsList {
-		newPath, errCreatePath := s.pathsRepository.Create(ctx, toPath.ID, path.Name)
+		id, errGetID := s.pathsRepository.GetID(ctx)
+		if errGetID != nil {
+			return nil, errGetID
+		}
+		uid := gofakeit.UUID()
+		newPath, errCreatePath := s.pathsRepository.Create(ctx, id, uid, toPath.ID, path.Name)
 		if errCreatePath != nil {
 			return nil, errCreatePath
 		}
@@ -274,7 +290,12 @@ func (s *SecretsService) copySecrets(ctx context.Context, secretsList []*secrets
 		return nil, errGetToPath
 	}
 	for _, secret := range secretsList {
-		newSecret, errCreateSecret := s.secretsRepository.Create(ctx, toPath.ID, secret.Name, secret.Value, secret.Type)
+		id, errGetID := s.secretsRepository.GetID(ctx)
+		if errGetID != nil {
+			return nil, errGetID
+		}
+		uid := gofakeit.UUID()
+		newSecret, errCreateSecret := s.secretsRepository.Create(ctx, id, uid, toPath.ID, secret.Name, secret.Value, secret.Type)
 		if errCreateSecret != nil {
 			return nil, errCreateSecret
 		}

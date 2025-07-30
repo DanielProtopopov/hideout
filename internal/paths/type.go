@@ -15,13 +15,14 @@ type (
 	}
 
 	Repository interface {
+		GetID(ctx context.Context) (uint, error)
 		Get(ctx context.Context, params ListPathParams) ([]*Path, error)
 		GetMapByID(ctx context.Context, params ListPathParams) (map[uint]*Path, error)
 		GetMapByUID(ctx context.Context, params ListPathParams) (map[string]*Path, error)
 		GetByUID(ctx context.Context, uid string) (*Path, error)
 		GetByID(ctx context.Context, id uint) (*Path, error)
 		Update(ctx context.Context, id uint, value string) (*Path, error)
-		Create(ctx context.Context, parentPathID uint, name string) (*Path, error)
+		Create(ctx context.Context, id uint, uid string, parentPathID uint, name string) (*Path, error)
 		Delete(ctx context.Context, id uint, forceDelete bool) error
 	}
 

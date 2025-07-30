@@ -27,5 +27,5 @@ type DatabaseConfig struct {
 	Pass    string
 	Name    string
 	Proto   string
-	SSLMode string
+	SSLMode bool
 }
