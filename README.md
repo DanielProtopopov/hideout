@@ -149,7 +149,7 @@ _For more examples, please refer to the [Documentation](https://github.com/Danie
 - [X] Add in-memory storage adapter
 - [X] Add copy-paste secrets & paths mechanism
 - [X] Add redis storage adapter
-- [ ] Add database storage adapter
+- [X] Add database storage adapter
 - [ ] Add file storage adapter
 - [ ] Add virtual filesystem adapter
 - [ ] Add references (linking) mechanism for secrets (multi-level)
