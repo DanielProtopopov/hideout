@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/BurntSushi/toml"
+	"github.com/jmoiron/sqlx"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/text/language"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"hideout/config"
 	"hideout/internal/paths"
 	"hideout/internal/secrets"
@@ -22,6 +25,7 @@ type Config struct {
 	Bundle      *i18n.Bundle             // I18n bundle instance (localization)
 	I18n        *i18n.Localizer          // I18n configuration (i18n)
 	Redis       config.RedisConfig       // Redis configuration
+	Database    config.DatabaseConfig    // Database configuration
 	Debug       bool                     // Debugging flag
 }
 
@@ -64,6 +68,16 @@ func Init(ctx context.Context) {
 			DB:       config.GetEnvAsInt("REDIS_DB", 0),
 			Proto:    config.GetEnv("REDIS_PROTOCOL", "tcp"),
 		},
+		Database: config.DatabaseConfig{
+			Type:    config.GetEnv("DB_TYPE", "postgresql"),
+			Host:    config.GetEnv("DB_HOST", "localhost"),
+			Port:    config.GetEnvAsInt("DB_PORT", 5432),
+			User:    config.GetEnv("DB_USER", "postgres"),
+			Pass:    config.GetEnv("DB_PASSWORD", "postgres"),
+			Name:    config.GetEnv("DB_NAME", "hideout"),
+			Proto:   config.GetEnv("DB_PROTOCOL", "postgresql"),
+			SSLMode: config.GetEnv("DB_SSL_MODE", "disable"),
+		},
 	}
 
 	client := redis.NewClient(&redis.Options{
@@ -71,12 +85,37 @@ func Init(ctx context.Context) {
 		Password: Settings.Redis.Password, DB: Settings.Redis.DB, ConnMaxIdleTime: 5 * time.Minute, MaxRetries: 3,
 	})
 	if errPing := client.Ping(ctx).Err(); errPing != nil {
-		log.Panicf("Error pinging redis: %s", errPing)
+		log.Panicf("Error pinging Redis: %s", errPing)
 	} else {
 		log.Println("Redis was pinged successfully")
 	}
-	structs.Redis = client
 
+	conn, errConnectSQL := sqlx.Connect(Settings.Database.Type, Settings.Database.GetDSN())
+	if errConnectSQL != nil {
+		log.Panicf("Error connecting database %s on host %s: %s",
+			Settings.Database.Name, Settings.Database.Host, errConnectSQL.Error())
+	} else {
+		log.Printf("Successfully connected to database %s on host %s", Settings.Database.Name, Settings.Database.Host)
+	}
+
+	conn.SetMaxOpenConns(25)
+	conn.SetMaxIdleConns(25)
+	conn.SetConnMaxLifetime(5 * time.Minute)
+
+	grm, errGormOpen := gorm.Open(postgres.New(postgres.Config{DSN: Settings.Database.GetDSN()}))
+	if errGormOpen != nil {
+		log.Panicf("Error connecting to the database: %s", errGormOpen.Error())
+	} else {
+		// grm.SkipDefaultTransaction = !Settings.Debug
+		structs.Gorm = grm
+		log.Printf("GORM connected to database %s on host %s", Settings.Database.Name, Settings.Database.Host)
+	}
+
+	if Settings.Debug {
+		structs.Gorm = structs.Gorm.Debug()
+	}
+
+	structs.Redis = client
 	structs.Secrets = []secrets.Secret{}
 	structs.Paths = []paths.Path{}
 }

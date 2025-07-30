@@ -25,26 +25,53 @@ type SecretsService struct {
 // NewService Creation of the service
 func NewService(ctx context.Context, config Config, pathsList *[]paths.Path, secretsList *[]secrets.Secret, repositoryType uint, preloadIntoMemoryCache bool) (*SecretsService, error) {
 	switch repositoryType {
-	case secrets.RepositoryType_InMemory:
-		return &SecretsService{config: &config, paths: pathsList, secrets: secretsList,
-			secretsRepository: secrets.NewInMemoryRepository(&structs.Secrets), pathsRepository: paths.NewInMemoryRepository(&structs.Paths)}, nil
-	case secrets.RepositoryType_Redis:
-		secretsRep := secrets.NewRedisRepository(structs.Redis, secrets.NewInMemoryRepository(&structs.Secrets))
-		pathsRep := paths.NewRedisRepository(structs.Redis, paths.NewInMemoryRepository(&structs.Paths))
-		if preloadIntoMemoryCache {
-			loadedSecrets, errLoadSecrets := secretsRep.Load(ctx)
-			if errLoadSecrets != nil {
-				return nil, errors.Wrap(errLoadSecrets, "Error preloading secrets into in-memory storage from Redis")
-			}
-			structs.Secrets = loadedSecrets
-			loadedPaths, errLoadPaths := pathsRep.Load(ctx)
-			if errLoadPaths != nil {
-				return nil, errors.Wrap(errLoadPaths, "Error preloading paths into in-memory storage from Redis")
-			}
-			structs.Paths = loadedPaths
+	case RepositoryType_InMemory:
+		{
+			return &SecretsService{config: &config, paths: pathsList, secrets: secretsList,
+				secretsRepository: secrets.NewInMemoryRepository(&structs.Secrets), pathsRepository: paths.NewInMemoryRepository(&structs.Paths)}, nil
 		}
-		return &SecretsService{config: &config, paths: pathsList, secrets: secretsList,
-			secretsRepository: secretsRep, pathsRepository: pathsRep}, nil
+	case RepositoryType_Redis:
+		{
+			inMemorySecretsRep := secrets.NewInMemoryRepository(&structs.Secrets)
+			inMemoryPathsRep := paths.NewInMemoryRepository(&structs.Paths)
+			redisSecretsRep := secrets.NewRedisRepository(structs.Redis, inMemorySecretsRep)
+			redisPathsRep := paths.NewRedisRepository(structs.Redis, inMemoryPathsRep)
+			if preloadIntoMemoryCache {
+				loadedSecrets, errLoadSecrets := redisSecretsRep.Load(ctx)
+				if errLoadSecrets != nil {
+					return nil, errors.Wrap(errLoadSecrets, "Error preloading secrets into in-memory storage from Redis")
+				}
+				structs.Secrets = loadedSecrets
+				loadedPaths, errLoadPaths := redisPathsRep.Load(ctx)
+				if errLoadPaths != nil {
+					return nil, errors.Wrap(errLoadPaths, "Error preloading paths into in-memory storage from Redis")
+				}
+				structs.Paths = loadedPaths
+			}
+			return &SecretsService{config: &config, paths: pathsList, secrets: secretsList,
+				secretsRepository: redisSecretsRep, pathsRepository: redisPathsRep}, nil
+		}
+	case RepositoryType_Database:
+		{
+			inMemorySecretsRep := secrets.NewInMemoryRepository(&structs.Secrets)
+			inMemoryPathsRep := paths.NewInMemoryRepository(&structs.Paths)
+			databaseSecretsRep := secrets.NewDatabaseRepository(structs.Gorm, inMemorySecretsRep)
+			databasePathsRep := paths.NewRedisRepository(structs.Redis, inMemoryPathsRep)
+			if preloadIntoMemoryCache {
+				loadedSecrets, errLoadSecrets := databaseSecretsRep.Load(ctx)
+				if errLoadSecrets != nil {
+					return nil, errors.Wrap(errLoadSecrets, "Error preloading secrets into in-memory storage from Redis")
+				}
+				structs.Secrets = loadedSecrets
+				loadedPaths, errLoadPaths := databasePathsRep.Load(ctx)
+				if errLoadPaths != nil {
+					return nil, errors.Wrap(errLoadPaths, "Error preloading paths into in-memory storage from Redis")
+				}
+				structs.Paths = loadedPaths
+			}
+			return &SecretsService{config: &config, paths: pathsList, secrets: secretsList,
+				secretsRepository: databaseSecretsRep, pathsRepository: databasePathsRep}, nil
+		}
 	}
 
 	return nil, errors.New("invalid repository type")

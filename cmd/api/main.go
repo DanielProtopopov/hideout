@@ -29,7 +29,7 @@ func main() {
 	}()
 
 	secretsSvc, errCreateService := secrets.NewService(ctx, secrets.Config{}, &structs.Paths, &structs.Secrets,
-		secrets2.RepositoryType_Redis, true)
+		secrets.RepositoryType_Redis, true)
 	if errCreateService != nil {
 		log.Fatal(errCreateService)
 	}

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"github.com/shopspring/decimal"
 	"os"
 	"strconv"
@@ -64,4 +65,16 @@ func GetEnvAsDuration(key string, defaultVal time.Duration) time.Duration {
 	}
 
 	return defaultVal
+}
+
+func (dc *DatabaseConfig) GetDSN() string {
+	return fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=%s",
+		dc.Proto,
+		dc.User,
+		dc.Pass,
+		dc.Host,
+		dc.Port,
+		dc.Name,
+		dc.SSLMode,
+	)
 }

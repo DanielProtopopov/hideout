@@ -18,3 +18,14 @@ type RedisConfig struct {
 	DB       int
 	Proto    string
 }
+
+type DatabaseConfig struct {
+	Type    string
+	Host    string
+	Port    int
+	User    string
+	Pass    string
+	Name    string
+	Proto   string
+	SSLMode string
+}
