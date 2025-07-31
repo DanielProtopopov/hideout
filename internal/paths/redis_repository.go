@@ -119,8 +119,8 @@ func (m RedisRepository) Create(ctx context.Context, id uint, uid string, parent
 	return newPath, nil
 }
 
-func (m RedisRepository) Count(ctx context.Context, name string) (uint, error) {
-	return m.inMemoryRepository.Count(ctx, name)
+func (m RedisRepository) Count(ctx context.Context, params ListPathParams) (uint, error) {
+	return m.inMemoryRepository.Count(ctx, params)
 }
 
 func (m RedisRepository) Delete(ctx context.Context, id uint, forceDelete bool) error {

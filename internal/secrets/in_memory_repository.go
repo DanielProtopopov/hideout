@@ -10,7 +10,6 @@ import (
 	error2 "hideout/internal/pkg/error"
 	pathPkg "path"
 	"slices"
-	"strings"
 	"time"
 )
 
@@ -98,7 +97,11 @@ func (m InMemoryRepository) Get(ctx context.Context, params ListSecretParams) ([
 	}
 
 	filteredResults := m.Filter(ctx, typeResults, params.ListParams)
-	offset, length := pagination.Paginate(len(filteredResults), int(params.Pagination.Page), int(params.Pagination.PerPage))
+	if params.Page == 0 && params.PerPage == 0 {
+		return filteredResults, nil
+	}
+
+	offset, length := pagination.Paginate(len(filteredResults), int(params.Page*params.PerPage), int(params.PerPage))
 	return filteredResults[offset:length], nil
 }
 
@@ -163,15 +166,16 @@ func (m InMemoryRepository) Create(ctx context.Context, id uint, uid string, pat
 	return &newSecret, nil
 }
 
-func (m InMemoryRepository) Count(ctx context.Context, pathID uint, name string) (uint, error) {
-	totalCount := uint(0)
-	for _, secretEntry := range *m.conn {
-		if pathID == secretEntry.PathID && strings.Contains(secretEntry.Name, name) && !secretEntry.DeletedAt.Valid {
-			totalCount++
-		}
+func (m InMemoryRepository) Count(ctx context.Context, params ListSecretParams) (uint, error) {
+	// These are not needed when performing filtering and counting
+	params.Pagination = pagination.Pagination{PerPage: 0, Page: 0}
+	params.Order = []ordering.OrderRQ{}
+	secretsList, errGetSecrets := m.Get(ctx, params)
+	if errGetSecrets != nil {
+		return 0, errGetSecrets
 	}
 
-	return totalCount, nil
+	return uint(len(secretsList)), nil
 }
 
 func (m InMemoryRepository) Delete(ctx context.Context, id uint, forceDelete bool) error {

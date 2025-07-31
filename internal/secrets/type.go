@@ -27,6 +27,7 @@ type (
 		Update(ctx context.Context, id uint, value string) (*Secret, error)
 		Create(ctx context.Context, id uint, uid string, pathID uint, name string, value string, valueType string) (*Secret, error)
 		Delete(ctx context.Context, id uint, forceDelete bool) error
+		Count(ctx context.Context, params ListSecretParams) (uint, error)
 	}
 
 	ListSecretParams struct {

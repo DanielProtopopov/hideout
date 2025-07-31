@@ -94,8 +94,8 @@ func (m DatabaseRepository) Create(ctx context.Context, id uint, uid string, par
 	return newPathEntry, nil
 }
 
-func (m DatabaseRepository) Count(ctx context.Context, name string) (uint, error) {
-	return m.inMemoryRepository.Count(ctx, name)
+func (m DatabaseRepository) Count(ctx context.Context, params ListPathParams) (uint, error) {
+	return m.inMemoryRepository.Count(ctx, params)
 }
 
 func (m DatabaseRepository) Delete(ctx context.Context, id uint, forceDelete bool) error {

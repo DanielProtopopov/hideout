@@ -123,8 +123,8 @@ func (m RedisRepository) Create(ctx context.Context, id uint, uid string, pathID
 	return newSecret, nil
 }
 
-func (m RedisRepository) Count(ctx context.Context, pathID uint, name string) (uint, error) {
-	return m.inMemoryRepository.Count(ctx, pathID, name)
+func (m RedisRepository) Count(ctx context.Context, params ListSecretParams) (uint, error) {
+	return m.inMemoryRepository.Count(ctx, params)
 }
 
 func (m RedisRepository) Delete(ctx context.Context, id uint, forceDelete bool) error {

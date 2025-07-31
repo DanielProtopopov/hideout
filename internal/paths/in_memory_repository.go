@@ -10,7 +10,6 @@ import (
 	error2 "hideout/internal/pkg/error"
 	pathPkg "path"
 	"slices"
-	"strings"
 	"time"
 )
 
@@ -87,7 +86,11 @@ func (m InMemoryRepository) Get(ctx context.Context, params ListPathParams) ([]*
 	}
 
 	filteredResults := m.Filter(ctx, nameResults, params.ListParams)
-	offset, length := pagination.Paginate(len(filteredResults), int(params.Pagination.Page), int(params.Pagination.PerPage))
+	if params.Page == 0 && params.PerPage == 0 {
+		return filteredResults, nil
+	}
+
+	offset, length := pagination.Paginate(len(filteredResults), int(params.Page*params.PerPage), int(params.PerPage))
 	return filteredResults[offset:length], nil
 }
 
@@ -135,15 +138,17 @@ func (m InMemoryRepository) Create(ctx context.Context, id uint, uid string, par
 	return &newPath, nil
 }
 
-func (m InMemoryRepository) Count(ctx context.Context, name string) (uint, error) {
-	totalCount := uint(0)
-	for _, pathEntry := range *m.conn {
-		if strings.Contains(pathEntry.Name, name) && !pathEntry.DeletedAt.Valid {
-			totalCount++
-		}
+func (m InMemoryRepository) Count(ctx context.Context, params ListPathParams) (uint, error) {
+	// These are not needed when performing filtering and counting
+	params.Pagination = pagination.Pagination{PerPage: 0, Page: 0}
+	params.Order = []ordering.OrderRQ{}
+
+	pathsList, errGetPaths := m.Get(ctx, params)
+	if errGetPaths != nil {
+		return 0, errGetPaths
 	}
 
-	return totalCount, nil
+	return uint(len(pathsList)), nil
 }
 
 func (m InMemoryRepository) Delete(ctx context.Context, id uint, forceDelete bool) error {
