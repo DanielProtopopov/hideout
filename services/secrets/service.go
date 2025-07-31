@@ -134,10 +134,7 @@ func (s *SecretsService) Tree(ctx context.Context, pathID uint) (TreeNode, error
 	}
 
 	for _, existingPathSecret := range existingPathSecrets {
-		result.Children = append(result.Children, TreeNode{
-			Name: existingPathSecret.Name,
-			Type: "Secret",
-		})
+		result.Children = append(result.Children, TreeNode{Name: existingPathSecret.Name, Type: "Secret"})
 	}
 
 	for _, existingPathPath := range existingPathPaths {

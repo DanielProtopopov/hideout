@@ -34,7 +34,7 @@ func main() {
 	}()
 
 	secretsSvc, errCreateService := secrets.NewService(ctx, secrets.Config{}, &structs.Paths, &structs.Secrets,
-		secrets.RepositoryType_Database, true)
+		apiconfig.Settings.Repository.Type, apiconfig.Settings.Repository.PreloadInMemory)
 	if errCreateService != nil {
 		log.Fatal(errCreateService)
 	}

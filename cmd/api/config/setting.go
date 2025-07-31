@@ -15,6 +15,7 @@ import (
 	"hideout/internal/paths"
 	"hideout/internal/secrets"
 	"hideout/internal/translations"
+	secrets2 "hideout/services/secrets"
 	"hideout/structs"
 	"log"
 	"time"
@@ -27,6 +28,7 @@ type Config struct {
 	I18n        *i18n.Localizer          // I18n configuration (i18n)
 	Redis       config.RedisConfig       // Redis configuration
 	Database    config.DatabaseConfig    // Database configuration
+	Repository  config.RepositoryConfig  // Data store (repository) configuration
 	Debug       bool                     // Debugging flag
 }
 
@@ -80,6 +82,17 @@ func Init(ctx context.Context) {
 			SSLMode: config.GetEnvAsBool("DB_SSL_MODE", true),
 		},
 	}
+
+	adapterType := config.GetEnv("ADAPTER_TYPE", "memory")
+	adapterTypeVal, adapterTypeExists := secrets2.TypeMap[adapterType]
+	if !adapterTypeExists {
+		log.Fatalf("Invalid adapter type, allowed: %s, %s, %s",
+			secrets2.TypeMapInv[secrets2.RepositoryType_InMemory],
+			secrets2.TypeMapInv[secrets2.RepositoryType_Redis],
+			secrets2.TypeMapInv[secrets2.RepositoryType_Database])
+	}
+	Settings.Repository = config.RepositoryConfig{Type: adapterTypeVal,
+		PreloadInMemory: config.GetEnvAsBool("ADAPTER_MEMORY_PRELOAD", true)}
 
 	client := redis.NewClient(&redis.Options{
 		Network: Settings.Redis.Proto, Addr: fmt.Sprintf("%s:%d", Settings.Redis.Host, Settings.Redis.Port),
