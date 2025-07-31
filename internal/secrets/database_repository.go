@@ -28,7 +28,7 @@ func (m DatabaseRepository) Load(ctx context.Context) ([]Secret, error) {
 	var results []Secret
 	errGetRecords := m.conn.Table(TableName).Select([]string{TableName + ".*"}).Find(&results).Error
 	if errGetRecords != nil {
-		return results, errors.Wrap(errGetRecords, "Failed to obtain records from the database")
+		return results, errors.Wrap(errGetRecords, "Failed to obtain records in database")
 	}
 
 	return results, nil
@@ -70,7 +70,7 @@ func (m DatabaseRepository) Update(ctx context.Context, secret Secret) (*Secret,
 	}
 	updatedSecret, errUpdateSecret := m.inMemoryRepository.Update(ctx, secret)
 	if errUpdateSecret != nil {
-		return nil, errors.Wrapf(errUpdateSecret, "Error updating secret with ID of %d in-memory", secret.ID)
+		return nil, errors.Wrapf(errUpdateSecret, "Error updating secret with ID of %d in memory", secret.ID)
 	}
 
 	return updatedSecret, nil
@@ -83,7 +83,7 @@ func (m DatabaseRepository) Create(ctx context.Context, secret Secret) (*Secret,
 	}
 	newSecretEntry, errCreateSecret := m.inMemoryRepository.Create(ctx, secret)
 	if errCreateSecret != nil {
-		return nil, errors.Wrapf(errCreateSecret, "Error creating secret with path ID of %d and name %s in-memory", secret.PathID, secret.Name)
+		return nil, errors.Wrapf(errCreateSecret, "Error creating secret with path ID of %d and name %s in memory", secret.PathID, secret.Name)
 	}
 	return newSecretEntry, nil
 }
@@ -108,7 +108,7 @@ func (m DatabaseRepository) Delete(ctx context.Context, id uint, forceDelete boo
 
 	errDelete := m.inMemoryRepository.Delete(ctx, id, forceDelete)
 	if errDelete != nil {
-		return errors.Wrapf(errDelete, "Error deleting secret with ID of %d in-memory", id)
+		return errors.Wrapf(errDelete, "Error deleting secret with ID of %d in memory", id)
 	}
 
 	return nil

@@ -74,7 +74,7 @@ func (m RedisRepository) GetByUID(ctx context.Context, uid string) (*Path, error
 func (m RedisRepository) Update(ctx context.Context, path Path) (*Path, error) {
 	existingPath, errGetPath := m.GetByID(ctx, path.ID)
 	if errGetPath != nil {
-		return nil, errors.Wrapf(errGetPath, "Failed to retrieve path with ID of %d", path.ID)
+		return nil, errors.Wrapf(errGetPath, "Failed to retrieve path with ID of %d in Redis", path.ID)
 	}
 	var updatedPathEntry = Path{
 		Model: model.Model{ID: existingPath.ID, UpdatedAt: time.Now()}, ParentID: existingPath.ParentID, UID: existingPath.UID, Name: path.Name,
@@ -89,7 +89,7 @@ func (m RedisRepository) Update(ctx context.Context, path Path) (*Path, error) {
 	}
 	updatedPath, errUpdatePath := m.inMemoryRepository.Update(ctx, path)
 	if errUpdatePath != nil {
-		return nil, errors.Wrapf(errUpdatePath, "Error updating path with ID of %d and name %s in-memory", path.ID, path.Name)
+		return nil, errors.Wrapf(errUpdatePath, "Error updating path with ID of %d and name %s in memory", path.ID, path.Name)
 	}
 
 	return updatedPath, nil
@@ -102,11 +102,11 @@ func (m RedisRepository) Create(ctx context.Context, path Path) (*Path, error) {
 	}
 	_, errCreate := m.conn.Set(ctx, fmt.Sprintf("path:%d", path.ID), newPathVal, 0).Result()
 	if errCreate != nil && !errors.Is(errCreate, redis.Nil) {
-		return nil, errors.Wrapf(errCreate, "Error creating path with ID of %d in-memory", path.ID)
+		return nil, errors.Wrapf(errCreate, "Error creating path with ID of %d in memory", path.ID)
 	}
 	newPath, errCreatePath := m.inMemoryRepository.Create(ctx, path)
 	if errCreatePath != nil {
-		return nil, errors.Wrapf(errCreatePath, "Error creating path with parent ID of %d and name %s in-memory", path.ParentID, path.Name)
+		return nil, errors.Wrapf(errCreatePath, "Error creating path with parent ID of %d and name %s in memory", path.ParentID, path.Name)
 	}
 	return newPath, nil
 }
