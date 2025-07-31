@@ -35,7 +35,7 @@ func (m RedisRepository) Load(ctx context.Context) ([]Path, error) {
 
 	values, errGetValues := m.conn.MGet(ctx, keys...).Result()
 	if errGetValues != nil {
-		return results, errors.Wrap(errGetValues, "Failed to retrieve values by keys from Redis")
+		return results, errors.Wrap(errGetValues, "Failed to retrieve values by keys in Redis")
 	}
 	for i, _ := range values {
 		if values[i] != nil {
@@ -43,7 +43,7 @@ func (m RedisRepository) Load(ctx context.Context) ([]Path, error) {
 			var resultString = values[i].(string)
 			errUnmarshal := json.Unmarshal([]byte(resultString), &result)
 			if errUnmarshal != nil {
-				return nil, errors.Wrapf(errUnmarshal, "Failed to unmarshal path data from Redis")
+				return nil, errors.Wrapf(errUnmarshal, "Failed to unmarshal path data in Redis")
 			}
 			results = append(results, result)
 		}
@@ -71,51 +71,43 @@ func (m RedisRepository) GetByUID(ctx context.Context, uid string) (*Path, error
 	return m.inMemoryRepository.GetByUID(ctx, uid)
 }
 
-func (m RedisRepository) Update(ctx context.Context, id uint, name string) (*Path, error) {
-	existingPath, errGetPath := m.GetByID(ctx, id)
+func (m RedisRepository) Update(ctx context.Context, path Path) (*Path, error) {
+	existingPath, errGetPath := m.GetByID(ctx, path.ID)
 	if errGetPath != nil {
-		return nil, errors.Wrapf(errGetPath, "Failed to retrieve path with ID of %d", id)
+		return nil, errors.Wrapf(errGetPath, "Failed to retrieve path with ID of %d", path.ID)
 	}
-	var existingPathName = existingPath.Name
 	var updatedPathEntry = Path{
-		Model: model.Model{ID: existingPath.ID, UpdatedAt: time.Now()}, ParentID: existingPath.ParentID, UID: existingPath.UID, Name: name,
+		Model: model.Model{ID: existingPath.ID, UpdatedAt: time.Now()}, ParentID: existingPath.ParentID, UID: existingPath.UID, Name: path.Name,
 	}
 	updatedPathVal, errMarshal := json.Marshal(updatedPathEntry)
 	if errMarshal != nil {
-		return nil, errors.Wrapf(errMarshal, "Error serializing path with ID of %d and name %s", existingPath.ID, name)
+		return nil, errors.Wrapf(errMarshal, "Error serializing path with ID of %d and name %s", existingPath.ID, path.Name)
 	}
-	_, errUpdate := m.conn.Set(ctx, fmt.Sprintf("path:%d", id), updatedPathVal, 0).Result()
-	// Revert back to old name
+	_, errUpdate := m.conn.Set(ctx, fmt.Sprintf("path:%d", path.ID), updatedPathVal, 0).Result()
 	if errUpdate != nil && !errors.Is(errUpdate, redis.Nil) {
-		_, _ = m.inMemoryRepository.Update(ctx, id, existingPathName)
-		return nil, errors.Wrapf(errUpdate, "Error updating path with ID of %d", id)
+		return nil, errors.Wrapf(errUpdate, "Error updating path with ID of %d in Redis", path.ID)
 	}
-	// Update was successful, update in-memory
-	updatedPath, errUpdatePath := m.inMemoryRepository.Update(ctx, id, name)
+	updatedPath, errUpdatePath := m.inMemoryRepository.Update(ctx, path)
 	if errUpdatePath != nil {
-		return nil, errors.Wrapf(errUpdatePath, "Error updating path with ID of %d and name %s", id, name)
+		return nil, errors.Wrapf(errUpdatePath, "Error updating path with ID of %d and name %s in-memory", path.ID, path.Name)
 	}
 
 	return updatedPath, nil
 }
 
-func (m RedisRepository) Create(ctx context.Context, id uint, uid string, parentPathID uint, name string) (*Path, error) {
-	newPath, errCreatePath := m.inMemoryRepository.Create(ctx, id, uid, parentPathID, name)
-	if errCreatePath != nil {
-		return nil, errors.Wrapf(errCreatePath, "Error creating path with parent ID of %d and name %s", parentPathID, name)
-	}
-
-	newPathVal, errMarshal := json.Marshal(newPath)
+func (m RedisRepository) Create(ctx context.Context, path Path) (*Path, error) {
+	newPathVal, errMarshal := json.Marshal(path)
 	if errMarshal != nil {
-		return nil, errors.Wrapf(errMarshal, "Error serializing path with ID of %d and name %s", newPath.ID, name)
+		return nil, errors.Wrapf(errMarshal, "Error serializing path with ID of %d and name %s", path.ID, path.Name)
 	}
-
-	_, errCreate := m.conn.Set(ctx, fmt.Sprintf("path:%d", newPath.ID), newPathVal, 0).Result()
+	_, errCreate := m.conn.Set(ctx, fmt.Sprintf("path:%d", path.ID), newPathVal, 0).Result()
 	if errCreate != nil && !errors.Is(errCreate, redis.Nil) {
-		_ = m.inMemoryRepository.Delete(ctx, newPath.ID, true)
-		return nil, errors.Wrapf(errCreate, "Error creating path with ID of %d", newPath.ID)
+		return nil, errors.Wrapf(errCreate, "Error creating path with ID of %d in-memory", path.ID)
 	}
-
+	newPath, errCreatePath := m.inMemoryRepository.Create(ctx, path)
+	if errCreatePath != nil {
+		return nil, errors.Wrapf(errCreatePath, "Error creating path with parent ID of %d and name %s in-memory", path.ParentID, path.Name)
+	}
 	return newPath, nil
 }
 
@@ -127,12 +119,12 @@ func (m RedisRepository) Delete(ctx context.Context, id uint, forceDelete bool) 
 	if forceDelete {
 		_, errDelete := m.conn.Del(ctx, fmt.Sprintf("path:%d", id)).Result()
 		if errDelete != nil && !errors.Is(errDelete, redis.Nil) {
-			return errors.Wrapf(errDelete, "Error deleting path with ID of %d", id)
+			return errors.Wrapf(errDelete, "Error deleting path with ID of %d in Redis", id)
 		}
 	} else {
 		existingPath, errGetPath := m.GetByID(ctx, id)
 		if errGetPath != nil {
-			return errors.Wrapf(errGetPath, "Failed to retrieve path with ID of %d", id)
+			return errors.Wrapf(errGetPath, "Failed to retrieve path with ID of %d in Redis", id)
 		}
 		existingPath.DeletedAt = sql.NullTime{Time: time.Now(), Valid: true}
 		updatedPathVal, errMarshal := json.Marshal(existingPath)

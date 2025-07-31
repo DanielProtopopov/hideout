@@ -24,8 +24,8 @@ type (
 		GetMapByPath(ctx context.Context, params ListSecretParams) (map[uint][]*Secret, error)
 		GetByUID(ctx context.Context, uid string) (*Secret, error)
 		GetByID(ctx context.Context, id uint) (*Secret, error)
-		Update(ctx context.Context, id uint, value string) (*Secret, error)
-		Create(ctx context.Context, id uint, uid string, pathID uint, name string, value string, valueType string) (*Secret, error)
+		Update(ctx context.Context, secret Secret) (*Secret, error)
+		Create(ctx context.Context, secret Secret) (*Secret, error)
 		Delete(ctx context.Context, id uint, forceDelete bool) error
 		Count(ctx context.Context, params ListSecretParams) (uint, error)
 	}

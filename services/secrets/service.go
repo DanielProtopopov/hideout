@@ -103,8 +103,8 @@ func (s *SecretsService) CreateSecret(ctx context.Context, pathID uint, name str
 	if errGetID != nil {
 		return nil, errGetID
 	}
-	uid := gofakeit.UUID()
-	return s.secretsRepository.Create(ctx, id, uid, pathID, name, value, valueType)
+	return s.secretsRepository.Create(ctx, secrets.Secret{Model: model.Model{ID: id}, PathID: pathID, UID: gofakeit.UUID(),
+		Name: name, Value: value, Type: valueType})
 }
 
 func (s *SecretsService) CreatePath(ctx context.Context, pathID uint, name string) (*paths.Path, error) {
@@ -112,8 +112,8 @@ func (s *SecretsService) CreatePath(ctx context.Context, pathID uint, name strin
 	if errGetID != nil {
 		return nil, errGetID
 	}
-	uid := gofakeit.UUID()
-	return s.pathsRepository.Create(ctx, id, uid, pathID, name)
+	return s.pathsRepository.Create(ctx, paths.Path{Model: model.Model{ID: id}, ParentID: pathID,
+		UID: gofakeit.UUID(), Name: name})
 }
 
 func (s *SecretsService) Tree(ctx context.Context, pathID uint) (TreeNode, error) {
@@ -269,8 +269,9 @@ func (s *SecretsService) copyPaths(ctx context.Context, pathsList []*paths.Path,
 		if errGetID != nil {
 			return nil, errGetID
 		}
-		uid := gofakeit.UUID()
-		newPath, errCreatePath := s.pathsRepository.Create(ctx, id, uid, toPath.ID, path.Name)
+		newPath, errCreatePath := s.pathsRepository.Create(ctx, paths.Path{
+			Model: model.Model{ID: id}, ParentID: toPath.ID, UID: gofakeit.UUID(), Name: path.Name,
+		})
 		if errCreatePath != nil {
 			return nil, errCreatePath
 		}
@@ -294,8 +295,10 @@ func (s *SecretsService) copySecrets(ctx context.Context, secretsList []*secrets
 		if errGetID != nil {
 			return nil, errGetID
 		}
-		uid := gofakeit.UUID()
-		newSecret, errCreateSecret := s.secretsRepository.Create(ctx, id, uid, toPath.ID, secret.Name, secret.Value, secret.Type)
+		newSecret, errCreateSecret := s.secretsRepository.Create(ctx, secrets.Secret{
+			Model: model.Model{ID: id}, PathID: toPath.ID, UID: gofakeit.UUID(),
+			Name: secret.Name, Value: secret.Value, Type: secret.Type,
+		})
 		if errCreateSecret != nil {
 			return nil, errCreateSecret
 		}

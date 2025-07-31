@@ -3,11 +3,11 @@ package secrets
 import (
 	"context"
 	"database/sql"
+	"hideout/internal/common/apperror"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
 	"hideout/internal/common/ordering"
 	"hideout/internal/common/pagination"
-	error2 "hideout/internal/pkg/error"
 	pathPkg "path"
 	"slices"
 	"time"
@@ -130,7 +130,7 @@ func (m InMemoryRepository) GetByID(ctx context.Context, id uint) (*Secret, erro
 		}
 	}
 
-	return nil, error2.ErrRecordNotFound
+	return nil, apperror.ErrRecordNotFound
 }
 
 func (m InMemoryRepository) GetByUID(ctx context.Context, uid string) (*Secret, error) {
@@ -140,30 +140,34 @@ func (m InMemoryRepository) GetByUID(ctx context.Context, uid string) (*Secret, 
 		}
 	}
 
-	return nil, error2.ErrRecordNotFound
+	return nil, apperror.ErrRecordNotFound
 }
 
-func (m InMemoryRepository) Update(ctx context.Context, id uint, value string) (*Secret, error) {
+func (m InMemoryRepository) Update(ctx context.Context, secret Secret) (*Secret, error) {
 	for _, secretEntry := range *m.conn {
-		if secretEntry.ID == id && !secretEntry.DeletedAt.Valid {
-			secretEntry.Value = value
+		if !secretEntry.DeletedAt.Valid && secretEntry.ID == secret.ID {
+			secretEntry.PathID = secret.PathID
+			secretEntry.Name = secret.Name
+			secretEntry.Value = secret.Value
+			secretEntry.Type = secret.Type
+			secretEntry.UpdatedAt = time.Now()
 			return &secretEntry, nil
 		}
 	}
 
-	return nil, error2.ErrRecordNotFound
+	return nil, apperror.ErrRecordNotFound
 }
 
-func (m InMemoryRepository) Create(ctx context.Context, id uint, uid string, pathID uint, name string, value string, valueType string) (*Secret, error) {
+func (m InMemoryRepository) Create(ctx context.Context, secret Secret) (*Secret, error) {
 	for _, secretEntry := range *m.conn {
-		if secretEntry.Name == name && secretEntry.PathID == pathID && !secretEntry.DeletedAt.Valid {
-			return nil, error2.ErrAlreadyExists
+		if !secretEntry.DeletedAt.Valid && secretEntry.Name == secret.Name && secretEntry.PathID == secret.PathID {
+			return nil, apperror.ErrAlreadyExists
 		}
 	}
 
-	newSecret := Secret{Model: model.Model{ID: id}, UID: uid, PathID: pathID, Name: name, Value: value, Type: valueType}
-	*m.conn = append(*m.conn, newSecret)
-	return &newSecret, nil
+	secret.CreatedAt = time.Now()
+	*m.conn = append(*m.conn, secret)
+	return &secret, nil
 }
 
 func (m InMemoryRepository) Count(ctx context.Context, params ListSecretParams) (uint, error) {
@@ -190,7 +194,7 @@ func (m InMemoryRepository) Delete(ctx context.Context, id uint, forceDelete boo
 		}
 	}
 
-	return error2.ErrRecordNotFound
+	return apperror.ErrRecordNotFound
 }
 
 func (m InMemoryRepository) Filter(ctx context.Context, data []*Secret, params generics.ListParams) []*Secret {

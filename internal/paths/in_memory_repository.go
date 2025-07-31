@@ -3,11 +3,11 @@ package paths
 import (
 	"context"
 	"database/sql"
+	"hideout/internal/common/apperror"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
 	"hideout/internal/common/ordering"
 	"hideout/internal/common/pagination"
-	error2 "hideout/internal/pkg/error"
 	pathPkg "path"
 	"slices"
 	"time"
@@ -101,7 +101,7 @@ func (m InMemoryRepository) GetByID(ctx context.Context, id uint) (*Path, error)
 		}
 	}
 
-	return nil, error2.ErrRecordNotFound
+	return nil, apperror.ErrRecordNotFound
 }
 
 func (m InMemoryRepository) GetByUID(ctx context.Context, uid string) (*Path, error) {
@@ -111,31 +111,32 @@ func (m InMemoryRepository) GetByUID(ctx context.Context, uid string) (*Path, er
 		}
 	}
 
-	return nil, error2.ErrRecordNotFound
+	return nil, apperror.ErrRecordNotFound
 }
 
-func (m InMemoryRepository) Update(ctx context.Context, id uint, name string) (*Path, error) {
+func (m InMemoryRepository) Update(ctx context.Context, path Path) (*Path, error) {
 	for _, pathEntry := range *m.conn {
-		if pathEntry.ID == id && !pathEntry.DeletedAt.Valid {
-			pathEntry.Name = name
+		if pathEntry.ID == path.ID && !pathEntry.DeletedAt.Valid {
+			pathEntry.ParentID = path.ParentID
+			pathEntry.Name = path.Name
 			pathEntry.UpdatedAt = time.Now()
 			return &pathEntry, nil
 		}
 	}
 
-	return nil, error2.ErrRecordNotFound
+	return nil, apperror.ErrRecordNotFound
 }
 
-func (m InMemoryRepository) Create(ctx context.Context, id uint, uid string, parentPathID uint, name string) (*Path, error) {
+func (m InMemoryRepository) Create(ctx context.Context, path Path) (*Path, error) {
 	for _, pathEntry := range *m.conn {
-		if pathEntry.Name == name && pathEntry.ID == parentPathID && !pathEntry.DeletedAt.Valid {
-			return nil, error2.ErrAlreadyExists
+		if !pathEntry.DeletedAt.Valid && pathEntry.Name == path.Name && pathEntry.ParentID == path.ParentID {
+			return nil, apperror.ErrAlreadyExists
 		}
 	}
 
-	newPath := Path{Model: model.Model{ID: id, CreatedAt: time.Now()}, UID: uid, ParentID: parentPathID, Name: name}
-	*m.conn = append(*m.conn, newPath)
-	return &newPath, nil
+	path.CreatedAt = time.Now()
+	*m.conn = append(*m.conn, path)
+	return &path, nil
 }
 
 func (m InMemoryRepository) Count(ctx context.Context, params ListPathParams) (uint, error) {
@@ -163,7 +164,7 @@ func (m InMemoryRepository) Delete(ctx context.Context, id uint, forceDelete boo
 		}
 	}
 
-	return error2.ErrRecordNotFound
+	return apperror.ErrRecordNotFound
 }
 
 func (m InMemoryRepository) Filter(ctx context.Context, results []*Path, params generics.ListParams) []*Path {

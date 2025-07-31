@@ -58,40 +58,32 @@ func (m DatabaseRepository) GetByUID(ctx context.Context, uid string) (*Secret, 
 	return m.inMemoryRepository.GetByUID(ctx, uid)
 }
 
-func (m DatabaseRepository) Update(ctx context.Context, id uint, value string) (*Secret, error) {
-	existingSecret, errGetSecret := m.GetByID(ctx, id)
+func (m DatabaseRepository) Update(ctx context.Context, secret Secret) (*Secret, error) {
+	existingSecret, errGetSecret := m.GetByID(ctx, secret.ID)
 	if errGetSecret != nil {
-		return nil, errors.Wrapf(errGetSecret, "Failed to retrieve secret with ID of %d", id)
+		return nil, errors.Wrapf(errGetSecret, "Failed to retrieve secret with ID of %d in database", secret.ID)
 	}
-
-	var updatedSecretEntry = Secret{Model: model.Model{ID: existingSecret.ID}, UID: existingSecret.UID, Value: value}
-	errUpdate := m.conn.Table(TableName).Model(&updatedSecretEntry).Update("value", value).Error
-
-	// Revert back to old name
+	var updatedSecretEntry = Secret{Model: model.Model{ID: existingSecret.ID, UpdatedAt: time.Now()}, UID: existingSecret.UID, Value: secret.Value}
+	errUpdate := m.conn.Table(TableName).Model(&updatedSecretEntry).Updates(&secret).Error
 	if errUpdate != nil {
-		return nil, errors.Wrapf(errUpdate, "Error updating secret with ID of %d", id)
+		return nil, errors.Wrapf(errUpdate, "Error updating secret with ID of %d in database", secret.ID)
 	}
-
-	// Update was successful, update in-memory
-	updatedSecret, errUpdateSecret := m.inMemoryRepository.Update(ctx, id, value)
+	updatedSecret, errUpdateSecret := m.inMemoryRepository.Update(ctx, secret)
 	if errUpdateSecret != nil {
-		return nil, errors.Wrapf(errUpdateSecret, "Error updating secret with ID of %d", id)
+		return nil, errors.Wrapf(errUpdateSecret, "Error updating secret with ID of %d in-memory", secret.ID)
 	}
 
 	return updatedSecret, nil
 }
 
-func (m DatabaseRepository) Create(ctx context.Context, id uint, uid string, pathID uint, name string, value string, valueType string) (*Secret, error) {
-	newSecret := Secret{Model: model.Model{ID: id}, PathID: pathID, UID: uid, Name: name, Value: value, Type: valueType}
-	errCreate := m.conn.Table(TableName).Create(&newSecret).Error
+func (m DatabaseRepository) Create(ctx context.Context, secret Secret) (*Secret, error) {
+	errCreate := m.conn.Table(TableName).Create(&secret).Error
 	if errCreate != nil {
-		return nil, errors.Wrapf(errCreate, "Error creating secret with ID of %d", newSecret.ID)
+		return nil, errors.Wrapf(errCreate, "Error creating secret with ID of %d in database", secret.ID)
 	}
-
-	newSecretEntry, errCreateSecret := m.inMemoryRepository.Create(ctx, newSecret.ID, newSecret.UID, newSecret.PathID,
-		newSecret.Name, newSecret.Value, newSecret.Type)
+	newSecretEntry, errCreateSecret := m.inMemoryRepository.Create(ctx, secret)
 	if errCreateSecret != nil {
-		return nil, errors.Wrapf(errCreateSecret, "Error creating secret with path ID of %d and name %s", pathID, name)
+		return nil, errors.Wrapf(errCreateSecret, "Error creating secret with path ID of %d and name %s in-memory", secret.PathID, secret.Name)
 	}
 	return newSecretEntry, nil
 }
@@ -104,15 +96,20 @@ func (m DatabaseRepository) Delete(ctx context.Context, id uint, forceDelete boo
 	if forceDelete {
 		errDelete := m.conn.Table(TableName).Unscoped().Delete(&Secret{}, id).Error
 		if errDelete != nil {
-			return errors.Wrapf(errDelete, "Error deleting secret with ID of %d", id)
+			return errors.Wrapf(errDelete, "Error deleting secret with ID of %d in database", id)
 		}
 	} else {
 		errUpdate := m.conn.Table(TableName).Where("id = ?", id).Update("deleted_at",
 			sql.NullTime{Valid: true, Time: time.Now()}).Error
 		if errUpdate != nil {
-			return errors.Wrapf(errUpdate, "Error marking secret with ID of %d deleted", id)
+			return errors.Wrapf(errUpdate, "Error marking secret with ID of %d deleted in database", id)
 		}
 	}
 
-	return m.inMemoryRepository.Delete(ctx, id, forceDelete)
+	errDelete := m.inMemoryRepository.Delete(ctx, id, forceDelete)
+	if errDelete != nil {
+		return errors.Wrapf(errDelete, "Error deleting secret with ID of %d in-memory", id)
+	}
+
+	return nil
 }

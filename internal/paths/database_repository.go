@@ -54,41 +54,34 @@ func (m DatabaseRepository) GetByUID(ctx context.Context, uid string) (*Path, er
 	return m.inMemoryRepository.GetByUID(ctx, uid)
 }
 
-func (m DatabaseRepository) Update(ctx context.Context, id uint, name string) (*Path, error) {
-	existingPath, errGetPath := m.GetByID(ctx, id)
+func (m DatabaseRepository) Update(ctx context.Context, path Path) (*Path, error) {
+	existingPath, errGetPath := m.GetByID(ctx, path.ID)
 	if errGetPath != nil {
-		return nil, errors.Wrapf(errGetPath, "Failed to retrieve path with ID of %d", id)
+		return nil, errors.Wrapf(errGetPath, "Failed to retrieve path with ID of %d", path.ID)
 	}
-	var existingPathName = existingPath.Name
-
-	var updatedPathEntry = Path{Model: model.Model{ID: existingPath.ID, UpdatedAt: time.Now()}, UID: existingPath.UID, Name: name}
-	errUpdate := m.conn.Table(TableName).Model(&updatedPathEntry).Update("name", name).Error
-
-	// Revert back to old name
+	var updatedPathEntry = Path{Model: model.Model{ID: existingPath.ID, UpdatedAt: time.Now()}, UID: existingPath.UID, Name: path.Name}
+	errUpdate := m.conn.Table(TableName).Model(&updatedPathEntry).Updates(&path).Error
 	if errUpdate != nil {
-		_, _ = m.inMemoryRepository.Update(ctx, id, existingPathName)
-		return nil, errors.Wrapf(errUpdate, "Error updating path with ID of %d", id)
+		return nil, errors.Wrapf(errUpdate, "Error updating path with ID of %d", path.ID)
 	}
-
-	// Update was successful, update in-memory
-	updatedPath, errUpdatePath := m.inMemoryRepository.Update(ctx, id, name)
+	updatedPath, errUpdatePath := m.inMemoryRepository.Update(ctx, updatedPathEntry)
 	if errUpdatePath != nil {
-		return nil, errors.Wrapf(errUpdatePath, "Error updating path with ID of %d", id)
+		return nil, errors.Wrapf(errUpdatePath, "Error updating path with ID of %d in-memory", path.ID)
 	}
 
 	return updatedPath, nil
 }
 
-func (m DatabaseRepository) Create(ctx context.Context, id uint, uid string, parentPathID uint, name string) (*Path, error) {
-	newPath := Path{Model: model.Model{ID: id, CreatedAt: time.Now()}, ParentID: parentPathID, UID: uid, Name: name}
-	errCreate := m.conn.Table(TableName).Create(&newPath).Error
+func (m DatabaseRepository) Create(ctx context.Context, path Path) (*Path, error) {
+	path.CreatedAt = time.Now()
+	errCreate := m.conn.Table(TableName).Create(&path).Error
 	if errCreate != nil {
-		return nil, errors.Wrapf(errCreate, "Error creating path with ID of %d", newPath.ID)
+		return nil, errors.Wrapf(errCreate, "Error creating path with ID of %d", path.ID)
 	}
 
-	newPathEntry, errCreatePath := m.inMemoryRepository.Create(ctx, newPath.ID, newPath.UID, newPath.ParentID, newPath.Name)
+	newPathEntry, errCreatePath := m.inMemoryRepository.Create(ctx, path)
 	if errCreatePath != nil {
-		return nil, errors.Wrapf(errCreatePath, "Error creating path with parent path ID of %d and name %s", parentPathID, name)
+		return nil, errors.Wrapf(errCreatePath, "Error creating path with parent path ID of %d and name %s in-memory", path.ParentID, path.Name)
 	}
 
 	return newPathEntry, nil
@@ -102,15 +95,20 @@ func (m DatabaseRepository) Delete(ctx context.Context, id uint, forceDelete boo
 	if forceDelete {
 		errDelete := m.conn.Table(TableName).Unscoped().Delete(&Path{}, id).Error
 		if errDelete != nil {
-			return errors.Wrapf(errDelete, "Error deleting path with ID of %d", id)
+			return errors.Wrapf(errDelete, "Error deleting path with ID of %d in database", id)
 		}
 	} else {
 		errUpdate := m.conn.Table(TableName).Where("id = ?", id).Update("deleted_at",
 			sql.NullTime{Valid: true, Time: time.Now()}).Error
 		if errUpdate != nil {
-			return errors.Wrapf(errUpdate, "Error marking path with ID of %d deleted", id)
+			return errors.Wrapf(errUpdate, "Error marking path with ID of %d deleted in database", id)
 		}
 	}
 
-	return m.inMemoryRepository.Delete(ctx, id, forceDelete)
+	errDelete := m.inMemoryRepository.Delete(ctx, id, forceDelete)
+	if errDelete != nil {
+		return errors.Wrapf(errDelete, "Error deleting path with ID of %d in-memory", id)
+	}
+
+	return nil
 }
