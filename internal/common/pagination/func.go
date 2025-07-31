@@ -14,3 +14,16 @@ func CountPages(total uint, paging PaginationRQ) PaginationRS {
 		Total:   total,
 	}
 }
+
+func Paginate(length int, skip int, size int) (int, int) {
+	if skip > length {
+		skip = length
+	}
+
+	end := skip + size
+	if end > length {
+		end = length
+	}
+
+	return skip, end
+}

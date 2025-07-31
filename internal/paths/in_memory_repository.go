@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
+	"hideout/internal/common/pagination"
 	error2 "hideout/internal/pkg/error"
 	pathPkg "path"
 	"slices"
@@ -84,7 +85,9 @@ func (m InMemoryRepository) Get(ctx context.Context, params ListPathParams) ([]*
 		}
 	}
 
-	return m.Filter(ctx, nameResults, params.ListParams)
+	filteredResults := m.Filter(ctx, nameResults, params.ListParams)
+	offset, length := pagination.Paginate(len(filteredResults), int(params.Pagination.Page), int(params.Pagination.PerPage))
+	return filteredResults[offset:length], nil
 }
 
 func (m InMemoryRepository) GetByID(ctx context.Context, id uint) (*Path, error) {
@@ -157,7 +160,7 @@ func (m InMemoryRepository) Delete(ctx context.Context, id uint, forceDelete boo
 	return error2.ErrRecordNotFound
 }
 
-func (m InMemoryRepository) Filter(ctx context.Context, results []*Path, params generics.ListParams) ([]*Path, error) {
+func (m InMemoryRepository) Filter(ctx context.Context, results []*Path, params generics.ListParams) []*Path {
 	var idResults []*Path
 	for _, pathEntry := range results {
 		if len(params.IDs) > 0 {
@@ -195,5 +198,5 @@ func (m InMemoryRepository) Filter(ctx context.Context, results []*Path, params 
 		}
 	}
 
-	return uidResults, nil
+	return uidResults
 }

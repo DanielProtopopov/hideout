@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
+	"hideout/internal/common/pagination"
 	error2 "hideout/internal/pkg/error"
 	pathPkg "path"
 	"slices"
@@ -95,7 +96,9 @@ func (m InMemoryRepository) Get(ctx context.Context, params ListSecretParams) ([
 		}
 	}
 
-	return m.Filter(ctx, typeResults, params.ListParams)
+	filteredResults := m.Filter(ctx, typeResults, params.ListParams)
+	offset, length := pagination.Paginate(len(filteredResults), int(params.Pagination.Page), int(params.Pagination.PerPage))
+	return filteredResults[offset:length], nil
 }
 
 func (m InMemoryRepository) GetMapByPath(ctx context.Context, params ListSecretParams) (map[uint][]*Secret, error) {
@@ -185,7 +188,7 @@ func (m InMemoryRepository) Delete(ctx context.Context, id uint, forceDelete boo
 	return error2.ErrRecordNotFound
 }
 
-func (m InMemoryRepository) Filter(ctx context.Context, results []*Secret, params generics.ListParams) ([]*Secret, error) {
+func (m InMemoryRepository) Filter(ctx context.Context, results []*Secret, params generics.ListParams) []*Secret {
 	var idResults []*Secret
 	for _, pathEntry := range results {
 		if len(params.IDs) > 0 {
@@ -223,5 +226,5 @@ func (m InMemoryRepository) Filter(ctx context.Context, results []*Secret, param
 		}
 	}
 
-	return uidResults, nil
+	return uidResults
 }
