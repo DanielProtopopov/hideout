@@ -28,6 +28,7 @@ type (
 		Create(ctx context.Context, secret Secret) (*Secret, error)
 		Delete(ctx context.Context, id uint, forceDelete bool) error
 		Count(ctx context.Context, params ListSecretParams) (uint, error)
+		Load(ctx context.Context) ([]Secret, error)
 	}
 
 	ListSecretParams struct {

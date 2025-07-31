@@ -33,10 +33,14 @@ func main() {
 		}
 	}()
 
-	secretsSvc, errCreateService := secrets.NewService(ctx, secrets.Config{}, &structs.Paths, &structs.Secrets,
-		apiconfig.Settings.Repository.Type, apiconfig.Settings.Repository.PreloadInMemory)
+	secretsSvc, errCreateService := secrets.NewService(ctx, apiconfig.Settings.Repository, &structs.Paths, &structs.Secrets)
 	if errCreateService != nil {
 		log.Fatal(errCreateService)
+	}
+
+	errReload := secretsSvc.Load(ctx)
+	if errReload != nil {
+		log.Fatal(errReload)
 	}
 
 	rootPath, _ := secretsSvc.CreatePath(ctx, 0, "")

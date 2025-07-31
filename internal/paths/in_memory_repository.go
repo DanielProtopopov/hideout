@@ -21,6 +21,10 @@ func NewInMemoryRepository(conn *[]Path) InMemoryRepository {
 	return InMemoryRepository{conn: conn}
 }
 
+func (m InMemoryRepository) Load(ctx context.Context) ([]Path, error) {
+	return nil, nil
+}
+
 func (m InMemoryRepository) GetID(ctx context.Context) (uint, error) {
 	id := uint(0)
 	for _, pathEntry := range *m.conn {

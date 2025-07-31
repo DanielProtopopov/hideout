@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/pkg/errors"
+	"hideout/config"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
 	"hideout/internal/paths"
@@ -15,7 +16,7 @@ type Config struct {
 }
 
 type SecretsService struct {
-	config  Config
+	config  config.RepositoryConfig
 	paths   *[]paths.Path
 	secrets *[]secrets.Secret
 
@@ -24,8 +25,8 @@ type SecretsService struct {
 }
 
 // NewService Creation of the service
-func NewService(ctx context.Context, config Config, pathsList *[]paths.Path, secretsList *[]secrets.Secret, repositoryType uint, preloadIntoMemoryCache bool) (*SecretsService, error) {
-	switch repositoryType {
+func NewService(ctx context.Context, config config.RepositoryConfig, pathsList *[]paths.Path, secretsList *[]secrets.Secret) (*SecretsService, error) {
+	switch config.Type {
 	case RepositoryType_InMemory:
 		{
 			return &SecretsService{config: config, paths: pathsList, secrets: secretsList,
@@ -37,7 +38,7 @@ func NewService(ctx context.Context, config Config, pathsList *[]paths.Path, sec
 			inMemoryPathsRep := paths.NewInMemoryRepository(&structs.Paths)
 			redisSecretsRep := secrets.NewRedisRepository(structs.Redis, inMemorySecretsRep)
 			redisPathsRep := paths.NewRedisRepository(structs.Redis, inMemoryPathsRep)
-			if preloadIntoMemoryCache {
+			if config.PreloadInMemory {
 				loadedSecrets, errLoadSecrets := redisSecretsRep.Load(ctx)
 				if errLoadSecrets != nil {
 					return nil, errors.Wrap(errLoadSecrets, "Error preloading secrets into in-memory storage in Redis")
@@ -49,8 +50,15 @@ func NewService(ctx context.Context, config Config, pathsList *[]paths.Path, sec
 				}
 				structs.Paths = loadedPaths
 			}
-			return &SecretsService{config: config, paths: pathsList, secrets: secretsList,
-				secretsRepository: redisSecretsRep, pathsRepository: redisPathsRep}, nil
+			secretsSvc := SecretsService{config: config, paths: pathsList, secrets: secretsList,
+				secretsRepository: redisSecretsRep, pathsRepository: redisPathsRep}
+
+			errLoad := secretsSvc.Load(ctx)
+			if errLoad != nil {
+				return nil, errors.Wrap(errLoad, "Error loading data into memory")
+			}
+
+			return &secretsSvc, nil
 		}
 	case RepositoryType_Database:
 		{
@@ -58,24 +66,36 @@ func NewService(ctx context.Context, config Config, pathsList *[]paths.Path, sec
 			inMemoryPathsRep := paths.NewInMemoryRepository(&structs.Paths)
 			databaseSecretsRep := secrets.NewDatabaseRepository(structs.Gorm, inMemorySecretsRep)
 			databasePathsRep := paths.NewDatabaseRepository(structs.Gorm, inMemoryPathsRep)
-			if preloadIntoMemoryCache {
-				loadedSecrets, errLoadSecrets := databaseSecretsRep.Load(ctx)
-				if errLoadSecrets != nil {
-					return nil, errors.Wrap(errLoadSecrets, "Error preloading secrets into in-memory storage in Redis")
-				}
-				structs.Secrets = loadedSecrets
-				loadedPaths, errLoadPaths := databasePathsRep.Load(ctx)
-				if errLoadPaths != nil {
-					return nil, errors.Wrap(errLoadPaths, "Error preloading paths into in-memory storage in Redis")
-				}
-				structs.Paths = loadedPaths
+
+			secretsSvc := SecretsService{config: config, paths: pathsList, secrets: secretsList,
+				secretsRepository: databaseSecretsRep, pathsRepository: databasePathsRep}
+			errLoad := secretsSvc.Load(ctx)
+			if errLoad != nil {
+				return nil, errors.Wrap(errLoad, "Error loading data into memory")
 			}
-			return &SecretsService{config: config, paths: pathsList, secrets: secretsList,
-				secretsRepository: databaseSecretsRep, pathsRepository: databasePathsRep}, nil
+
+			return &secretsSvc, nil
 		}
 	}
 
 	return nil, errors.New("invalid repository type")
+}
+
+func (s *SecretsService) Load(ctx context.Context) error {
+	if s.config.PreloadInMemory {
+		loadedSecrets, errLoadSecrets := s.secretsRepository.Load(ctx)
+		if errLoadSecrets != nil {
+			return errors.Wrap(errLoadSecrets, "Error preloading secrets into in-memory storage in Redis")
+		}
+		structs.Secrets = loadedSecrets
+		loadedPaths, errLoadPaths := s.pathsRepository.Load(ctx)
+		if errLoadPaths != nil {
+			return errors.Wrap(errLoadPaths, "Error preloading paths into in-memory storage in Redis")
+		}
+		structs.Paths = loadedPaths
+	}
+
+	return nil
 }
 
 func (s *SecretsService) GetPathByUID(ctx context.Context, pathUID string) (*paths.Path, error) {

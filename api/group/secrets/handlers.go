@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"context"
 	"errors"
 	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
@@ -40,6 +41,10 @@ func GetSecretsHandler(c *gin.Context) {
 	Language, _ := c.Get("Language")
 	Localizer := i18n.NewLocalizer(apiconfig.Settings.Bundle, Language.(string))
 
+	rqContext = context.WithValue(rqContext, "Sentry", SentryHub)
+	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
+	rqContext = context.WithValue(rqContext, "Language", Language)
+
 	validationSpan := sentry.StartSpan(rqContext, "get.secrets.list")
 	validationSpan.Description = "rq.validate"
 
@@ -64,7 +69,7 @@ func GetSecretsHandler(c *gin.Context) {
 	}
 	validationSpan.Finish()
 
-	secretsSvc, errCreateService := secrets.NewService(rqContext, secrets.Config{}, &structs.Paths, &structs.Secrets, secrets.RepositoryType_Redis, false)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.Repository, &structs.Paths, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
@@ -144,6 +149,10 @@ func UpdateSecretsHandler(c *gin.Context) {
 	Language, _ := c.Get("Language")
 	Localizer := i18n.NewLocalizer(apiconfig.Settings.Bundle, Language.(string))
 
+	rqContext = context.WithValue(rqContext, "Sentry", SentryHub)
+	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
+	rqContext = context.WithValue(rqContext, "Language", Language)
+
 	validationSpan := sentry.StartSpan(rqContext, "update.secrets")
 	validationSpan.Description = "rq.validate"
 
@@ -191,6 +200,10 @@ func DeleteSecretsHandler(c *gin.Context) {
 	Language, _ := c.Get("Language")
 	Localizer := i18n.NewLocalizer(apiconfig.Settings.Bundle, Language.(string))
 
+	rqContext = context.WithValue(rqContext, "Sentry", SentryHub)
+	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
+	rqContext = context.WithValue(rqContext, "Language", Language)
+
 	validationSpan := sentry.StartSpan(rqContext, "delete.secrets")
 	validationSpan.Description = "rq.validate"
 
@@ -237,6 +250,10 @@ func CreateSecretsHandler(c *gin.Context) {
 
 	Language, _ := c.Get("Language")
 	Localizer := i18n.NewLocalizer(apiconfig.Settings.Bundle, Language.(string))
+
+	rqContext = context.WithValue(rqContext, "Sentry", SentryHub)
+	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
+	rqContext = context.WithValue(rqContext, "Language", Language)
 
 	validationSpan := sentry.StartSpan(rqContext, "create.secrets")
 	validationSpan.Description = "rq.validate"

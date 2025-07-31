@@ -1,8 +1,11 @@
 package public
 
 import (
+	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+	apiconfig "hideout/cmd/api/config"
 	"net/http"
 )
 
@@ -25,8 +28,12 @@ func GetSitemapHandler(c *gin.Context) {
 		rqContext = sentry.SetHubOnContext(rqContext, SentryHub)
 	}
 
-	// Language, _ := c.Get("Language")
-	// Localizer := i18n.NewLocalizer(apiconfig.Settings.Bundle, Language.(string))
+	Language, _ := c.Get("Language")
+	Localizer := i18n.NewLocalizer(apiconfig.Settings.Bundle, Language.(string))
+
+	rqContext = context.WithValue(rqContext, "Sentry", SentryHub)
+	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
+	rqContext = context.WithValue(rqContext, "Language", Language)
 
 	c.HTML(http.StatusOK, "", gin.H{})
 }

@@ -25,6 +25,7 @@ type (
 		Create(ctx context.Context, path Path) (*Path, error)
 		Delete(ctx context.Context, id uint, forceDelete bool) error
 		Count(ctx context.Context, params ListPathParams) (uint, error)
+		Load(ctx context.Context) ([]Path, error)
 	}
 
 	ListPathParams struct {
