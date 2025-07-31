@@ -31,4 +31,10 @@ type (
 		Name         string
 		ParentPathID uint
 	}
+
+	// multiSorter implements the Sort interface, sorting the secrets within.
+	multiSorter struct {
+		paths []*Path
+		less  []lessFunc
+	}
 )

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
+	"hideout/internal/common/ordering"
 	"hideout/internal/common/pagination"
 	error2 "hideout/internal/pkg/error"
 	pathPkg "path"
@@ -198,5 +199,101 @@ func (m InMemoryRepository) Filter(ctx context.Context, results []*Path, params 
 		}
 	}
 
-	return uidResults
+	return m.Sort(ctx, softDeletedResults, params.Order)
+}
+
+func (m InMemoryRepository) Sort(ctx context.Context, data []*Path, ordering []ordering.OrderRQ) []*Path {
+	var orderParams []lessFunc
+	for _, order := range ordering {
+		columnMap, _ := OrderMap[order.OrderBy]
+		switch columnMap {
+		case "id":
+			{
+				if order.Order == true {
+					orderParams = append(orderParams, func(p1, p2 *Path) bool {
+						if order.Order {
+							return p1.ID < p2.ID
+						} else {
+							return p1.ID > p2.ID
+						}
+					})
+				}
+			}
+		case "parent_id":
+			{
+				if order.Order == true {
+					orderParams = append(orderParams, func(p1, p2 *Path) bool {
+						if order.Order {
+							return p1.ParentID < p2.ParentID
+						} else {
+							return p1.ParentID > p2.ParentID
+						}
+					})
+				}
+			}
+		case "uid":
+			{
+				if order.Order == true {
+					orderParams = append(orderParams, func(p1, p2 *Path) bool {
+						if order.Order {
+							return p1.UID < p2.UID
+						} else {
+							return p1.UID > p2.UID
+						}
+					})
+				}
+			}
+		case "name":
+			{
+				if order.Order == true {
+					orderParams = append(orderParams, func(p1, p2 *Path) bool {
+						if order.Order {
+							return p1.Name < p2.Name
+						} else {
+							return p1.Name > p2.Name
+						}
+					})
+				}
+			}
+		case "created_at":
+			{
+				if order.Order == true {
+					orderParams = append(orderParams, func(p1, p2 *Path) bool {
+						if order.Order {
+							return p1.CreatedAt.Before(p2.CreatedAt)
+						} else {
+							return p1.CreatedAt.After(p2.CreatedAt)
+						}
+					})
+				}
+			}
+		case "updated_at":
+			{
+				if order.Order == true {
+					orderParams = append(orderParams, func(p1, p2 *Path) bool {
+						if order.Order {
+							return p1.UpdatedAt.Before(p2.UpdatedAt)
+						} else {
+							return p1.UpdatedAt.After(p2.UpdatedAt)
+						}
+					})
+				}
+			}
+		case "deleted_at":
+			{
+				if order.Order == true {
+					orderParams = append(orderParams, func(p1, p2 *Path) bool {
+						if order.Order {
+							return p1.DeletedAt.Valid && p2.DeletedAt.Valid && p1.DeletedAt.Time.Before(p2.DeletedAt.Time)
+						} else {
+							return p1.DeletedAt.Valid && p2.DeletedAt.Valid && p1.DeletedAt.Time.After(p2.DeletedAt.Time)
+						}
+					})
+				}
+			}
+		}
+	}
+
+	OrderedBy(orderParams...).Sort(data)
+	return data
 }

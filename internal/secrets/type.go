@@ -35,4 +35,10 @@ type (
 		Name    string
 		Types   []string
 	}
+
+	// multiSorter implements the Sort interface, sorting the secrets within.
+	multiSorter struct {
+		secrets []*Secret
+		less    []lessFunc
+	}
 )
