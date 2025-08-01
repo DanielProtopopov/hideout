@@ -1,3 +1,7 @@
 BEGIN;
 
+DROP TABLE IF EXISTS secrets;
+
+DROP TABLE IF EXISTS folders;
+
 COMMIT;

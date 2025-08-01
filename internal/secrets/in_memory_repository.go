@@ -8,7 +8,7 @@ import (
 	"hideout/internal/common/model"
 	"hideout/internal/common/ordering"
 	"hideout/internal/common/pagination"
-	pathPkg "path"
+	"path"
 	"slices"
 	"time"
 )
@@ -63,29 +63,29 @@ func (m InMemoryRepository) GetMapByUID(ctx context.Context, params ListSecretPa
 }
 
 func (m InMemoryRepository) Get(ctx context.Context, params ListSecretParams) ([]*Secret, error) {
-	var pathResults []*Secret
+	var folderResults []*Secret
 	for _, secretEntry := range *m.conn {
-		if len(params.PathIDs) > 0 {
-			if slices.Contains(params.PathIDs, secretEntry.ID) {
-				pathResults = append(pathResults, &secretEntry)
+		if len(params.FolderIDs) > 0 {
+			if slices.Contains(params.FolderIDs, secretEntry.ID) {
+				folderResults = append(folderResults, &secretEntry)
 			}
 		} else {
-			pathResults = append(pathResults, &secretEntry)
+			folderResults = append(folderResults, &secretEntry)
 		}
 	}
 
 	var nameResults []*Secret
-	for _, pathResult := range pathResults {
+	for _, folderResult := range folderResults {
 		if params.Name != "" {
-			matched, errPathMatch := pathPkg.Match(params.Name, pathResult.Name)
-			if errPathMatch != nil {
-				return nil, errPathMatch
+			matched, errFolderMatch := path.Match(params.Name, folderResult.Name)
+			if errFolderMatch != nil {
+				return nil, errFolderMatch
 			}
 			if matched {
-				nameResults = append(nameResults, pathResult)
+				nameResults = append(nameResults, folderResult)
 			}
 		} else {
-			nameResults = append(nameResults, pathResult)
+			nameResults = append(nameResults, folderResult)
 		}
 	}
 
@@ -109,19 +109,19 @@ func (m InMemoryRepository) Get(ctx context.Context, params ListSecretParams) ([
 	return filteredResults[offset:length], nil
 }
 
-func (m InMemoryRepository) GetMapByPath(ctx context.Context, params ListSecretParams) (map[uint][]*Secret, error) {
+func (m InMemoryRepository) GetMapByFolder(ctx context.Context, params ListSecretParams) (map[uint][]*Secret, error) {
 	secrets, errGetSecrets := m.Get(ctx, params)
 	if errGetSecrets != nil {
 		return nil, errGetSecrets
 	}
 	results := make(map[uint][]*Secret)
 	for _, secret := range secrets {
-		secretsInPath, secretExists := results[secret.PathID]
+		secretsInFolder, secretExists := results[secret.FolderID]
 		if !secretExists {
-			secretsInPath = []*Secret{}
+			secretsInFolder = []*Secret{}
 		}
-		secretsInPath = append(secretsInPath, secret)
-		results[secret.PathID] = secretsInPath
+		secretsInFolder = append(secretsInFolder, secret)
+		results[secret.FolderID] = secretsInFolder
 	}
 
 	return results, nil
@@ -150,7 +150,7 @@ func (m InMemoryRepository) GetByUID(ctx context.Context, uid string) (*Secret, 
 func (m InMemoryRepository) Update(ctx context.Context, secret Secret) (*Secret, error) {
 	for _, secretEntry := range *m.conn {
 		if !secretEntry.DeletedAt.Valid && secretEntry.ID == secret.ID {
-			secretEntry.PathID = secret.PathID
+			secretEntry.FolderID = secret.FolderID
 			secretEntry.Name = secret.Name
 			secretEntry.Value = secret.Value
 			secretEntry.Type = secret.Type
@@ -164,7 +164,7 @@ func (m InMemoryRepository) Update(ctx context.Context, secret Secret) (*Secret,
 
 func (m InMemoryRepository) Create(ctx context.Context, secret Secret) (*Secret, error) {
 	for _, secretEntry := range *m.conn {
-		if !secretEntry.DeletedAt.Valid && secretEntry.Name == secret.Name && secretEntry.PathID == secret.PathID {
+		if !secretEntry.DeletedAt.Valid && secretEntry.Name == secret.Name && secretEntry.FolderID == secret.FolderID {
 			return nil, apperror.ErrAlreadyExists
 		}
 	}
@@ -204,39 +204,39 @@ func (m InMemoryRepository) Delete(ctx context.Context, id uint, forceDelete boo
 
 func (m InMemoryRepository) Filter(ctx context.Context, data []*Secret, params generics.ListParams) []*Secret {
 	var idResults []*Secret
-	for _, pathEntry := range data {
+	for _, folderEntry := range data {
 		if len(params.IDs) > 0 {
-			if slices.Contains(params.IDs, pathEntry.ID) {
-				idResults = append(idResults, pathEntry)
+			if slices.Contains(params.IDs, folderEntry.ID) {
+				idResults = append(idResults, folderEntry)
 			}
 		} else {
-			idResults = append(idResults, pathEntry)
+			idResults = append(idResults, folderEntry)
 		}
 	}
 
 	var uidResults []*Secret
-	for _, pathEntry := range idResults {
+	for _, folderEntry := range idResults {
 		if len(params.UIDs) > 0 {
-			if slices.Contains(params.UIDs, pathEntry.UID) {
-				uidResults = append(uidResults, pathEntry)
+			if slices.Contains(params.UIDs, folderEntry.UID) {
+				uidResults = append(uidResults, folderEntry)
 			}
 		} else {
-			uidResults = append(uidResults, pathEntry)
+			uidResults = append(uidResults, folderEntry)
 		}
 	}
 
 	var softDeletedResults []*Secret
-	for _, pathEntry := range uidResults {
+	for _, folderEntry := range uidResults {
 		if params.Deleted == model.Yes {
-			if pathEntry.DeletedAt.Valid {
-				softDeletedResults = append(softDeletedResults, pathEntry)
+			if folderEntry.DeletedAt.Valid {
+				softDeletedResults = append(softDeletedResults, folderEntry)
 			}
 		} else if params.Deleted == model.No {
-			if !pathEntry.DeletedAt.Valid {
-				softDeletedResults = append(softDeletedResults, pathEntry)
+			if !folderEntry.DeletedAt.Valid {
+				softDeletedResults = append(softDeletedResults, folderEntry)
 			}
 		} else {
-			softDeletedResults = append(softDeletedResults, pathEntry)
+			softDeletedResults = append(softDeletedResults, folderEntry)
 		}
 	}
 
@@ -260,14 +260,14 @@ func (m InMemoryRepository) Sort(ctx context.Context, data []*Secret, ordering [
 					})
 				}
 			}
-		case "path_id":
+		case "folder_id":
 			{
 				if order.Order == true {
 					orderParams = append(orderParams, func(p1, p2 *Secret) bool {
 						if order.Order {
-							return p1.PathID < p2.PathID
+							return p1.FolderID < p2.FolderID
 						} else {
-							return p1.PathID > p2.PathID
+							return p1.FolderID > p2.FolderID
 						}
 					})
 				}

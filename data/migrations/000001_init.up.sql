@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS public.secrets
     deleted_at TIMESTAMP    NULL DEFAULT NULL
 );
 
-CREATE TABLE IF NOT EXISTS public.paths
+CREATE TABLE IF NOT EXISTS public.folders
 (
     id         SERIAL PRIMARY KEY,
     parent_id  INTEGER      NULL     DEFAULT NULL,

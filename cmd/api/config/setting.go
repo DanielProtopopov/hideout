@@ -12,7 +12,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"hideout/config"
-	"hideout/internal/paths"
+	"hideout/internal/folders"
 	"hideout/internal/secrets"
 	"hideout/internal/translations"
 	secrets2 "hideout/services/secrets"
@@ -131,5 +131,5 @@ func Init(ctx context.Context) {
 
 	structs.Redis = client
 	structs.Secrets = []secrets.Secret{}
-	structs.Paths = []paths.Path{}
+	structs.Folders = []folders.Folder{}
 }

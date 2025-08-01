@@ -12,7 +12,7 @@ import (
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
 	"hideout/internal/common/rqrs"
-	"hideout/internal/paths"
+	"hideout/internal/folders"
 	secrets2 "hideout/internal/secrets"
 	"hideout/services/secrets"
 	"hideout/structs"
@@ -53,7 +53,7 @@ func GetSecretsHandler(c *gin.Context) {
 	validationSpan.Description = "rq.validate"
 
 	var request GetSecretsRQ
-	response := GetSecretsRS{Secrets: []Secret{}, Paths: []Path{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
+	response := GetSecretsRS{Secrets: []Secret{}, Folders: []Folder{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
 	errBindBody := c.ShouldBindBodyWith(&request, binding.JSON)
 	if errBindBody != nil {
@@ -73,7 +73,7 @@ func GetSecretsHandler(c *gin.Context) {
 	}
 	validationSpan.Finish()
 
-	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.Repository, &structs.Paths, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.Repository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
@@ -82,55 +82,55 @@ func GetSecretsHandler(c *gin.Context) {
 		return
 	}
 
-	pathByUID, errGetPath := secretsSvc.GetPathByUID(rqContext, request.PathUID)
-	if errGetPath != nil {
-		if errors.Is(errGetPath, apperror.ErrRecordNotFound) {
-			log.Printf("Path with UID of %s was not found", request.PathUID)
-			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "PathNotFoundError"}})
+	folderByUID, errGetFolder := secretsSvc.GetFolderByUID(rqContext, request.FolderUID)
+	if errGetFolder != nil {
+		if errors.Is(errGetFolder, apperror.ErrRecordNotFound) {
+			log.Printf("Folder with UID of %s was not found", request.FolderUID)
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "FolderNotFoundError"}})
 			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
 			c.JSON(http.StatusNotFound, response)
 			return
 		}
-		log.Printf("Error fetching path with UID of %s: %s", request.PathUID, errGetPath.Error())
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetPathError"}})
-		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetPath.Error(), Code: 0})
+		log.Printf("Error fetching folder with UID of %s: %s", request.FolderUID, errGetFolder.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetFolder.Error(), Code: 0})
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
-	secretResults, errGetPathSecrets := secretsSvc.GetSecrets(rqContext, secrets2.ListSecretParams{
+	secretResults, errGetFolderSecrets := secretsSvc.GetSecrets(rqContext, secrets2.ListSecretParams{
 		ListParams: generics.ListParams{Deleted: model.No, Pagination: request.Pagination, Order: request.Order},
-		PathIDs:    []uint{pathByUID.ID},
+		FolderIDs:  []uint{folderByUID.ID},
 	})
-	if errGetPathSecrets != nil {
-		log.Printf("Error fetching path secrets: %s", errGetPathSecrets.Error())
+	if errGetFolderSecrets != nil {
+		log.Printf("Error fetching folder secrets: %s", errGetFolderSecrets.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretsError"}})
-		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetPathSecrets.Error(), Code: 0})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetFolderSecrets.Error(), Code: 0})
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
-	pathResults, errGetPathPaths := secretsSvc.GetPaths(rqContext, paths.ListPathParams{
-		ListParams:   generics.ListParams{Deleted: model.No, Pagination: request.Pagination, Order: request.Order},
-		ParentPathID: pathByUID.ID,
+	folderResults, errGetFolderFolders := secretsSvc.GetFolders(rqContext, folders.ListFolderParams{
+		ListParams:     generics.ListParams{Deleted: model.No, Pagination: request.Pagination, Order: request.Order},
+		ParentFolderID: folderByUID.ID,
 	})
 
-	if errGetPathPaths != nil {
-		log.Printf("Error fetching path' paths: %s", errGetPathPaths.Error())
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetPathsError"}})
-		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetPathPaths.Error(), Code: 0})
+	if errGetFolderFolders != nil {
+		log.Printf("Error fetching folder' folders: %s", errGetFolderFolders.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFoldersError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetFolderFolders.Error(), Code: 0})
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
 	for _, secret := range secretResults {
-		secretEntry := Secret{UID: secret.UID, PathUID: pathByUID.UID, Name: secret.Name, Value: secret.Value, Type: secret.Type}
+		secretEntry := Secret{UID: secret.UID, FolderUID: folderByUID.UID, Name: secret.Name, Value: secret.Value, Type: secret.Type}
 		response.Secrets = append(response.Secrets, secretEntry)
 	}
 
-	for _, path := range pathResults {
-		pathEntry := Path{UID: path.UID, Name: path.Name, ParentUID: request.PathUID}
-		response.Paths = append(response.Paths, pathEntry)
+	for _, folder := range folderResults {
+		folderEntry := Folder{UID: folder.UID, Name: folder.Name, ParentUID: request.FolderUID}
+		response.Folders = append(response.Folders, folderEntry)
 	}
 
 	c.JSON(http.StatusOK, response)

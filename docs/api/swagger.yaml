@@ -1,12 +1,11 @@
-basePath: /api/v1
 definitions:
   api_group_secrets.Secret:
     properties:
+      FolderUID:
+        example: /
+        type: string
       Name:
         example: DEBUG
-        type: string
-      PathUID:
-        example: /
         type: string
       Type:
         example: int
@@ -18,7 +17,7 @@ definitions:
         example: Test
         type: string
     type: object
-  ordering.OrderRQ:
+  ordering.Order:
     properties:
       Order:
         example: true
@@ -27,14 +26,17 @@ definitions:
         example: ID
         type: string
     type: object
-  pagination.PaginationRQ:
+  pagination.Pagination:
     properties:
       Page:
-        example: 1
+        minimum: 1
         type: integer
       PerPage:
-        example: 10
+        minimum: 1
         type: integer
+    required:
+    - Page
+    - PerPage
     type: object
   rqrs.Error:
     properties:
@@ -84,43 +86,7 @@ definitions:
         example: 280
         type: integer
     type: object
-  secrets.GetSecretsRQ:
-    properties:
-      Order:
-        items:
-          $ref: '#/definitions/ordering.OrderRQ'
-        type: array
-      Pagination:
-        $ref: '#/definitions/pagination.PaginationRQ'
-      PathUID:
-        example: abc-def-ghi
-        type: string
-    type: object
-  secrets.GetSecretsRS:
-    properties:
-      Errors:
-        items:
-          $ref: '#/definitions/rqrs.Error'
-        type: array
-      Pages:
-        example: 14
-        type: integer
-      Paths:
-        items:
-          $ref: '#/definitions/secrets.Path'
-        type: array
-      PerPage:
-        example: 20
-        type: integer
-      Secrets:
-        items:
-          $ref: '#/definitions/api_group_secrets.Secret'
-        type: array
-      Total:
-        example: 280
-        type: integer
-    type: object
-  secrets.Path:
+  secrets.Folder:
     properties:
       Name:
         example: 'Folder #1'
@@ -131,6 +97,42 @@ definitions:
       UID:
         example: abc-def-ghi
         type: string
+    type: object
+  secrets.GetSecretsRQ:
+    properties:
+      FolderUID:
+        example: abc-def-ghi
+        type: string
+      Order:
+        items:
+          $ref: '#/definitions/ordering.Order'
+        type: array
+      Pagination:
+        $ref: '#/definitions/pagination.Pagination'
+    type: object
+  secrets.GetSecretsRS:
+    properties:
+      Errors:
+        items:
+          $ref: '#/definitions/rqrs.Error'
+        type: array
+      Folders:
+        items:
+          $ref: '#/definitions/secrets.Folder'
+        type: array
+      Pages:
+        example: 14
+        type: integer
+      PerPage:
+        example: 20
+        type: integer
+      Secrets:
+        items:
+          $ref: '#/definitions/api_group_secrets.Secret'
+        type: array
+      Total:
+        example: 280
+        type: integer
     type: object
   secrets.UpdateSecretsRS:
     properties:

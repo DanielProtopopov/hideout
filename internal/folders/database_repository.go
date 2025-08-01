@@ -1,4 +1,4 @@
-package paths
+package folders
 
 import (
 	"context"
@@ -30,8 +30,8 @@ func (m DatabaseRepository) GetID(ctx context.Context) (uint, error) {
 	return id + 1, errScan
 }
 
-func (m DatabaseRepository) Load(ctx context.Context) ([]Path, error) {
-	var results []Path
+func (m DatabaseRepository) Load(ctx context.Context) ([]Folder, error) {
+	var results []Folder
 	errGetRecords := m.conn.Table(TableName).Select([]string{TableName + ".*"}).Find(&results).Error
 	if errGetRecords != nil {
 		return results, errors.Wrap(errGetRecords, "Failed to obtain records in database")
@@ -40,7 +40,7 @@ func (m DatabaseRepository) Load(ctx context.Context) ([]Path, error) {
 	return results, nil
 }
 
-func (m DatabaseRepository) GetMapByID(ctx context.Context, params ListPathParams) (map[uint]*Path, error) {
+func (m DatabaseRepository) GetMapByID(ctx context.Context, params ListFolderParams) (map[uint]*Folder, error) {
 	if m.inMemoryRepository != nil {
 		return m.inMemoryRepository.GetMapByID(ctx, params)
 	}
@@ -50,7 +50,7 @@ func (m DatabaseRepository) GetMapByID(ctx context.Context, params ListPathParam
 		return nil, errGetResults
 	}
 
-	var mapResults = make(map[uint]*Path)
+	var mapResults = make(map[uint]*Folder)
 	for _, result := range results {
 		mapResults[result.ID] = result
 	}
@@ -58,7 +58,7 @@ func (m DatabaseRepository) GetMapByID(ctx context.Context, params ListPathParam
 	return mapResults, nil
 }
 
-func (m DatabaseRepository) GetMapByUID(ctx context.Context, params ListPathParams) (map[string]*Path, error) {
+func (m DatabaseRepository) GetMapByUID(ctx context.Context, params ListFolderParams) (map[string]*Folder, error) {
 	if m.inMemoryRepository != nil {
 		return m.inMemoryRepository.GetMapByUID(ctx, params)
 	}
@@ -68,7 +68,7 @@ func (m DatabaseRepository) GetMapByUID(ctx context.Context, params ListPathPara
 		return nil, errGetResults
 	}
 
-	var mapResults = make(map[string]*Path)
+	var mapResults = make(map[string]*Folder)
 	for _, result := range results {
 		mapResults[result.UID] = result
 	}
@@ -76,12 +76,12 @@ func (m DatabaseRepository) GetMapByUID(ctx context.Context, params ListPathPara
 	return mapResults, nil
 }
 
-func (m DatabaseRepository) Get(ctx context.Context, params ListPathParams) ([]*Path, error) {
+func (m DatabaseRepository) Get(ctx context.Context, params ListFolderParams) ([]*Folder, error) {
 	if m.inMemoryRepository != nil {
 		return m.inMemoryRepository.Get(ctx, params)
 	}
 
-	var results []*Path
+	var results []*Folder
 	Query := m.GetQuery(m.conn, []string{TableName + ".*"}, params)
 	errQuery := Query.Find(&results).Error
 	if errQuery != nil {
@@ -94,12 +94,12 @@ func (m DatabaseRepository) Get(ctx context.Context, params ListPathParams) ([]*
 	return results, nil
 }
 
-func (m DatabaseRepository) GetByID(ctx context.Context, id uint) (*Path, error) {
+func (m DatabaseRepository) GetByID(ctx context.Context, id uint) (*Folder, error) {
 	if m.inMemoryRepository != nil {
 		return m.inMemoryRepository.GetByID(ctx, id)
 	}
 
-	var result Path
+	var result Folder
 	Query := m.conn.Table(TableName).Select([]string{TableName + ".*"}).Where(TableName+".id = ? AND "+TableName+".deleted_at IS NULL", id)
 
 	errQuery := Query.First(&result).Error
@@ -113,12 +113,12 @@ func (m DatabaseRepository) GetByID(ctx context.Context, id uint) (*Path, error)
 	return &result, nil
 }
 
-func (m DatabaseRepository) GetByUID(ctx context.Context, uid string) (*Path, error) {
+func (m DatabaseRepository) GetByUID(ctx context.Context, uid string) (*Folder, error) {
 	if m.inMemoryRepository != nil {
 		return m.inMemoryRepository.GetByUID(ctx, uid)
 	}
 
-	var result Path
+	var result Folder
 	Query := m.conn.Table(TableName).Select([]string{TableName + ".*"}).Where(TableName+".uid = ? AND "+TableName+".deleted_at IS NULL", uid)
 
 	errQuery := Query.First(&result).Error
@@ -132,46 +132,46 @@ func (m DatabaseRepository) GetByUID(ctx context.Context, uid string) (*Path, er
 	return &result, nil
 }
 
-func (m DatabaseRepository) Update(ctx context.Context, path Path) (*Path, error) {
-	var updatedPathEntry = &path
-	errUpdate := m.conn.Table(TableName).Model(&path).Updates(updatedPathEntry).Error
+func (m DatabaseRepository) Update(ctx context.Context, folder Folder) (*Folder, error) {
+	var updatedFolderEntry = &folder
+	errUpdate := m.conn.Table(TableName).Model(&folder).Updates(updatedFolderEntry).Error
 	if errUpdate != nil {
-		return nil, errors.Wrapf(errUpdate, "Error updating path with ID of %d in database", path.ID)
+		return nil, errors.Wrapf(errUpdate, "Error updating folder with ID of %d in database", folder.ID)
 	}
 
 	if m.inMemoryRepository != nil {
-		updatedPath, errUpdatePath := m.inMemoryRepository.Update(ctx, path)
-		if errUpdatePath != nil {
-			return nil, errors.Wrapf(errUpdatePath, "Error updating path with ID of %d in memory", path.ID)
+		updatedFolder, errUpdateFolder := m.inMemoryRepository.Update(ctx, folder)
+		if errUpdateFolder != nil {
+			return nil, errors.Wrapf(errUpdateFolder, "Error updating folder with ID of %d in memory", folder.ID)
 		}
 
-		updatedPathEntry = updatedPath
+		updatedFolderEntry = updatedFolder
 	}
 
-	return updatedPathEntry, nil
+	return updatedFolderEntry, nil
 }
 
-func (m DatabaseRepository) Create(ctx context.Context, path Path) (*Path, error) {
-	var createdPathEntry = &path
-	path.CreatedAt = time.Now()
-	errCreate := m.conn.Table(TableName).Create(&path).Error
+func (m DatabaseRepository) Create(ctx context.Context, folder Folder) (*Folder, error) {
+	var createdFolderEntry = &folder
+	folder.CreatedAt = time.Now()
+	errCreate := m.conn.Table(TableName).Create(&folder).Error
 	if errCreate != nil {
-		return nil, errors.Wrapf(errCreate, "Error creating path with ID of %d in database", path.ID)
+		return nil, errors.Wrapf(errCreate, "Error creating folder with ID of %d in database", folder.ID)
 	}
 
 	if m.inMemoryRepository != nil {
-		newPathEntry, errCreatePath := m.inMemoryRepository.Create(ctx, *createdPathEntry)
-		if errCreatePath != nil {
-			return nil, errors.Wrapf(errCreatePath, "Error creating path with parent path ID of %d and name %s in memory", path.ParentID, path.Name)
+		newFolderEntry, errCreateFolder := m.inMemoryRepository.Create(ctx, *createdFolderEntry)
+		if errCreateFolder != nil {
+			return nil, errors.Wrapf(errCreateFolder, "Error creating folder with parent folder ID of %d and name %s in memory", folder.ParentID, folder.Name)
 		}
 
-		createdPathEntry = newPathEntry
+		createdFolderEntry = newFolderEntry
 	}
 
-	return createdPathEntry, nil
+	return createdFolderEntry, nil
 }
 
-func (m DatabaseRepository) Count(ctx context.Context, params ListPathParams) (uint, error) {
+func (m DatabaseRepository) Count(ctx context.Context, params ListFolderParams) (uint, error) {
 	// These are not needed when performing filtering and counting
 	params.Pagination = pagination.Pagination{PerPage: 0, Page: 0}
 	params.Order = []ordering.Order{}
@@ -188,29 +188,29 @@ func (m DatabaseRepository) Count(ctx context.Context, params ListPathParams) (u
 
 func (m DatabaseRepository) Delete(ctx context.Context, id uint, forceDelete bool) error {
 	if forceDelete {
-		errDelete := m.conn.Table(TableName).Unscoped().Delete(&Path{}, id).Error
+		errDelete := m.conn.Table(TableName).Unscoped().Delete(&Folder{}, id).Error
 		if errDelete != nil {
-			return errors.Wrapf(errDelete, "Error deleting path with ID of %d in database", id)
+			return errors.Wrapf(errDelete, "Error deleting folder with ID of %d in database", id)
 		}
 	} else {
 		errUpdate := m.conn.Table(TableName).Where("id = ?", id).Update("deleted_at",
 			sql.NullTime{Valid: true, Time: time.Now()}).Error
 		if errUpdate != nil {
-			return errors.Wrapf(errUpdate, "Error marking path with ID of %d deleted in database", id)
+			return errors.Wrapf(errUpdate, "Error marking folder with ID of %d deleted in database", id)
 		}
 	}
 
 	if m.inMemoryRepository != nil {
 		errDelete := m.inMemoryRepository.Delete(ctx, id, forceDelete)
 		if errDelete != nil {
-			return errors.Wrapf(errDelete, "Error deleting path with ID of %d in memory", id)
+			return errors.Wrapf(errDelete, "Error deleting folder with ID of %d in memory", id)
 		}
 	}
 
 	return nil
 }
 
-func (m DatabaseRepository) GetQuery(tx *gorm.DB, selectedColumnNames []string, params ListPathParams) (Query *gorm.DB) {
+func (m DatabaseRepository) GetQuery(tx *gorm.DB, selectedColumnNames []string, params ListFolderParams) (Query *gorm.DB) {
 	conn := m.conn
 	if tx != nil {
 		conn = tx

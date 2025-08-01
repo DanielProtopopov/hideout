@@ -94,9 +94,9 @@ func (m DatabaseRepository) Get(ctx context.Context, params ListSecretParams) ([
 	return results, nil
 }
 
-func (m DatabaseRepository) GetMapByPath(ctx context.Context, params ListSecretParams) (map[uint][]*Secret, error) {
+func (m DatabaseRepository) GetMapByFolder(ctx context.Context, params ListSecretParams) (map[uint][]*Secret, error) {
 	if m.inMemoryRepository != nil {
-		return m.inMemoryRepository.GetMapByPath(ctx, params)
+		return m.inMemoryRepository.GetMapByFolder(ctx, params)
 	}
 
 	results, errGetResults := m.Get(ctx, params)
@@ -106,12 +106,12 @@ func (m DatabaseRepository) GetMapByPath(ctx context.Context, params ListSecretP
 
 	var mapResults = make(map[uint][]*Secret)
 	for _, secret := range results {
-		secretsInPath, secretExists := mapResults[secret.PathID]
+		secretsInFolder, secretExists := mapResults[secret.FolderID]
 		if !secretExists {
-			secretsInPath = []*Secret{}
+			secretsInFolder = []*Secret{}
 		}
-		secretsInPath = append(secretsInPath, secret)
-		mapResults[secret.PathID] = secretsInPath
+		secretsInFolder = append(secretsInFolder, secret)
+		mapResults[secret.FolderID] = secretsInFolder
 	}
 
 	return mapResults, nil
@@ -185,7 +185,7 @@ func (m DatabaseRepository) Create(ctx context.Context, secret Secret) (*Secret,
 	if m.inMemoryRepository != nil {
 		newSecretEntry, errCreateSecret := m.inMemoryRepository.Create(ctx, *createdSecretEntry)
 		if errCreateSecret != nil {
-			return nil, errors.Wrapf(errCreateSecret, "Error creating secret with parent path ID of %d and name %s in memory", secret.PathID, secret.Name)
+			return nil, errors.Wrapf(errCreateSecret, "Error creating secret with parent folder ID of %d and name %s in memory", secret.FolderID, secret.Name)
 		}
 
 		createdSecretEntry = newSecretEntry

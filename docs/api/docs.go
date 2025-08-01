@@ -278,13 +278,13 @@ const docTemplate = `{
         "api_group_secrets.Secret": {
             "type": "object",
             "properties": {
+                "FolderUID": {
+                    "type": "string",
+                    "example": "/"
+                },
                 "Name": {
                     "type": "string",
                     "example": "DEBUG"
-                },
-                "PathUID": {
-                    "type": "string",
-                    "example": "/"
                 },
                 "Type": {
                     "type": "string",
@@ -300,7 +300,7 @@ const docTemplate = `{
                 }
             }
         },
-        "ordering.OrderRQ": {
+        "ordering.Order": {
             "type": "object",
             "properties": {
                 "Order": {
@@ -313,16 +313,20 @@ const docTemplate = `{
                 }
             }
         },
-        "pagination.PaginationRQ": {
+        "pagination.Pagination": {
             "type": "object",
+            "required": [
+                "Page",
+                "PerPage"
+            ],
             "properties": {
                 "Page": {
                     "type": "integer",
-                    "example": 1
+                    "minimum": 1
                 },
                 "PerPage": {
                     "type": "integer",
-                    "example": 10
+                    "minimum": 1
                 }
             }
         },
@@ -395,21 +399,38 @@ const docTemplate = `{
                 }
             }
         },
+        "secrets.Folder": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "type": "string",
+                    "example": "Folder #1"
+                },
+                "ParentUID": {
+                    "type": "string",
+                    "example": "abc-def-ghi"
+                },
+                "UID": {
+                    "type": "string",
+                    "example": "abc-def-ghi"
+                }
+            }
+        },
         "secrets.GetSecretsRQ": {
             "type": "object",
             "properties": {
+                "FolderUID": {
+                    "type": "string",
+                    "example": "abc-def-ghi"
+                },
                 "Order": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ordering.OrderRQ"
+                        "$ref": "#/definitions/ordering.Order"
                     }
                 },
                 "Pagination": {
-                    "$ref": "#/definitions/pagination.PaginationRQ"
-                },
-                "PathUID": {
-                    "type": "string",
-                    "example": "abc-def-ghi"
+                    "$ref": "#/definitions/pagination.Pagination"
                 }
             }
         },
@@ -422,15 +443,15 @@ const docTemplate = `{
                         "$ref": "#/definitions/rqrs.Error"
                     }
                 },
+                "Folders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/secrets.Folder"
+                    }
+                },
                 "Pages": {
                     "type": "integer",
                     "example": 14
-                },
-                "Paths": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/secrets.Path"
-                    }
                 },
                 "PerPage": {
                     "type": "integer",
@@ -445,23 +466,6 @@ const docTemplate = `{
                 "Total": {
                     "type": "integer",
                     "example": 280
-                }
-            }
-        },
-        "secrets.Path": {
-            "type": "object",
-            "properties": {
-                "Name": {
-                    "type": "string",
-                    "example": "Folder #1"
-                },
-                "ParentUID": {
-                    "type": "string",
-                    "example": "abc-def-ghi"
-                },
-                "UID": {
-                    "type": "string",
-                    "example": "abc-def-ghi"
                 }
             }
         },
@@ -509,7 +513,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "api.hideout.local",
-	BasePath:         "/api/v1",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Hideout API",
 	Description:      "API for working with secrets",

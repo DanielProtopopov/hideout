@@ -140,9 +140,9 @@ func (m RedisRepository) Get(ctx context.Context, params ListSecretParams) ([]*S
 	return inMemoryRepository.Get(ctx, params)
 }
 
-func (m RedisRepository) GetMapByPath(ctx context.Context, params ListSecretParams) (map[uint][]*Secret, error) {
+func (m RedisRepository) GetMapByFolder(ctx context.Context, params ListSecretParams) (map[uint][]*Secret, error) {
 	if m.inMemoryRepository != nil {
-		return m.inMemoryRepository.GetMapByPath(ctx, params)
+		return m.inMemoryRepository.GetMapByFolder(ctx, params)
 	}
 
 	return nil, apperror.ErrNotImplemented
@@ -211,26 +211,26 @@ func (m RedisRepository) Update(ctx context.Context, secret Secret) (*Secret, er
 }
 
 func (m RedisRepository) Create(ctx context.Context, secret Secret) (*Secret, error) {
-	var createdPathEntry = &secret
-	createdSecretVal, errMarshal := json.Marshal(createdPathEntry)
+	var createdFolderEntry = &secret
+	createdSecretVal, errMarshal := json.Marshal(createdFolderEntry)
 	if errMarshal != nil {
-		return nil, errors.Wrapf(errMarshal, "Error serializing secret with ID of %d and name %s", createdPathEntry.ID, createdPathEntry.Name)
+		return nil, errors.Wrapf(errMarshal, "Error serializing secret with ID of %d and name %s", createdFolderEntry.ID, createdFolderEntry.Name)
 	}
-	_, errCreate := m.conn.Set(ctx, fmt.Sprintf("secret:%d", createdPathEntry.ID), createdSecretVal, 0).Result()
+	_, errCreate := m.conn.Set(ctx, fmt.Sprintf("secret:%d", createdFolderEntry.ID), createdSecretVal, 0).Result()
 	if errCreate != nil && !errors.Is(errCreate, redis.Nil) {
-		return nil, errors.Wrapf(errCreate, "Error creating secret with ID of %d in Redis", createdPathEntry.ID)
+		return nil, errors.Wrapf(errCreate, "Error creating secret with ID of %d in Redis", createdFolderEntry.ID)
 	}
 
 	if m.inMemoryRepository != nil {
 		newSecret, errCreateSecret := m.inMemoryRepository.Create(ctx, secret)
 		if errCreateSecret != nil {
-			return nil, errors.Wrapf(errCreateSecret, "Error creating secret with path ID of %d and name %s in memory", secret.PathID, secret.Name)
+			return nil, errors.Wrapf(errCreateSecret, "Error creating secret with folder ID of %d and name %s in memory", secret.FolderID, secret.Name)
 		}
 
-		createdPathEntry = newSecret
+		createdFolderEntry = newSecret
 	}
 
-	return createdPathEntry, nil
+	return createdFolderEntry, nil
 }
 
 func (m RedisRepository) Count(ctx context.Context, params ListSecretParams) (uint, error) {

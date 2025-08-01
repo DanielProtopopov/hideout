@@ -24,7 +24,7 @@ import (
 // @license.name Private
 
 // @host api.hideout.local
-// @BasePath /api/v1
+// @BaseFolder /api/v1
 // @query.collection.format multi
 
 // @securityDefinitions.apikey ApiKeyAuth

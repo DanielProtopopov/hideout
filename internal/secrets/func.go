@@ -65,10 +65,10 @@ func (params ListSecretParams) DatabaseOrder(TableName string, Query *gorm.DB, O
 func (params ListSecretParams) Apply(data map[string][]*Secret) (results map[string][]*Secret) {
 	if len(params.IDs) != 0 {
 		idResults := make(map[string][]*Secret)
-		for pathVal, secretsEntry := range data {
+		for folderVal, secretsEntry := range data {
 			for _, secret := range secretsEntry {
 				if slices.Index(params.IDs, secret.ID) != -1 {
-					idResults[pathVal] = append(idResults[pathVal], secret)
+					idResults[folderVal] = append(idResults[folderVal], secret)
 				}
 			}
 		}
@@ -79,10 +79,10 @@ func (params ListSecretParams) Apply(data map[string][]*Secret) (results map[str
 
 	if len(params.UIDs) != 0 {
 		uidResults := make(map[string][]*Secret)
-		for pathVal, secretsEntry := range data {
+		for folderVal, secretsEntry := range data {
 			for _, secret := range secretsEntry {
 				if slices.Index(params.UIDs, secret.UID) != -1 {
-					uidResults[pathVal] = append(uidResults[pathVal], secret)
+					uidResults[folderVal] = append(uidResults[folderVal], secret)
 				}
 			}
 		}

@@ -1,4 +1,4 @@
-package paths
+package folders
 
 import (
 	"context"
@@ -29,26 +29,26 @@ func (m RedisRepository) GetID(ctx context.Context) (uint, error) {
 		return m.inMemoryRepository.GetID(ctx)
 	}
 
-	paths, errLoadPaths := m.Load(ctx)
-	if errLoadPaths != nil {
-		return 0, errors.Wrap(errLoadPaths, "Failed to load paths from Redis")
+	folders, errLoadFolders := m.Load(ctx)
+	if errLoadFolders != nil {
+		return 0, errors.Wrap(errLoadFolders, "Failed to load folders from Redis")
 	}
 
 	var maxID = uint(0)
-	for _, path := range paths {
-		if path.ID >= maxID {
-			maxID = path.ID
+	for _, folder := range folders {
+		if folder.ID >= maxID {
+			maxID = folder.ID
 		}
 	}
 
 	return maxID, nil
 }
 
-func (m RedisRepository) Load(ctx context.Context) ([]Path, error) {
-	pattern := "path:*"
+func (m RedisRepository) Load(ctx context.Context) ([]Folder, error) {
+	pattern := "folder:*"
 	iter := m.conn.Scan(ctx, 0, pattern, 0).Iterator()
 	var keys []string
-	var results []Path
+	var results []Folder
 	for iter.Next(ctx) {
 		keys = append(keys, iter.Val())
 	}
@@ -59,11 +59,11 @@ func (m RedisRepository) Load(ctx context.Context) ([]Path, error) {
 	}
 	for i, _ := range values {
 		if values[i] != nil {
-			var result = Path{}
+			var result = Folder{}
 			var resultString = values[i].(string)
 			errUnmarshal := json.Unmarshal([]byte(resultString), &result)
 			if errUnmarshal != nil {
-				return nil, errors.Wrapf(errUnmarshal, "Failed to unmarshal path data in Redis")
+				return nil, errors.Wrapf(errUnmarshal, "Failed to unmarshal folder data in Redis")
 			}
 			results = append(results, result)
 		}
@@ -71,7 +71,7 @@ func (m RedisRepository) Load(ctx context.Context) ([]Path, error) {
 	return results, nil
 }
 
-func (m RedisRepository) GetMapByID(ctx context.Context, params ListPathParams) (map[uint]*Path, error) {
+func (m RedisRepository) GetMapByID(ctx context.Context, params ListFolderParams) (map[uint]*Folder, error) {
 	if m.inMemoryRepository != nil {
 		return m.inMemoryRepository.GetMapByID(ctx, params)
 	}
@@ -81,7 +81,7 @@ func (m RedisRepository) GetMapByID(ctx context.Context, params ListPathParams) 
 		return nil, errGetResults
 	}
 
-	resultsMap := make(map[uint]*Path)
+	resultsMap := make(map[uint]*Folder)
 	for _, result := range results {
 		resultsMap[result.ID] = result
 	}
@@ -89,7 +89,7 @@ func (m RedisRepository) GetMapByID(ctx context.Context, params ListPathParams) 
 	return resultsMap, nil
 }
 
-func (m RedisRepository) GetMapByUID(ctx context.Context, params ListPathParams) (map[string]*Path, error) {
+func (m RedisRepository) GetMapByUID(ctx context.Context, params ListFolderParams) (map[string]*Folder, error) {
 	if m.inMemoryRepository != nil {
 		return m.inMemoryRepository.GetMapByUID(ctx, params)
 	}
@@ -99,7 +99,7 @@ func (m RedisRepository) GetMapByUID(ctx context.Context, params ListPathParams)
 		return nil, errGetResults
 	}
 
-	resultsMap := make(map[string]*Path)
+	resultsMap := make(map[string]*Folder)
 	for _, result := range results {
 		resultsMap[result.UID] = result
 	}
@@ -107,15 +107,15 @@ func (m RedisRepository) GetMapByUID(ctx context.Context, params ListPathParams)
 	return resultsMap, nil
 }
 
-func (m RedisRepository) Get(ctx context.Context, params ListPathParams) ([]*Path, error) {
+func (m RedisRepository) Get(ctx context.Context, params ListFolderParams) ([]*Folder, error) {
 	if m.inMemoryRepository != nil {
 		return m.inMemoryRepository.Get(ctx, params)
 	}
 
-	pattern := "path:*"
+	pattern := "folder:*"
 	iter := m.conn.Scan(ctx, 0, pattern, 0).Iterator()
 	var keys []string
-	var results []Path
+	var results []Folder
 	for iter.Next(ctx) {
 		keys = append(keys, iter.Val())
 	}
@@ -126,11 +126,11 @@ func (m RedisRepository) Get(ctx context.Context, params ListPathParams) ([]*Pat
 	}
 	for i, _ := range values {
 		if values[i] != nil {
-			var result Path
+			var result Folder
 			var resultString = values[i].(string)
 			errUnmarshal := json.Unmarshal([]byte(resultString), &result)
 			if errUnmarshal != nil {
-				return nil, errors.Wrapf(errUnmarshal, "Failed to unmarshal path data in Redis")
+				return nil, errors.Wrapf(errUnmarshal, "Failed to unmarshal folder data in Redis")
 			}
 			results = append(results, result)
 		}
@@ -140,12 +140,12 @@ func (m RedisRepository) Get(ctx context.Context, params ListPathParams) ([]*Pat
 	return inMemoryRepository.Get(ctx, params)
 }
 
-func (m RedisRepository) GetByID(ctx context.Context, id uint) (*Path, error) {
+func (m RedisRepository) GetByID(ctx context.Context, id uint) (*Folder, error) {
 	if m.inMemoryRepository != nil {
 		return m.inMemoryRepository.GetByID(ctx, id)
 	}
 
-	resultsMap, errGetResults := m.GetMapByID(ctx, ListPathParams{ListParams: generics.ListParams{IDs: []uint{id}, Deleted: model.No}})
+	resultsMap, errGetResults := m.GetMapByID(ctx, ListFolderParams{ListParams: generics.ListParams{IDs: []uint{id}, Deleted: model.No}})
 	if errGetResults != nil {
 		return nil, errGetResults
 	}
@@ -158,12 +158,12 @@ func (m RedisRepository) GetByID(ctx context.Context, id uint) (*Path, error) {
 	return result, nil
 }
 
-func (m RedisRepository) GetByUID(ctx context.Context, uid string) (*Path, error) {
+func (m RedisRepository) GetByUID(ctx context.Context, uid string) (*Folder, error) {
 	if m.inMemoryRepository != nil {
 		return m.inMemoryRepository.GetByUID(ctx, uid)
 	}
 
-	resultsMap, errGetResults := m.GetMapByUID(ctx, ListPathParams{ListParams: generics.ListParams{UIDs: []string{uid}, Deleted: model.No}})
+	resultsMap, errGetResults := m.GetMapByUID(ctx, ListFolderParams{ListParams: generics.ListParams{UIDs: []string{uid}, Deleted: model.No}})
 	if errGetResults != nil {
 		return nil, errGetResults
 	}
@@ -176,52 +176,52 @@ func (m RedisRepository) GetByUID(ctx context.Context, uid string) (*Path, error
 	return result, nil
 }
 
-func (m RedisRepository) Update(ctx context.Context, path Path) (*Path, error) {
-	var updatedPathEntry = &path
-	updatedPathVal, errMarshal := json.Marshal(updatedPathEntry)
+func (m RedisRepository) Update(ctx context.Context, folder Folder) (*Folder, error) {
+	var updatedFolderEntry = &folder
+	updatedFolderVal, errMarshal := json.Marshal(updatedFolderEntry)
 	if errMarshal != nil {
-		return nil, errors.Wrapf(errMarshal, "Error serializing path with ID of %d and name %s", updatedPathEntry.ID, path.Name)
+		return nil, errors.Wrapf(errMarshal, "Error serializing folder with ID of %d and name %s", updatedFolderEntry.ID, folder.Name)
 	}
-	_, errUpdate := m.conn.Set(ctx, fmt.Sprintf("path:%d", path.ID), updatedPathVal, 0).Result()
+	_, errUpdate := m.conn.Set(ctx, fmt.Sprintf("folder:%d", folder.ID), updatedFolderVal, 0).Result()
 	if errUpdate != nil && !errors.Is(errUpdate, redis.Nil) {
-		return nil, errors.Wrapf(errUpdate, "Error updating path with ID of %d in Redis", path.ID)
+		return nil, errors.Wrapf(errUpdate, "Error updating folder with ID of %d in Redis", folder.ID)
 	}
 
 	if m.inMemoryRepository != nil {
-		updatedPath, errUpdatePath := m.inMemoryRepository.Update(ctx, *updatedPathEntry)
-		if errUpdatePath != nil {
-			return nil, errors.Wrapf(errUpdatePath, "Error updating path with ID of %d and name %s in memory", path.ID, path.Name)
+		updatedFolder, errUpdateFolder := m.inMemoryRepository.Update(ctx, *updatedFolderEntry)
+		if errUpdateFolder != nil {
+			return nil, errors.Wrapf(errUpdateFolder, "Error updating folder with ID of %d and name %s in memory", folder.ID, folder.Name)
 		}
 
-		updatedPathEntry = updatedPath
+		updatedFolderEntry = updatedFolder
 	}
 
-	return updatedPathEntry, nil
+	return updatedFolderEntry, nil
 }
 
-func (m RedisRepository) Create(ctx context.Context, path Path) (*Path, error) {
-	var createdPathEntry = &path
-	newPathVal, errMarshal := json.Marshal(createdPathEntry)
+func (m RedisRepository) Create(ctx context.Context, folder Folder) (*Folder, error) {
+	var createdFolderEntry = &folder
+	newFolderVal, errMarshal := json.Marshal(createdFolderEntry)
 	if errMarshal != nil {
-		return nil, errors.Wrapf(errMarshal, "Error serializing path with ID of %d and name %s", createdPathEntry.ID, createdPathEntry.Name)
+		return nil, errors.Wrapf(errMarshal, "Error serializing folder with ID of %d and name %s", createdFolderEntry.ID, createdFolderEntry.Name)
 	}
-	_, errCreate := m.conn.Set(ctx, fmt.Sprintf("path:%d", createdPathEntry.ID), newPathVal, 0).Result()
+	_, errCreate := m.conn.Set(ctx, fmt.Sprintf("folder:%d", createdFolderEntry.ID), newFolderVal, 0).Result()
 	if errCreate != nil && !errors.Is(errCreate, redis.Nil) {
-		return nil, errors.Wrapf(errCreate, "Error creating path with ID of %d in memory", createdPathEntry.ID)
+		return nil, errors.Wrapf(errCreate, "Error creating folder with ID of %d in memory", createdFolderEntry.ID)
 	}
 
 	if m.inMemoryRepository != nil {
-		newPath, errCreatePath := m.inMemoryRepository.Create(ctx, *createdPathEntry)
-		if errCreatePath != nil {
-			return nil, errors.Wrapf(errCreatePath, "Error creating path with parent ID of %d and name %s in memory", path.ParentID, path.Name)
+		newFolder, errCreateFolder := m.inMemoryRepository.Create(ctx, *createdFolderEntry)
+		if errCreateFolder != nil {
+			return nil, errors.Wrapf(errCreateFolder, "Error creating folder with parent ID of %d and name %s in memory", folder.ParentID, folder.Name)
 		}
-		createdPathEntry = newPath
+		createdFolderEntry = newFolder
 	}
 
-	return createdPathEntry, nil
+	return createdFolderEntry, nil
 }
 
-func (m RedisRepository) Count(ctx context.Context, params ListPathParams) (uint, error) {
+func (m RedisRepository) Count(ctx context.Context, params ListFolderParams) (uint, error) {
 	// These are not needed when performing filtering and counting
 	params.Pagination = pagination.Pagination{PerPage: 0, Page: 0}
 	params.Order = []ordering.Order{}
@@ -240,21 +240,21 @@ func (m RedisRepository) Count(ctx context.Context, params ListPathParams) (uint
 
 func (m RedisRepository) Delete(ctx context.Context, id uint, forceDelete bool) error {
 	if forceDelete {
-		_, errDelete := m.conn.Del(ctx, fmt.Sprintf("path:%d", id)).Result()
+		_, errDelete := m.conn.Del(ctx, fmt.Sprintf("folder:%d", id)).Result()
 		if errDelete != nil && !errors.Is(errDelete, redis.Nil) {
-			return errors.Wrapf(errDelete, "Error deleting path with ID of %d in Redis", id)
+			return errors.Wrapf(errDelete, "Error deleting folder with ID of %d in Redis", id)
 		}
 	} else {
-		existingPath, errGetPath := m.GetByID(ctx, id)
-		if errGetPath != nil {
-			return errors.Wrapf(errGetPath, "Failed to retrieve path with ID of %d in Redis", id)
+		existingFolder, errGetFolder := m.GetByID(ctx, id)
+		if errGetFolder != nil {
+			return errors.Wrapf(errGetFolder, "Failed to retrieve folder with ID of %d in Redis", id)
 		}
-		existingPath.DeletedAt = sql.NullTime{Time: time.Now(), Valid: true}
-		updatedPathVal, errMarshal := json.Marshal(existingPath)
+		existingFolder.DeletedAt = sql.NullTime{Time: time.Now(), Valid: true}
+		updatedFolderVal, errMarshal := json.Marshal(existingFolder)
 		if errMarshal != nil {
-			return errors.Wrapf(errMarshal, "Error serializing path with ID of %d and name %s", existingPath.ID, existingPath.Name)
+			return errors.Wrapf(errMarshal, "Error serializing folder with ID of %d and name %s", existingFolder.ID, existingFolder.Name)
 		}
-		_, errUpdate := m.conn.Set(ctx, fmt.Sprintf("path:%d", id), updatedPathVal, 0).Result()
+		_, errUpdate := m.conn.Set(ctx, fmt.Sprintf("folder:%d", id), updatedFolderVal, 0).Result()
 		if errUpdate != nil {
 			return errors.Wrapf(errUpdate, "Failed to update soft-deleted record in Redis")
 		}

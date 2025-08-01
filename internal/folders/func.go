@@ -1,4 +1,4 @@
-package paths
+package folders
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func (params ListPathParams) DatabaseFilter(TableName string, Query *gorm.DB) *gorm.DB {
+func (params ListFolderParams) DatabaseFilter(TableName string, Query *gorm.DB) *gorm.DB {
 	if len(params.IDs) != 0 {
 		Query = Query.Where(TableName+".id IN (?)", params.IDs)
 	}
@@ -46,7 +46,7 @@ func (params ListPathParams) DatabaseFilter(TableName string, Query *gorm.DB) *g
 	return Query
 }
 
-func (params ListPathParams) DatabaseOrder(TableName string, Query *gorm.DB, OrderMap map[string]string) *gorm.DB {
+func (params ListFolderParams) DatabaseOrder(TableName string, Query *gorm.DB, OrderMap map[string]string) *gorm.DB {
 	var results []string
 	for _, order := range params.Order {
 		orderDirectionVal := "desc"
@@ -62,13 +62,13 @@ func (params ListPathParams) DatabaseOrder(TableName string, Query *gorm.DB, Ord
 	return Query.Order(strings.Join(results, ", "))
 }
 
-func (params ListPathParams) Apply(data map[string][]*Path) (results map[string][]*Path) {
+func (params ListFolderParams) Apply(data map[string][]*Folder) (results map[string][]*Folder) {
 	if len(params.IDs) != 0 {
-		idResults := make(map[string][]*Path)
-		for pathVal, pathsEntry := range data {
-			for _, path := range pathsEntry {
-				if slices.Index(params.IDs, path.ID) != -1 {
-					idResults[pathVal] = append(idResults[pathVal], path)
+		idResults := make(map[string][]*Folder)
+		for folderVal, foldersEntry := range data {
+			for _, folder := range foldersEntry {
+				if slices.Index(params.IDs, folder.ID) != -1 {
+					idResults[folderVal] = append(idResults[folderVal], folder)
 				}
 			}
 		}
@@ -78,11 +78,11 @@ func (params ListPathParams) Apply(data map[string][]*Path) (results map[string]
 	}
 
 	if len(params.UIDs) != 0 {
-		uidResults := make(map[string][]*Path)
-		for pathVal, pathsEntry := range data {
-			for _, path := range pathsEntry {
-				if slices.Index(params.UIDs, path.UID) != -1 {
-					uidResults[pathVal] = append(uidResults[pathVal], path)
+		uidResults := make(map[string][]*Folder)
+		for folderVal, foldersEntry := range data {
+			for _, folder := range foldersEntry {
+				if slices.Index(params.UIDs, folder.UID) != -1 {
+					uidResults[folderVal] = append(uidResults[folderVal], folder)
 				}
 			}
 		}
@@ -92,11 +92,11 @@ func (params ListPathParams) Apply(data map[string][]*Path) (results map[string]
 	return results
 }
 
-type lessFunc func(p1, p2 *Path) bool
+type lessFunc func(p1, p2 *Folder) bool
 
 // Sort sorts the argument slice according to the less functions passed to OrderedBy.
-func (ms *multiSorter) Sort(paths []*Path) {
-	ms.paths = paths
+func (ms *multiSorter) Sort(folders []*Folder) {
+	ms.folders = folders
 	sort.Sort(ms)
 }
 
@@ -110,12 +110,12 @@ func OrderedBy(less ...lessFunc) *multiSorter {
 
 // Len is part of sort.Interface.
 func (ms *multiSorter) Len() int {
-	return len(ms.paths)
+	return len(ms.folders)
 }
 
 // Swap is part of sort.Interface.
 func (ms *multiSorter) Swap(i, j int) {
-	ms.paths[i], ms.paths[j] = ms.paths[j], ms.paths[i]
+	ms.folders[i], ms.folders[j] = ms.folders[j], ms.folders[i]
 }
 
 // Less is part of sort.Interface. It is implemented by looping along the
@@ -125,7 +125,7 @@ func (ms *multiSorter) Swap(i, j int) {
 // -1, 0, 1 and reduce the number of calls for greater efficiency: an
 // exercise for the reader.
 func (ms *multiSorter) Less(i, j int) bool {
-	p, q := ms.paths[i], ms.paths[j]
+	p, q := ms.folders[i], ms.folders[j]
 	// Try all but the last comparison.
 	var k int
 	for k = 0; k < len(ms.less)-1; k++ {

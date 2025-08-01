@@ -7,7 +7,7 @@ import (
 	"hideout/api"
 	apiconfig "hideout/cmd/api/config"
 	"hideout/internal/common/model"
-	"hideout/internal/paths"
+	"hideout/internal/folders"
 	secrets2 "hideout/internal/secrets"
 	"hideout/services/secrets"
 	"hideout/structs"
@@ -34,7 +34,7 @@ func main() {
 		}
 	}()
 
-	secretsSvc, errCreateService := secrets.NewService(ctx, apiconfig.Settings.Repository, &structs.Paths, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(ctx, apiconfig.Settings.Repository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Fatal(errCreateService)
 	}
@@ -46,18 +46,18 @@ func main() {
 		}
 	}
 
-	rootPath, _ := secretsSvc.CreatePath(ctx, paths.Path{Model: model.Model{ID: 0}, Name: ""})
-	testPath, _ := secretsSvc.CreatePath(ctx, paths.Path{ParentID: rootPath.ID, Name: "test"})
+	rootFolder, _ := secretsSvc.CreateFolder(ctx, folders.Folder{Model: model.Model{ID: 0}, Name: ""})
+	testFolder, _ := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "test"})
 
-	anotherTestPath, _ := secretsSvc.CreatePath(ctx, paths.Path{ParentID: rootPath.ID, Name: "another-test"})
-	yetAnotherTestPath, _ := secretsSvc.CreatePath(ctx, paths.Path{ParentID: rootPath.ID, Name: "yet-another-test"})
+	anotherTestFolder, _ := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "another-test"})
+	yetAnotherTestFolder, _ := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "yet-another-test"})
 
-	rootSecret, _ := secretsSvc.CreateSecret(ctx, secrets2.Secret{PathID: rootPath.ID, Name: "Root secret", Value: "123", Type: "integer"})
-	_, _ = secretsSvc.CreateSecret(ctx, secrets2.Secret{PathID: testPath.ID, Name: "Secret #1", Value: "123", Type: "integer"})
-	_, _ = secretsSvc.CreateSecret(ctx, secrets2.Secret{PathID: testPath.ID, Name: "Secret #2", Value: "456", Type: "integer"})
-	_, _ = secretsSvc.CreateSecret(ctx, secrets2.Secret{PathID: testPath.ID, Name: "Secret #3", Value: "789", Type: "integer"})
+	rootSecret, _ := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: rootFolder.ID, Name: "Root secret", Value: "123", Type: "integer"})
+	_, _ = secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #1", Value: "123", Type: "integer"})
+	_, _ = secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #2", Value: "456", Type: "integer"})
+	_, _ = secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #3", Value: "789", Type: "integer"})
 
-	tree, errGetTree := secretsSvc.Tree(ctx, rootPath.ID)
+	tree, errGetTree := secretsSvc.Tree(ctx, rootFolder.ID)
 	if errGetTree != nil {
 		log.Fatal(errGetTree)
 	}
@@ -68,13 +68,13 @@ func main() {
 	}
 	log.Println(string(jsonResult))
 
-	_, _, errCopy := secretsSvc.Copy(ctx, []*paths.Path{testPath}, []*secrets2.Secret{rootSecret},
-		rootPath.ID, anotherTestPath.ID)
+	_, _, errCopy := secretsSvc.Copy(ctx, []*folders.Folder{testFolder}, []*secrets2.Secret{rootSecret},
+		rootFolder.ID, anotherTestFolder.ID)
 	if errCopy != nil {
 		log.Fatal(errCopy)
 	}
 
-	tree, errGetTree = secretsSvc.Tree(ctx, rootPath.ID)
+	tree, errGetTree = secretsSvc.Tree(ctx, rootFolder.ID)
 	if errGetTree != nil {
 		log.Fatal(errGetTree)
 	}
@@ -85,13 +85,13 @@ func main() {
 	}
 	log.Println(string(jsonResult))
 
-	_, _, errCopy = secretsSvc.Copy(ctx, []*paths.Path{anotherTestPath, testPath}, []*secrets2.Secret{rootSecret},
-		rootPath.ID, yetAnotherTestPath.ID)
+	_, _, errCopy = secretsSvc.Copy(ctx, []*folders.Folder{anotherTestFolder, testFolder}, []*secrets2.Secret{rootSecret},
+		rootFolder.ID, yetAnotherTestFolder.ID)
 	if errCopy != nil {
 		log.Fatal(errCopy)
 	}
 
-	tree, errGetTree = secretsSvc.Tree(ctx, rootPath.ID)
+	tree, errGetTree = secretsSvc.Tree(ctx, rootFolder.ID)
 	if errGetTree != nil {
 		log.Fatal(errGetTree)
 	}
@@ -102,12 +102,12 @@ func main() {
 	}
 	log.Println(string(jsonResult))
 
-	_, _, errDelete := secretsSvc.Delete(ctx, []*paths.Path{anotherTestPath}, nil, rootPath.ID, false)
+	_, _, errDelete := secretsSvc.Delete(ctx, []*folders.Folder{anotherTestFolder}, nil, rootFolder.ID, false)
 	if errDelete != nil {
 		log.Fatal(errDelete)
 	}
 
-	tree, errGetTree = secretsSvc.Tree(ctx, rootPath.ID)
+	tree, errGetTree = secretsSvc.Tree(ctx, rootFolder.ID)
 	if errGetTree != nil {
 		log.Fatal(errGetTree)
 	}
