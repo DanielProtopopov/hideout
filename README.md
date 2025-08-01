@@ -147,7 +147,7 @@ _For more examples, please refer to the [Documentation](https://github.com/Danie
 ## Roadmap
 
 - [X] Add in-memory storage adapter
-- [X] Add copy-paste secrets & paths mechanism
+- [X] Add copy-paste secrets & folders mechanism
 - [X] Add redis storage adapter
 - [X] Add database storage adapter
 - [ ] Add file storage adapter
