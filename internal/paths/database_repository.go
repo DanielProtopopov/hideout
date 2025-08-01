@@ -99,10 +99,10 @@ func (m DatabaseRepository) GetByID(ctx context.Context, id uint) (*Path, error)
 		return m.inMemoryRepository.GetByID(ctx, id)
 	}
 
-	var result *Path
+	var result Path
 	Query := m.conn.Table(TableName).Select([]string{TableName + ".*"}).Where(TableName+".id = ? AND "+TableName+".deleted_at IS NULL", id)
 
-	errQuery := Query.First(result).Error
+	errQuery := Query.First(&result).Error
 	if errQuery != nil {
 		if errors.Is(errQuery, gorm.ErrRecordNotFound) {
 			return nil, apperror.ErrRecordNotFound
@@ -110,7 +110,7 @@ func (m DatabaseRepository) GetByID(ctx context.Context, id uint) (*Path, error)
 		return nil, errQuery
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 func (m DatabaseRepository) GetByUID(ctx context.Context, uid string) (*Path, error) {
@@ -118,10 +118,10 @@ func (m DatabaseRepository) GetByUID(ctx context.Context, uid string) (*Path, er
 		return m.inMemoryRepository.GetByUID(ctx, uid)
 	}
 
-	var result *Path
+	var result Path
 	Query := m.conn.Table(TableName).Select([]string{TableName + ".*"}).Where(TableName+".uid = ? AND "+TableName+".deleted_at IS NULL", uid)
 
-	errQuery := Query.First(result).Error
+	errQuery := Query.First(&result).Error
 	if errQuery != nil {
 		if errors.Is(errQuery, gorm.ErrRecordNotFound) {
 			return nil, apperror.ErrRecordNotFound
@@ -129,7 +129,7 @@ func (m DatabaseRepository) GetByUID(ctx context.Context, uid string) (*Path, er
 		return nil, errQuery
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 func (m DatabaseRepository) Update(ctx context.Context, path Path) (*Path, error) {

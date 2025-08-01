@@ -5,7 +5,6 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/pkg/errors"
 	"hideout/config"
-	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
 	"hideout/internal/paths"
 	"hideout/internal/secrets"
@@ -109,44 +108,6 @@ func (s *SecretsService) Load(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func (s *SecretsService) GetPathByUID(ctx context.Context, pathUID string) (*paths.Path, error) {
-	return s.pathsRepository.GetByUID(ctx, pathUID)
-}
-
-func (s *SecretsService) GetPaths(ctx context.Context, pathID uint) ([]*paths.Path, error) {
-	return s.pathsRepository.Get(ctx, paths.ListPathParams{
-		ListParams: generics.ListParams{Deleted: model.No}, ParentPathID: pathID,
-	})
-}
-
-func (s *SecretsService) GetSecrets(ctx context.Context, pathID uint) ([]*secrets.Secret, error) {
-	return s.secretsRepository.Get(ctx, secrets.ListSecretParams{
-		ListParams: generics.ListParams{Deleted: model.No}, PathIDs: []uint{pathID},
-	})
-}
-
-func (s *SecretsService) DeleteSecret(ctx context.Context, secretID uint, forceDelete bool) error {
-	return s.secretsRepository.Delete(ctx, secretID, forceDelete)
-}
-
-func (s *SecretsService) CreateSecret(ctx context.Context, pathID uint, name string, value string, valueType string) (*secrets.Secret, error) {
-	id, errGetID := s.secretsRepository.GetID(ctx)
-	if errGetID != nil {
-		return nil, errGetID
-	}
-	return s.secretsRepository.Create(ctx, secrets.Secret{Model: model.Model{ID: id}, PathID: pathID, UID: gofakeit.UUID(),
-		Name: name, Value: value, Type: valueType})
-}
-
-func (s *SecretsService) CreatePath(ctx context.Context, pathID uint, name string) (*paths.Path, error) {
-	id, errGetID := s.pathsRepository.GetID(ctx)
-	if errGetID != nil {
-		return nil, errGetID
-	}
-	return s.pathsRepository.Create(ctx, paths.Path{Model: model.Model{ID: id}, ParentID: pathID,
-		UID: gofakeit.UUID(), Name: name})
 }
 
 func (s *SecretsService) Tree(ctx context.Context, pathID uint) (TreeNode, error) {

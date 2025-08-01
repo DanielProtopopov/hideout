@@ -9,7 +9,11 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	apiconfig "hideout/cmd/api/config"
 	"hideout/internal/common/apperror"
+	"hideout/internal/common/generics"
+	"hideout/internal/common/model"
 	"hideout/internal/common/rqrs"
+	"hideout/internal/paths"
+	secrets2 "hideout/internal/secrets"
 	"hideout/services/secrets"
 	"hideout/structs"
 	"log"
@@ -94,7 +98,10 @@ func GetSecretsHandler(c *gin.Context) {
 		return
 	}
 
-	secretResults, errGetPathSecrets := secretsSvc.GetSecrets(rqContext, pathByUID.ID)
+	secretResults, errGetPathSecrets := secretsSvc.GetSecrets(rqContext, secrets2.ListSecretParams{
+		ListParams: generics.ListParams{Deleted: model.No, Pagination: request.Pagination, Order: request.Order},
+		PathIDs:    []uint{pathByUID.ID},
+	})
 	if errGetPathSecrets != nil {
 		log.Printf("Error fetching path secrets: %s", errGetPathSecrets.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretsError"}})
@@ -103,7 +110,11 @@ func GetSecretsHandler(c *gin.Context) {
 		return
 	}
 
-	pathResults, errGetPathPaths := secretsSvc.GetPaths(rqContext, pathByUID.ID)
+	pathResults, errGetPathPaths := secretsSvc.GetPaths(rqContext, paths.ListPathParams{
+		ListParams:   generics.ListParams{Deleted: model.No, Pagination: request.Pagination, Order: request.Order},
+		ParentPathID: pathByUID.ID,
+	})
+
 	if errGetPathPaths != nil {
 		log.Printf("Error fetching path' paths: %s", errGetPathPaths.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetPathsError"}})

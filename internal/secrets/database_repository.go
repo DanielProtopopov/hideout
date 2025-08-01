@@ -122,10 +122,10 @@ func (m DatabaseRepository) GetByID(ctx context.Context, id uint) (*Secret, erro
 		return m.inMemoryRepository.GetByID(ctx, id)
 	}
 
-	var result *Secret
+	var result Secret
 	Query := m.conn.Table(TableName).Select([]string{TableName + ".*"}).Where(TableName+".id = ? AND "+TableName+".deleted_at IS NULL", id)
 
-	errQuery := Query.First(result).Error
+	errQuery := Query.First(&result).Error
 	if errQuery != nil {
 		if errors.Is(errQuery, gorm.ErrRecordNotFound) {
 			return nil, apperror.ErrRecordNotFound
@@ -133,7 +133,7 @@ func (m DatabaseRepository) GetByID(ctx context.Context, id uint) (*Secret, erro
 		return nil, errQuery
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 func (m DatabaseRepository) GetByUID(ctx context.Context, uid string) (*Secret, error) {
@@ -141,10 +141,10 @@ func (m DatabaseRepository) GetByUID(ctx context.Context, uid string) (*Secret, 
 		return m.inMemoryRepository.GetByUID(ctx, uid)
 	}
 
-	var result *Secret
+	var result Secret
 	Query := m.conn.Table(TableName).Select([]string{TableName + ".*"}).Where(TableName+".uid = ? AND "+TableName+".deleted_at IS NULL", uid)
 
-	errQuery := Query.First(result).Error
+	errQuery := Query.First(&result).Error
 	if errQuery != nil {
 		if errors.Is(errQuery, gorm.ErrRecordNotFound) {
 			return nil, apperror.ErrRecordNotFound
@@ -152,7 +152,7 @@ func (m DatabaseRepository) GetByUID(ctx context.Context, uid string) (*Secret, 
 		return nil, errQuery
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 func (m DatabaseRepository) Update(ctx context.Context, secret Secret) (*Secret, error) {

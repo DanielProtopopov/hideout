@@ -3,7 +3,7 @@ package pagination
 import "math"
 
 // CountPages для получения общего количества страниц
-func CountPages(total uint, paging PaginationRQ) PaginationRS {
+func CountPages(total uint, paging Pagination) PaginationRS {
 	if paging.PerPage == 0 {
 		return PaginationRS{PerPage: 0, Pages: 0, Total: 0}
 	}

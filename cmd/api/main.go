@@ -6,6 +6,7 @@ import (
 	"github.com/joho/godotenv"
 	"hideout/api"
 	apiconfig "hideout/cmd/api/config"
+	"hideout/internal/common/model"
 	"hideout/internal/paths"
 	secrets2 "hideout/internal/secrets"
 	"hideout/services/secrets"
@@ -45,15 +46,16 @@ func main() {
 		}
 	}
 
-	rootPath, _ := secretsSvc.CreatePath(ctx, 0, "")
-	testPath, _ := secretsSvc.CreatePath(ctx, rootPath.ID, "test")
-	anotherTestPath, _ := secretsSvc.CreatePath(ctx, rootPath.ID, "another-test")
-	yetAnotherTestPath, _ := secretsSvc.CreatePath(ctx, rootPath.ID, "yet-another-test")
+	rootPath, _ := secretsSvc.CreatePath(ctx, paths.Path{Model: model.Model{ID: 0}, Name: ""})
+	testPath, _ := secretsSvc.CreatePath(ctx, paths.Path{ParentID: rootPath.ID, Name: "test"})
 
-	rootSecret, _ := secretsSvc.CreateSecret(ctx, rootPath.ID, "Root secret", "123", "Integer")
-	_, _ = secretsSvc.CreateSecret(ctx, testPath.ID, "Secret #1", "123", "Integer")
-	_, _ = secretsSvc.CreateSecret(ctx, testPath.ID, "Secret #2", "456", "Integer")
-	_, _ = secretsSvc.CreateSecret(ctx, testPath.ID, "Secret #3", "789", "Integer")
+	anotherTestPath, _ := secretsSvc.CreatePath(ctx, paths.Path{ParentID: rootPath.ID, Name: "another-test"})
+	yetAnotherTestPath, _ := secretsSvc.CreatePath(ctx, paths.Path{ParentID: rootPath.ID, Name: "yet-another-test"})
+
+	rootSecret, _ := secretsSvc.CreateSecret(ctx, secrets2.Secret{PathID: rootPath.ID, Name: "Root secret", Value: "123", Type: "integer"})
+	_, _ = secretsSvc.CreateSecret(ctx, secrets2.Secret{PathID: testPath.ID, Name: "Secret #1", Value: "123", Type: "integer"})
+	_, _ = secretsSvc.CreateSecret(ctx, secrets2.Secret{PathID: testPath.ID, Name: "Secret #2", Value: "456", Type: "integer"})
+	_, _ = secretsSvc.CreateSecret(ctx, secrets2.Secret{PathID: testPath.ID, Name: "Secret #3", Value: "789", Type: "integer"})
 
 	tree, errGetTree := secretsSvc.Tree(ctx, rootPath.ID)
 	if errGetTree != nil {

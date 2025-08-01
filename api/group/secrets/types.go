@@ -29,9 +29,9 @@ type (
 	}
 
 	GetSecretsRQ struct {
-		PathUID    string                  `json:"PathUID" description:"Folder unique identifier" example:"abc-def-ghi"`
-		Pagination pagination.PaginationRQ `json:"Pagination" description:"Pagination"`
-		Order      []ordering.Order        `json:"Order" description:"Order"`
+		PathUID    string                `json:"PathUID" description:"Folder unique identifier" example:"abc-def-ghi"`
+		Pagination pagination.Pagination `json:"Pagination" description:"Pagination"`
+		Order      []ordering.Order      `json:"Order" description:"Order"`
 	}
 
 	GetSecretsRS struct {
@@ -67,7 +67,7 @@ type (
 	}
 
 	ListSecretParams struct {
-		Pagination pagination.PaginationRQ
+		Pagination pagination.Pagination
 		Order      []ordering.Order
 	}
 )

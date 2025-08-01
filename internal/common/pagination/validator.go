@@ -2,7 +2,7 @@ package pagination
 
 import "context"
 
-func (rq *PaginationRQ) Validate(ctx context.Context) error {
+func (rq *Pagination) Validate(ctx context.Context) error {
 	if rq.Page != 0 {
 		// @TODO Validation
 	} else {
