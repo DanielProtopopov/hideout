@@ -38,9 +38,11 @@ func main() {
 		log.Fatal(errCreateService)
 	}
 
-	errReload := secretsSvc.Load(ctx)
-	if errReload != nil {
-		log.Fatal(errReload)
+	if apiconfig.Settings.Repository.PreloadInMemory {
+		errReload := secretsSvc.Load(ctx)
+		if errReload != nil {
+			log.Fatal(errReload)
+		}
 	}
 
 	rootPath, _ := secretsSvc.CreatePath(ctx, 0, "")

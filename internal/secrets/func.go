@@ -1,9 +1,66 @@
 package secrets
 
 import (
+	"fmt"
+	"gorm.io/gorm"
+	"hideout/internal/common/model"
 	"slices"
 	"sort"
+	"strings"
 )
+
+func (params ListSecretParams) DatabaseFilter(TableName string, Query *gorm.DB) *gorm.DB {
+	if len(params.IDs) != 0 {
+		Query = Query.Where(TableName+".id IN (?)", params.IDs)
+	}
+	if len(params.UIDs) != 0 {
+		Query = Query.Where(TableName+".uid IN (?)", params.UIDs)
+	}
+
+	if params.Pagination.Page != 0 {
+		Query = Query.Offset(int(params.Pagination.Offset()))
+	}
+	if params.Pagination.PerPage != 0 {
+		Query = Query.Limit(int(params.Pagination.Limit()))
+	}
+
+	if !params.CreatedAt.IsZero() {
+		Query = Query.Where(TableName+".created_at BETWEEN ? AND ?", params.CreatedAt.From.UTC(), params.CreatedAt.To.UTC())
+	}
+
+	if !params.UpdatedAt.IsZero() {
+		Query = Query.Where(TableName+".updated_at BETWEEN ? AND ?", params.UpdatedAt.From.UTC(), params.UpdatedAt.To.UTC())
+	}
+
+	if params.Deleted == model.Yes {
+		Query = Query.Unscoped().Where(TableName + ".deleted_at IS NOT NULL")
+		if !params.DeletedAt.IsZero() {
+			Query = Query.Where(TableName+".deleted_at BETWEEN ? AND ?", params.DeletedAt.From.UTC(), params.DeletedAt.To.UTC())
+		}
+	} else if params.Deleted == model.No {
+		Query = Query.Unscoped().Where(TableName + ".deleted_at IS NULL")
+	} else if params.Deleted == model.YesOrNo {
+		Query = Query.Unscoped()
+	}
+
+	return Query
+}
+
+func (params ListSecretParams) DatabaseOrder(TableName string, Query *gorm.DB, OrderMap map[string]string) *gorm.DB {
+	var results []string
+	for _, order := range params.Order {
+		orderDirectionVal := "desc"
+		if order.Order {
+			orderDirectionVal = "asc"
+		}
+		orderColumn, orderColumnExists := OrderMap[order.OrderBy]
+		if orderColumnExists {
+			results = append(results, fmt.Sprintf("%s.%s %s", TableName, orderColumn, orderDirectionVal))
+		}
+	}
+
+	return Query.Order(strings.Join(results, ", "))
+}
 
 func (params ListSecretParams) Apply(data map[string][]*Secret) (results map[string][]*Secret) {
 	if len(params.IDs) != 0 {

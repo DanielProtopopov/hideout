@@ -17,8 +17,8 @@ type InMemoryRepository struct {
 	conn *[]Secret
 }
 
-func NewInMemoryRepository(conn *[]Secret) InMemoryRepository {
-	return InMemoryRepository{conn: conn}
+func NewInMemoryRepository(conn *[]Secret) *InMemoryRepository {
+	return &InMemoryRepository{conn: conn}
 }
 
 func (m InMemoryRepository) Load(ctx context.Context) ([]Secret, error) {
@@ -177,7 +177,8 @@ func (m InMemoryRepository) Create(ctx context.Context, secret Secret) (*Secret,
 func (m InMemoryRepository) Count(ctx context.Context, params ListSecretParams) (uint, error) {
 	// These are not needed when performing filtering and counting
 	params.Pagination = pagination.Pagination{PerPage: 0, Page: 0}
-	params.Order = []ordering.OrderRQ{}
+	params.Order = []ordering.Order{}
+
 	secretsList, errGetSecrets := m.Get(ctx, params)
 	if errGetSecrets != nil {
 		return 0, errGetSecrets
@@ -242,7 +243,7 @@ func (m InMemoryRepository) Filter(ctx context.Context, data []*Secret, params g
 	return m.Sort(ctx, softDeletedResults, params.Order)
 }
 
-func (m InMemoryRepository) Sort(ctx context.Context, data []*Secret, ordering []ordering.OrderRQ) []*Secret {
+func (m InMemoryRepository) Sort(ctx context.Context, data []*Secret, ordering []ordering.Order) []*Secret {
 	var orderParams []lessFunc
 	for _, order := range ordering {
 		columnMap, _ := OrderMap[order.OrderBy]

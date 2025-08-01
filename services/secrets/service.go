@@ -34,8 +34,12 @@ func NewService(ctx context.Context, config config.RepositoryConfig, pathsList *
 		}
 	case RepositoryType_Redis:
 		{
-			inMemorySecretsRep := secrets.NewInMemoryRepository(&structs.Secrets)
-			inMemoryPathsRep := paths.NewInMemoryRepository(&structs.Paths)
+			var inMemorySecretsRep *secrets.InMemoryRepository = nil
+			var inMemoryPathsRep *paths.InMemoryRepository = nil
+			if config.PreloadInMemory {
+				inMemorySecretsRep = secrets.NewInMemoryRepository(&structs.Secrets)
+				inMemoryPathsRep = paths.NewInMemoryRepository(&structs.Paths)
+			}
 			redisSecretsRep := secrets.NewRedisRepository(structs.Redis, inMemorySecretsRep)
 			redisPathsRep := paths.NewRedisRepository(structs.Redis, inMemoryPathsRep)
 			if config.PreloadInMemory {
@@ -53,25 +57,34 @@ func NewService(ctx context.Context, config config.RepositoryConfig, pathsList *
 			secretsSvc := SecretsService{config: config, paths: pathsList, secrets: secretsList,
 				secretsRepository: redisSecretsRep, pathsRepository: redisPathsRep}
 
-			errLoad := secretsSvc.Load(ctx)
-			if errLoad != nil {
-				return nil, errors.Wrap(errLoad, "Error loading data into memory")
+			if config.PreloadInMemory {
+				errLoad := secretsSvc.Load(ctx)
+				if errLoad != nil {
+					return nil, errors.Wrap(errLoad, "Error loading data into memory")
+				}
 			}
 
 			return &secretsSvc, nil
 		}
 	case RepositoryType_Database:
 		{
-			inMemorySecretsRep := secrets.NewInMemoryRepository(&structs.Secrets)
-			inMemoryPathsRep := paths.NewInMemoryRepository(&structs.Paths)
+			var inMemorySecretsRep *secrets.InMemoryRepository = nil
+			var inMemoryPathsRep *paths.InMemoryRepository = nil
+			if config.PreloadInMemory {
+				inMemorySecretsRep = secrets.NewInMemoryRepository(&structs.Secrets)
+				inMemoryPathsRep = paths.NewInMemoryRepository(&structs.Paths)
+			}
 			databaseSecretsRep := secrets.NewDatabaseRepository(structs.Gorm, inMemorySecretsRep)
 			databasePathsRep := paths.NewDatabaseRepository(structs.Gorm, inMemoryPathsRep)
 
 			secretsSvc := SecretsService{config: config, paths: pathsList, secrets: secretsList,
 				secretsRepository: databaseSecretsRep, pathsRepository: databasePathsRep}
-			errLoad := secretsSvc.Load(ctx)
-			if errLoad != nil {
-				return nil, errors.Wrap(errLoad, "Error loading data into memory")
+
+			if config.PreloadInMemory {
+				errLoad := secretsSvc.Load(ctx)
+				if errLoad != nil {
+					return nil, errors.Wrap(errLoad, "Error loading data into memory")
+				}
 			}
 
 			return &secretsSvc, nil

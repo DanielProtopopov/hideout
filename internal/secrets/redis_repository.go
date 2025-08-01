@@ -7,21 +7,41 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
+	"hideout/internal/common/apperror"
+	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
+	"hideout/internal/common/ordering"
+	"hideout/internal/common/pagination"
 	"time"
 )
 
 type RedisRepository struct {
 	conn               *redis.Client
-	inMemoryRepository InMemoryRepository
+	inMemoryRepository *InMemoryRepository
 }
 
-func NewRedisRepository(conn *redis.Client, inMemoryRep InMemoryRepository) RedisRepository {
+func NewRedisRepository(conn *redis.Client, inMemoryRep *InMemoryRepository) RedisRepository {
 	return RedisRepository{conn: conn, inMemoryRepository: inMemoryRep}
 }
 
 func (m RedisRepository) GetID(ctx context.Context) (uint, error) {
-	return m.inMemoryRepository.GetID(ctx)
+	if m.inMemoryRepository != nil {
+		return m.inMemoryRepository.GetID(ctx)
+	}
+
+	secrets, errLoadSecrets := m.Load(ctx)
+	if errLoadSecrets != nil {
+		return 0, errors.Wrap(errLoadSecrets, "Failed to load secrets from Redis")
+	}
+
+	var maxID = uint(0)
+	for _, secret := range secrets {
+		if secret.ID >= maxID {
+			maxID = secret.ID
+		}
+	}
+
+	return maxID, nil
 }
 
 func (m RedisRepository) Load(ctx context.Context) ([]Secret, error) {
@@ -52,64 +72,182 @@ func (m RedisRepository) Load(ctx context.Context) ([]Secret, error) {
 }
 
 func (m RedisRepository) GetMapByID(ctx context.Context, params ListSecretParams) (map[uint]*Secret, error) {
-	return m.inMemoryRepository.GetMapByID(ctx, params)
+	if m.inMemoryRepository != nil {
+		return m.inMemoryRepository.GetMapByID(ctx, params)
+	}
+
+	results, errGetResults := m.Get(ctx, params)
+	if errGetResults != nil {
+		return nil, errGetResults
+	}
+
+	var mapResults = make(map[uint]*Secret)
+	for _, result := range results {
+		mapResults[result.ID] = result
+	}
+
+	return mapResults, nil
 }
 
 func (m RedisRepository) GetMapByUID(ctx context.Context, params ListSecretParams) (map[string]*Secret, error) {
-	return m.inMemoryRepository.GetMapByUID(ctx, params)
+	if m.inMemoryRepository != nil {
+		return m.inMemoryRepository.GetMapByUID(ctx, params)
+	}
+
+	results, errGetResults := m.Get(ctx, params)
+	if errGetResults != nil {
+		return nil, errGetResults
+	}
+
+	var mapResults = make(map[string]*Secret)
+	for _, result := range results {
+		mapResults[result.UID] = result
+	}
+
+	return mapResults, nil
 }
 
 func (m RedisRepository) Get(ctx context.Context, params ListSecretParams) ([]*Secret, error) {
-	return m.inMemoryRepository.Get(ctx, params)
+	if m.inMemoryRepository != nil {
+		return m.inMemoryRepository.Get(ctx, params)
+	}
+
+	pattern := "secret:*"
+	iter := m.conn.Scan(ctx, 0, pattern, 0).Iterator()
+	var keys []string
+	var results []Secret
+	for iter.Next(ctx) {
+		keys = append(keys, iter.Val())
+	}
+
+	values, errGetValues := m.conn.MGet(ctx, keys...).Result()
+	if errGetValues != nil {
+		return nil, errors.Wrap(errGetValues, "Failed to retrieve values by keys in Redis")
+	}
+	for i, _ := range values {
+		if values[i] != nil {
+			var result Secret
+			var resultString = values[i].(string)
+			errUnmarshal := json.Unmarshal([]byte(resultString), &result)
+			if errUnmarshal != nil {
+				return nil, errors.Wrapf(errUnmarshal, "Failed to unmarshal secret data in Redis")
+			}
+			results = append(results, result)
+		}
+	}
+
+	inMemoryRepository := NewInMemoryRepository(&results)
+	return inMemoryRepository.Get(ctx, params)
 }
 
 func (m RedisRepository) GetMapByPath(ctx context.Context, params ListSecretParams) (map[uint][]*Secret, error) {
-	return m.inMemoryRepository.GetMapByPath(ctx, params)
+	if m.inMemoryRepository != nil {
+		return m.inMemoryRepository.GetMapByPath(ctx, params)
+	}
+
+	return nil, apperror.ErrNotImplemented
 }
 
 func (m RedisRepository) GetByID(ctx context.Context, id uint) (*Secret, error) {
-	return m.inMemoryRepository.GetByID(ctx, id)
+	if m.inMemoryRepository != nil {
+		return m.inMemoryRepository.GetByID(ctx, id)
+	}
+
+	results, errGetResults := m.GetMapByID(ctx, ListSecretParams{
+		ListParams: generics.ListParams{IDs: []uint{id}, Deleted: model.No},
+	})
+	if errGetResults != nil {
+		return nil, errGetResults
+	}
+
+	result, exists := results[id]
+	if !exists {
+		return nil, apperror.ErrRecordNotFound
+	}
+
+	return result, nil
 }
 
 func (m RedisRepository) GetByUID(ctx context.Context, uid string) (*Secret, error) {
-	return m.inMemoryRepository.GetByUID(ctx, uid)
+	if m.inMemoryRepository != nil {
+		return m.inMemoryRepository.GetByUID(ctx, uid)
+	}
+
+	results, errGetResults := m.GetMapByUID(ctx, ListSecretParams{
+		ListParams: generics.ListParams{UIDs: []string{uid}, Deleted: model.No},
+	})
+	if errGetResults != nil {
+		return nil, errGetResults
+	}
+
+	result, exists := results[uid]
+	if !exists {
+		return nil, apperror.ErrRecordNotFound
+	}
+
+	return result, nil
 }
 
 func (m RedisRepository) Update(ctx context.Context, secret Secret) (*Secret, error) {
-	var updatedSecretEntry = Secret{Model: model.Model{ID: secret.ID, UpdatedAt: time.Now()}, UID: secret.UID, Value: secret.Value}
+	var updatedSecretEntry = &secret
 	updatedSecretVal, errMarshal := json.Marshal(updatedSecretEntry)
 	if errMarshal != nil {
-		return nil, errors.Wrapf(errMarshal, "Error serializing secret with ID of %d and name %s", secret.ID, secret.Name)
+		return nil, errors.Wrapf(errMarshal, "Error serializing secret with ID of %d and name %s", updatedSecretEntry.ID, updatedSecretEntry.Name)
 	}
-	_, errUpdate := m.conn.Set(ctx, fmt.Sprintf("secret:%d", secret.ID), updatedSecretVal, 0).Result()
+	_, errUpdate := m.conn.Set(ctx, fmt.Sprintf("secret:%d", updatedSecretEntry.ID), updatedSecretVal, 0).Result()
 	if errUpdate != nil && !errors.Is(errUpdate, redis.Nil) {
-		return nil, errors.Wrapf(errUpdate, "Error updating secret with ID of %d in Redis", secret.ID)
+		return nil, errors.Wrapf(errUpdate, "Error updating secret with ID of %d in Redis", updatedSecretEntry.ID)
 	}
-	updatedSecret, errUpdateSecret := m.inMemoryRepository.Update(ctx, updatedSecretEntry)
-	if errUpdateSecret != nil {
-		return nil, errors.Wrapf(errUpdateSecret, "Error updating secret with ID of %d in memory", secret.ID)
+	if m.inMemoryRepository != nil {
+		updatedSecret, errUpdateSecret := m.inMemoryRepository.Update(ctx, *updatedSecretEntry)
+		if errUpdateSecret != nil {
+			return nil, errors.Wrapf(errUpdateSecret, "Error updating secret with ID of %d in memory", secret.ID)
+		}
+
+		updatedSecretEntry = updatedSecret
 	}
-	return updatedSecret, nil
+
+	return updatedSecretEntry, nil
 }
 
 func (m RedisRepository) Create(ctx context.Context, secret Secret) (*Secret, error) {
-	createdSecretVal, errMarshal := json.Marshal(secret)
+	var createdPathEntry = &secret
+	createdSecretVal, errMarshal := json.Marshal(createdPathEntry)
 	if errMarshal != nil {
-		return nil, errors.Wrapf(errMarshal, "Error serializing secret with ID of %d and name %s", secret.ID, secret.Name)
+		return nil, errors.Wrapf(errMarshal, "Error serializing secret with ID of %d and name %s", createdPathEntry.ID, createdPathEntry.Name)
 	}
-	_, errCreate := m.conn.Set(ctx, fmt.Sprintf("secret:%d", secret.ID), createdSecretVal, 0).Result()
+	_, errCreate := m.conn.Set(ctx, fmt.Sprintf("secret:%d", createdPathEntry.ID), createdSecretVal, 0).Result()
 	if errCreate != nil && !errors.Is(errCreate, redis.Nil) {
-		return nil, errors.Wrapf(errCreate, "Error creating secret with ID of %d in Redis", secret.ID)
+		return nil, errors.Wrapf(errCreate, "Error creating secret with ID of %d in Redis", createdPathEntry.ID)
 	}
-	newSecret, errCreateSecret := m.inMemoryRepository.Create(ctx, secret)
-	if errCreateSecret != nil {
-		return nil, errors.Wrapf(errCreateSecret, "Error creating secret with path ID of %d and name %s in memory", secret.PathID, secret.Name)
+
+	if m.inMemoryRepository != nil {
+		newSecret, errCreateSecret := m.inMemoryRepository.Create(ctx, secret)
+		if errCreateSecret != nil {
+			return nil, errors.Wrapf(errCreateSecret, "Error creating secret with path ID of %d and name %s in memory", secret.PathID, secret.Name)
+		}
+
+		createdPathEntry = newSecret
 	}
-	return newSecret, nil
+
+	return createdPathEntry, nil
 }
 
 func (m RedisRepository) Count(ctx context.Context, params ListSecretParams) (uint, error) {
-	return m.inMemoryRepository.Count(ctx, params)
+	// These are not needed when performing filtering and counting
+	params.Pagination = pagination.Pagination{PerPage: 0, Page: 0}
+	params.Order = []ordering.Order{}
+
+	if m.inMemoryRepository != nil {
+		return m.inMemoryRepository.Count(ctx, params)
+	}
+
+	results, errGetResults := m.Get(ctx, params)
+	if errGetResults != nil {
+		return 0, errGetResults
+	}
+
+	return uint(len(results)), nil
 }
 
 func (m RedisRepository) Delete(ctx context.Context, id uint, forceDelete bool) error {
@@ -134,5 +272,9 @@ func (m RedisRepository) Delete(ctx context.Context, id uint, forceDelete bool) 
 		}
 	}
 
-	return m.inMemoryRepository.Delete(ctx, id, forceDelete)
+	if m.inMemoryRepository != nil {
+		return m.inMemoryRepository.Delete(ctx, id, forceDelete)
+	}
+
+	return nil
 }

@@ -31,7 +31,7 @@ type (
 	GetSecretsRQ struct {
 		PathUID    string                  `json:"PathUID" description:"Folder unique identifier" example:"abc-def-ghi"`
 		Pagination pagination.PaginationRQ `json:"Pagination" description:"Pagination"`
-		Order      []ordering.OrderRQ      `json:"Order" description:"Order"`
+		Order      []ordering.Order        `json:"Order" description:"Order"`
 	}
 
 	GetSecretsRS struct {
@@ -68,6 +68,6 @@ type (
 
 	ListSecretParams struct {
 		Pagination pagination.PaginationRQ
-		Order      []ordering.OrderRQ
+		Order      []ordering.Order
 	}
 )

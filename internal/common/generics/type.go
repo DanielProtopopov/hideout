@@ -21,7 +21,7 @@ type (
 		// * 3 - model.YesOrNo
 		Deleted uint
 		pagination.Pagination
-		Order     []ordering.OrderRQ
+		Order     []ordering.Order
 		CreatedAt FromTo[time.Time]
 		UpdatedAt FromTo[time.Time]
 		DeletedAt FromTo[time.Time]
