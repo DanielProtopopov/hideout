@@ -474,6 +474,12 @@ const docTemplate = `{
                         "$ref": "#/definitions/rqrs.Error"
                     }
                 },
+                "Folders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/secrets.Folder"
+                    }
+                },
                 "Pages": {
                     "type": "integer",
                     "example": 14
@@ -481,6 +487,12 @@ const docTemplate = `{
                 "PerPage": {
                     "type": "integer",
                     "example": 20
+                },
+                "Secrets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api_group_secrets.Secret"
+                    }
                 },
                 "Total": {
                     "type": "integer",
@@ -613,13 +625,22 @@ const docTemplate = `{
                     "type": "string",
                     "example": "abc-def-ghi"
                 },
-                "Order": {
+                "FoldersOrder": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ordering.Order"
                     }
                 },
-                "Pagination": {
+                "FoldersPagination": {
+                    "$ref": "#/definitions/pagination.Pagination"
+                },
+                "SecretsOrder": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ordering.Order"
+                    }
+                },
+                "SecretsPagination": {
                     "$ref": "#/definitions/pagination.Pagination"
                 }
             }

@@ -93,14 +93,14 @@ func NewService(ctx context.Context, config config.RepositoryConfig, foldersList
 	return nil, errors.New("invalid repository type")
 }
 
-func (s *SecretsService) Load(ctx context.Context) error {
-	if s.config.PreloadInMemory {
-		loadedSecrets, errLoadSecrets := s.secretsRepository.Load(ctx)
+func (m *SecretsService) Load(ctx context.Context) error {
+	if m.config.PreloadInMemory {
+		loadedSecrets, errLoadSecrets := m.secretsRepository.Load(ctx)
 		if errLoadSecrets != nil {
 			return errors.Wrap(errLoadSecrets, "Error preloading secrets into in-memory storage in Redis")
 		}
 		structs.Secrets = loadedSecrets
-		loadedFolders, errLoadFolders := s.foldersRepository.Load(ctx)
+		loadedFolders, errLoadFolders := m.foldersRepository.Load(ctx)
 		if errLoadFolders != nil {
 			return errors.Wrap(errLoadFolders, "Error preloading folders into in-memory storage in Redis")
 		}
@@ -110,19 +110,19 @@ func (s *SecretsService) Load(ctx context.Context) error {
 	return nil
 }
 
-func (s *SecretsService) Tree(ctx context.Context, folderID uint) (TreeNode, error) {
+func (m *SecretsService) Tree(ctx context.Context, folderID uint) (TreeNode, error) {
 	result := TreeNode{Name: "", Type: "Folder", Children: nil}
-	existingFolder, errGetFolder := s.foldersRepository.GetByID(ctx, folderID)
+	existingFolder, errGetFolder := m.foldersRepository.GetByID(ctx, folderID)
 	if errGetFolder != nil {
 		return result, errGetFolder
 	}
 	result.Name = existingFolder.Name
 
-	existingFolderFolders, errGetExistingFolderFolders := s.getFoldersByFolder(ctx, existingFolder.ID)
+	existingFolderFolders, errGetExistingFolderFolders := m.getFoldersByFolder(ctx, existingFolder.ID)
 	if errGetExistingFolderFolders != nil {
 		return result, errGetExistingFolderFolders
 	}
-	existingFolderSecrets, errGetExistingFolderSecrets := s.getSecretsByFolder(ctx, existingFolder.ID)
+	existingFolderSecrets, errGetExistingFolderSecrets := m.getSecretsByFolder(ctx, existingFolder.ID)
 	if errGetExistingFolderSecrets != nil {
 		return result, errGetExistingFolderSecrets
 	}
@@ -132,7 +132,7 @@ func (s *SecretsService) Tree(ctx context.Context, folderID uint) (TreeNode, err
 	}
 
 	for _, existingFolderFolder := range existingFolderFolders {
-		folderNode, errGetFolderNode := s.Tree(ctx, existingFolderFolder.ID)
+		folderNode, errGetFolderNode := m.Tree(ctx, existingFolderFolder.ID)
 		if errGetFolderNode != nil {
 			return result, errGetFolderNode
 		}
@@ -142,18 +142,18 @@ func (s *SecretsService) Tree(ctx context.Context, folderID uint) (TreeNode, err
 	return result, nil
 }
 
-func (s *SecretsService) Delete(ctx context.Context, existingFolders []*folders.Folder, existingSecrets []*secrets.Secret, folderIDFrom uint, forceDelete bool) ([]*folders.Folder, []*secrets.Secret, error) {
+func (m *SecretsService) Delete(ctx context.Context, existingFolders []*folders.Folder, existingSecrets []*secrets.Secret, folderIDFrom uint, forceDelete bool) ([]*folders.Folder, []*secrets.Secret, error) {
 	var deletedFolders []*folders.Folder
 	var deletedSecrets []*secrets.Secret
 
-	_, errGetFolderFrom := s.foldersRepository.GetByID(ctx, folderIDFrom)
+	_, errGetFolderFrom := m.foldersRepository.GetByID(ctx, folderIDFrom)
 	if errGetFolderFrom != nil {
 		return nil, nil, errGetFolderFrom
 	}
 
 	// This deletes secrets From designed folder
 	for _, existingSecret := range existingSecrets {
-		errDeleteSecret := s.secretsRepository.Delete(ctx, existingSecret.ID, forceDelete)
+		errDeleteSecret := m.secretsRepository.Delete(ctx, existingSecret.ID, forceDelete)
 		if errDeleteSecret != nil {
 			return nil, nil, errDeleteSecret
 		}
@@ -162,22 +162,22 @@ func (s *SecretsService) Delete(ctx context.Context, existingFolders []*folders.
 
 	// This recursively deletes folders and their secrets from sub-folders
 	for _, existingFolder := range existingFolders {
-		existingFolderFolders, errGetExistingFolderFolders := s.getFoldersByFolder(ctx, existingFolder.ID)
+		existingFolderFolders, errGetExistingFolderFolders := m.getFoldersByFolder(ctx, existingFolder.ID)
 		if errGetExistingFolderFolders != nil {
 			return nil, nil, errGetExistingFolderFolders
 		}
-		existingFolderSecrets, errGetExistingFolderSecrets := s.getSecretsByFolder(ctx, existingFolder.ID)
+		existingFolderSecrets, errGetExistingFolderSecrets := m.getSecretsByFolder(ctx, existingFolder.ID)
 		if errGetExistingFolderSecrets != nil {
 			return nil, nil, errGetExistingFolderSecrets
 		}
 
 		// Delete folders & secrets from an existing folder
-		deletedFolderFolders, deletedFolderSecrets, errDelete := s.Delete(ctx, existingFolderFolders, existingFolderSecrets, existingFolder.ID, forceDelete)
+		deletedFolderFolders, deletedFolderSecrets, errDelete := m.Delete(ctx, existingFolderFolders, existingFolderSecrets, existingFolder.ID, forceDelete)
 		if errDelete != nil {
 			return nil, nil, errDelete
 		}
 
-		errDeleteFolder := s.foldersRepository.Delete(ctx, existingFolder.ID, forceDelete)
+		errDeleteFolder := m.foldersRepository.Delete(ctx, existingFolder.ID, forceDelete)
 		if errDeleteFolder != nil {
 			return nil, nil, errDeleteFolder
 		}
@@ -190,21 +190,21 @@ func (s *SecretsService) Delete(ctx context.Context, existingFolders []*folders.
 	return deletedFolders, deletedSecrets, nil
 }
 
-func (s *SecretsService) Copy(ctx context.Context, existingFolders []*folders.Folder, existingSecrets []*secrets.Secret, folderIDFrom uint, folderIDTo uint) ([]*folders.Folder, []*secrets.Secret, error) {
+func (m *SecretsService) Copy(ctx context.Context, existingFolders []*folders.Folder, existingSecrets []*secrets.Secret, folderIDFrom uint, folderIDTo uint) ([]*folders.Folder, []*secrets.Secret, error) {
 	var newSecrets []*secrets.Secret
 	var newFolders []*folders.Folder
 
-	_, errGetFolderFrom := s.foldersRepository.GetByID(ctx, folderIDFrom)
+	_, errGetFolderFrom := m.foldersRepository.GetByID(ctx, folderIDFrom)
 	if errGetFolderFrom != nil {
 		return nil, nil, errGetFolderFrom
 	}
-	_, errGetFolderTo := s.foldersRepository.GetByID(ctx, folderIDTo)
+	_, errGetFolderTo := m.foldersRepository.GetByID(ctx, folderIDTo)
 	if errGetFolderTo != nil {
 		return nil, nil, errGetFolderTo
 	}
 
 	// This copies secrets From designed folder To target folder
-	copiedSecretsMap, errCopySecrets := s.copySecrets(ctx, existingSecrets, folderIDFrom, folderIDTo)
+	copiedSecretsMap, errCopySecrets := m.copySecrets(ctx, existingSecrets, folderIDFrom, folderIDTo)
 	if errCopySecrets != nil {
 		return nil, nil, errCopySecrets
 	}
@@ -213,7 +213,7 @@ func (s *SecretsService) Copy(ctx context.Context, existingFolders []*folders.Fo
 	}
 
 	// This copies folders From designed folder To target folder
-	copiedFoldersMap, errCopyFolders := s.copyFolders(ctx, existingFolders, folderIDFrom, folderIDTo)
+	copiedFoldersMap, errCopyFolders := m.copyFolders(ctx, existingFolders, folderIDFrom, folderIDTo)
 	if errCopyFolders != nil {
 		return nil, nil, errCopyFolders
 	}
@@ -224,17 +224,17 @@ func (s *SecretsService) Copy(ctx context.Context, existingFolders []*folders.Fo
 	// This recursively copies folders and their secrets from folders in From folder
 	for _, existingFolder := range existingFolders {
 		copiedFolder, _ := copiedFoldersMap[existingFolder.ID]
-		existingFolderFolders, errGetExistingFolderFolders := s.getFoldersByFolder(ctx, existingFolder.ID)
+		existingFolderFolders, errGetExistingFolderFolders := m.getFoldersByFolder(ctx, existingFolder.ID)
 		if errGetExistingFolderFolders != nil {
 			return nil, nil, errGetExistingFolderFolders
 		}
-		existingFolderSecrets, errGetExistingFolderSecrets := s.getSecretsByFolder(ctx, existingFolder.ID)
+		existingFolderSecrets, errGetExistingFolderSecrets := m.getSecretsByFolder(ctx, existingFolder.ID)
 		if errGetExistingFolderSecrets != nil {
 			return nil, nil, errGetExistingFolderSecrets
 		}
 
 		// Copy folders & secrets from an existing folder to a copied folder
-		createdFolders, createdSecrets, errCopy := s.Copy(ctx, existingFolderFolders, existingFolderSecrets, existingFolder.ID, copiedFolder.ID)
+		createdFolders, createdSecrets, errCopy := m.Copy(ctx, existingFolderFolders, existingFolderSecrets, existingFolder.ID, copiedFolder.ID)
 		if errCopy != nil {
 			return nil, nil, errCopy
 		}
@@ -245,22 +245,22 @@ func (s *SecretsService) Copy(ctx context.Context, existingFolders []*folders.Fo
 	return newFolders, newSecrets, nil
 }
 
-func (s *SecretsService) copyFolders(ctx context.Context, foldersList []*folders.Folder, folderIDFrom uint, folderIDTo uint) (map[uint]*folders.Folder, error) {
+func (m *SecretsService) copyFolders(ctx context.Context, foldersList []*folders.Folder, folderIDFrom uint, folderIDTo uint) (map[uint]*folders.Folder, error) {
 	results := make(map[uint]*folders.Folder)
-	_, errGetFromFolder := s.foldersRepository.GetByID(ctx, folderIDFrom)
+	_, errGetFromFolder := m.foldersRepository.GetByID(ctx, folderIDFrom)
 	if errGetFromFolder != nil {
 		return nil, errGetFromFolder
 	}
-	toFolder, errGetToFolder := s.foldersRepository.GetByID(ctx, folderIDTo)
+	toFolder, errGetToFolder := m.foldersRepository.GetByID(ctx, folderIDTo)
 	if errGetToFolder != nil {
 		return nil, errGetToFolder
 	}
 	for _, folder := range foldersList {
-		id, errGetID := s.foldersRepository.GetID(ctx)
+		id, errGetID := m.foldersRepository.GetID(ctx)
 		if errGetID != nil {
 			return nil, errGetID
 		}
-		newFolder, errCreateFolder := s.foldersRepository.Create(ctx, folders.Folder{
+		newFolder, errCreateFolder := m.foldersRepository.Create(ctx, folders.Folder{
 			Model: model.Model{ID: id}, ParentID: toFolder.ID, UID: gofakeit.UUID(), Name: folder.Name,
 		})
 		if errCreateFolder != nil {
@@ -271,22 +271,22 @@ func (s *SecretsService) copyFolders(ctx context.Context, foldersList []*folders
 	return results, nil
 }
 
-func (s *SecretsService) copySecrets(ctx context.Context, secretsList []*secrets.Secret, folderIDFrom uint, folderIDTo uint) (map[uint]*secrets.Secret, error) {
+func (m *SecretsService) copySecrets(ctx context.Context, secretsList []*secrets.Secret, folderIDFrom uint, folderIDTo uint) (map[uint]*secrets.Secret, error) {
 	results := make(map[uint]*secrets.Secret)
-	_, errGetFromFolder := s.foldersRepository.GetByID(ctx, folderIDFrom)
+	_, errGetFromFolder := m.foldersRepository.GetByID(ctx, folderIDFrom)
 	if errGetFromFolder != nil {
 		return nil, errGetFromFolder
 	}
-	toFolder, errGetToFolder := s.foldersRepository.GetByID(ctx, folderIDTo)
+	toFolder, errGetToFolder := m.foldersRepository.GetByID(ctx, folderIDTo)
 	if errGetToFolder != nil {
 		return nil, errGetToFolder
 	}
 	for _, secret := range secretsList {
-		id, errGetID := s.secretsRepository.GetID(ctx)
+		id, errGetID := m.secretsRepository.GetID(ctx)
 		if errGetID != nil {
 			return nil, errGetID
 		}
-		newSecret, errCreateSecret := s.secretsRepository.Create(ctx, secrets.Secret{
+		newSecret, errCreateSecret := m.secretsRepository.Create(ctx, secrets.Secret{
 			Model: model.Model{ID: id}, FolderID: toFolder.ID, UID: gofakeit.UUID(),
 			Name: secret.Name, Value: secret.Value, Type: secret.Type,
 		})
@@ -298,14 +298,14 @@ func (s *SecretsService) copySecrets(ctx context.Context, secretsList []*secrets
 	return results, nil
 }
 
-func (s *SecretsService) getSecretsByFolder(ctx context.Context, parentFolderID uint) ([]*secrets.Secret, error) {
+func (m *SecretsService) getSecretsByFolder(ctx context.Context, parentFolderID uint) ([]*secrets.Secret, error) {
 	var results []*secrets.Secret
-	parentFolder, errGetFolder := s.foldersRepository.GetByID(ctx, parentFolderID)
+	parentFolder, errGetFolder := m.foldersRepository.GetByID(ctx, parentFolderID)
 	if errGetFolder != nil {
 		return nil, errGetFolder
 	}
 
-	for _, secret := range *s.secrets {
+	for _, secret := range *m.secrets {
 		if secret.FolderID == parentFolder.ID {
 			results = append(results, &secret)
 		}
@@ -314,9 +314,9 @@ func (s *SecretsService) getSecretsByFolder(ctx context.Context, parentFolderID 
 	return results, nil
 }
 
-func (s *SecretsService) getFoldersByFolder(ctx context.Context, parentFolderID uint) ([]*folders.Folder, error) {
+func (m *SecretsService) getFoldersByFolder(ctx context.Context, parentFolderID uint) ([]*folders.Folder, error) {
 	var results []*folders.Folder
-	for _, folder := range *s.folders {
+	for _, folder := range *m.folders {
 		if folder.ParentID == parentFolderID {
 			results = append(results, &folder)
 		}

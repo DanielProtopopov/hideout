@@ -29,9 +29,11 @@ type (
 	}
 
 	GetSecretsRQ struct {
-		FolderUID  string                `json:"FolderUID" description:"Folder unique identifier" example:"abc-def-ghi"`
-		Pagination pagination.Pagination `json:"Pagination" description:"Pagination"`
-		Order      []ordering.Order      `json:"Order" description:"Order"`
+		FolderUID         string                `json:"FolderUID" description:"Folder unique identifier" example:"abc-def-ghi"`
+		SecretsPagination pagination.Pagination `json:"SecretsPagination" description:"Secrets pagination"`
+		SecretsOrder      []ordering.Order      `json:"SecretsOrder" description:"Secrets order"`
+		FoldersPagination pagination.Pagination `json:"FoldersPagination" description:"Folders pagination"`
+		FoldersOrder      []ordering.Order      `json:"FoldersOrder" description:"Folders order"`
 	}
 
 	GetSecretsRS struct {
@@ -75,6 +77,8 @@ type (
 	}
 
 	CopyPasteSecretsRS struct {
+		Secrets []Secret `json:"Secrets"`
+		Folders []Folder `json:"Folders"`
 		rqrs.ResponseListRS
 	}
 

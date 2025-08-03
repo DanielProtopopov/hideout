@@ -71,12 +71,20 @@ definitions:
         items:
           $ref: '#/definitions/rqrs.Error'
         type: array
+      Folders:
+        items:
+          $ref: '#/definitions/secrets.Folder'
+        type: array
       Pages:
         example: 14
         type: integer
       PerPage:
         example: 20
         type: integer
+      Secrets:
+        items:
+          $ref: '#/definitions/api_group_secrets.Secret'
+        type: array
       Total:
         example: 280
         type: integer
@@ -167,11 +175,17 @@ definitions:
       FolderUID:
         example: abc-def-ghi
         type: string
-      Order:
+      FoldersOrder:
         items:
           $ref: '#/definitions/ordering.Order'
         type: array
-      Pagination:
+      FoldersPagination:
+        $ref: '#/definitions/pagination.Pagination'
+      SecretsOrder:
+        items:
+          $ref: '#/definitions/ordering.Order'
+        type: array
+      SecretsPagination:
         $ref: '#/definitions/pagination.Pagination'
     type: object
   secrets.GetSecretsRS:

@@ -13,17 +13,31 @@ import (
 )
 
 func (rq GetSecretsRQ) Validate(ctx context.Context, secretsService *secrets.SecretsService, Localizer *i18n.Localizer) (Errors []rqrs.Error) {
-	errPagination := rq.Pagination.Validate(ctx)
-	if errPagination != nil {
+	errSecretsPagination := rq.SecretsPagination.Validate(ctx)
+	if errSecretsPagination != nil {
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "PaginationError"}})
-		Errors = append(Errors, rqrs.Error{Message: msg, Description: errors.Wrap(errPagination, "Pagination validation failed").Error(), Code: 0})
+		Errors = append(Errors, rqrs.Error{Message: msg, Description: errors.Wrap(errSecretsPagination, "Secrets pagination validation failed").Error(), Code: 0})
 	}
 
-	for _, orderVal := range rq.Order {
-		errOrdering := orderVal.Validate(ctx, Localizer)
-		if errOrdering != nil {
+	errFoldersPagination := rq.FoldersPagination.Validate(ctx)
+	if errFoldersPagination != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "PaginationError"}})
+		Errors = append(Errors, rqrs.Error{Message: msg, Description: errors.Wrap(errSecretsPagination, "Folders pagination validation failed").Error(), Code: 0})
+	}
+
+	for _, orderVal := range rq.SecretsOrder {
+		errSecretOrdering := orderVal.Validate(ctx, Localizer)
+		if errSecretOrdering != nil {
 			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "OrderError"}})
-			Errors = append(Errors, rqrs.Error{Message: msg, Description: errors.Wrap(errPagination, "Order validation failed").Error(), Code: 0})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: errors.Wrap(errSecretOrdering, "Secret order validation failed").Error(), Code: 0})
+		}
+	}
+
+	for _, orderVal := range rq.FoldersOrder {
+		errFolderOrdering := orderVal.Validate(ctx, Localizer)
+		if errFolderOrdering != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "OrderError"}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: errors.Wrap(errFolderOrdering, "Folder order validation failed").Error(), Code: 0})
 		}
 	}
 
@@ -108,16 +122,16 @@ func (rq DeleteSecretsRQ) Validate(ctx context.Context, secretsService *secrets.
 }
 
 func (rq CopyPasteSecretsRQ) Validate(ctx context.Context, secretsService *secrets.SecretsService, Localizer *i18n.Localizer) (Errors []rqrs.Error) {
-	for _, deleteFolderEntry := range rq.FolderUIDs {
-		_, errGetFolderByUID := secretsService.GetFolderByUID(ctx, deleteFolderEntry)
+	for _, copyFolderUID := range rq.FolderUIDs {
+		_, errGetFolderByUID := secretsService.GetFolderByUID(ctx, copyFolderUID)
 		if errGetFolderByUID != nil {
 			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"}})
 			Errors = append(Errors, rqrs.Error{Message: msg, Description: errGetFolderByUID.Error(), Code: 0})
 		}
 	}
 
-	for _, deleteSecretEntry := range rq.SecretUIDs {
-		_, errGetSecretByUID := secretsService.GetSecretByUID(ctx, deleteSecretEntry)
+	for _, copySecretUID := range rq.SecretUIDs {
+		_, errGetSecretByUID := secretsService.GetSecretByUID(ctx, copySecretUID)
 		if errGetSecretByUID != nil {
 			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretByUIDError"}})
 			Errors = append(Errors, rqrs.Error{Message: msg, Description: errGetSecretByUID.Error(), Code: 0})
