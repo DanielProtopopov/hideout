@@ -50,7 +50,7 @@ func GetSecretsHandler(c *gin.Context) {
 	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
 	rqContext = context.WithValue(rqContext, "Language", Language)
 
-	validationSpan := sentry.StartSpan(rqContext, "get.secrets.list")
+	validationSpan := sentry.StartSpan(rqContext, "validate.get.secrets")
 	validationSpan.Description = "rq.validate"
 
 	var request GetSecretsRQ
@@ -80,6 +80,9 @@ func GetSecretsHandler(c *gin.Context) {
 		return
 	}
 	validationSpan.Finish()
+
+	runSpan := sentry.StartSpan(rqContext, "get.secrets")
+	runSpan.Description = "run"
 
 	folderByUID, errGetFolder := secretsSvc.GetFolderByUID(rqContext, request.FolderUID)
 	if errGetFolder != nil {
@@ -132,6 +135,8 @@ func GetSecretsHandler(c *gin.Context) {
 		response.Folders = append(response.Folders, folderEntry)
 	}
 
+	runSpan.Finish()
+
 	c.JSON(http.StatusOK, response)
 }
 
@@ -164,7 +169,7 @@ func UpdateSecretsHandler(c *gin.Context) {
 	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
 	rqContext = context.WithValue(rqContext, "Language", Language)
 
-	validationSpan := sentry.StartSpan(rqContext, "update.secrets")
+	validationSpan := sentry.StartSpan(rqContext, "validate.update.secrets")
 	validationSpan.Description = "rq.validate"
 
 	var request UpdateSecretsRQ
@@ -195,8 +200,8 @@ func UpdateSecretsHandler(c *gin.Context) {
 	}
 	validationSpan.Finish()
 
-	prepareSpan := sentry.StartSpan(rqContext, "update.secrets")
-	prepareSpan.Description = "prepare"
+	runSpan := sentry.StartSpan(rqContext, "update.secrets")
+	runSpan.Description = "run"
 
 	for _, updateSecretEntry := range request.Data {
 		folderByUID, errGetFolderByUID := secretsSvc.GetFolderByUID(rqContext, updateSecretEntry.FolderUID)
@@ -220,6 +225,8 @@ func UpdateSecretsHandler(c *gin.Context) {
 			Value: updatedSecret.Value, Type: updatedSecret.Type,
 		})
 	}
+
+	runSpan.Finish()
 
 	c.JSON(http.StatusOK, response)
 }
@@ -253,7 +260,7 @@ func DeleteSecretsHandler(c *gin.Context) {
 	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
 	rqContext = context.WithValue(rqContext, "Language", Language)
 
-	validationSpan := sentry.StartSpan(rqContext, "delete.secrets")
+	validationSpan := sentry.StartSpan(rqContext, "validate.delete.secrets")
 	validationSpan.Description = "rq.validate"
 
 	var request DeleteSecretsRQ
@@ -284,8 +291,8 @@ func DeleteSecretsHandler(c *gin.Context) {
 	}
 	validationSpan.Finish()
 
-	prepareSpan := sentry.StartSpan(rqContext, "delete.secrets")
-	prepareSpan.Description = "prepare"
+	runSpan := sentry.StartSpan(rqContext, "delete.secrets")
+	runSpan.Description = "run"
 
 	for _, deleteSecretUID := range request.SecretUIDs {
 		secretByUID, errGetSecretByUID := secretsSvc.GetSecretByUID(rqContext, deleteSecretUID)
@@ -319,6 +326,7 @@ func DeleteSecretsHandler(c *gin.Context) {
 		}
 	}
 
+	runSpan.Finish()
 	c.JSON(http.StatusOK, response)
 }
 
@@ -351,7 +359,7 @@ func CreateSecretsHandler(c *gin.Context) {
 	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
 	rqContext = context.WithValue(rqContext, "Language", Language)
 
-	validationSpan := sentry.StartSpan(rqContext, "create.secrets")
+	validationSpan := sentry.StartSpan(rqContext, "validate.create.secrets")
 	validationSpan.Description = "rq.validate"
 
 	var request CreateSecretsRQ
@@ -382,8 +390,8 @@ func CreateSecretsHandler(c *gin.Context) {
 	}
 	validationSpan.Finish()
 
-	prepareSpan := sentry.StartSpan(rqContext, "create.secrets")
-	prepareSpan.Description = "prepare"
+	runSpan := sentry.StartSpan(rqContext, "create.secrets")
+	runSpan.Description = "run"
 
 	for _, secretToCreate := range request.Data {
 		folderByUID, errGetFolder := secretsSvc.GetFolderByUID(rqContext, secretToCreate.FolderUID)
@@ -415,6 +423,7 @@ func CreateSecretsHandler(c *gin.Context) {
 		})
 	}
 
+	runSpan.Finish()
 	c.JSON(http.StatusOK, response)
 }
 
@@ -447,7 +456,7 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
 	rqContext = context.WithValue(rqContext, "Language", Language)
 
-	validationSpan := sentry.StartSpan(rqContext, "update.secrets")
+	validationSpan := sentry.StartSpan(rqContext, "validate.update.secrets")
 	validationSpan.Description = "rq.validate"
 
 	var request CopyPasteSecretsRQ
@@ -478,8 +487,8 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 	}
 	validationSpan.Finish()
 
-	prepareSpan := sentry.StartSpan(rqContext, "update.secrets")
-	prepareSpan.Description = "prepare"
+	runSpan := sentry.StartSpan(rqContext, "copy.paste.secrets")
+	runSpan.Description = "run"
 
 	secretsList, errGetSecrets := secretsSvc.GetSecrets(rqContext, secrets2.ListSecretParams{
 		ListParams: generics.ListParams{Deleted: model.No, UIDs: request.SecretUIDs},
@@ -558,5 +567,6 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 		})
 	}
 
+	runSpan.Finish()
 	c.JSON(http.StatusOK, response)
 }
