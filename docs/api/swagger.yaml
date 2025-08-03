@@ -50,6 +50,59 @@ definitions:
         example: Message
         type: string
     type: object
+  secrets.CopyPasteSecretsRQ:
+    properties:
+      FolderUIDs:
+        items:
+          type: string
+        type: array
+      FromFolderUID:
+        type: string
+      SecretUIDs:
+        items:
+          type: string
+        type: array
+      ToFolderUID:
+        type: string
+    type: object
+  secrets.CopyPasteSecretsRS:
+    properties:
+      Errors:
+        items:
+          $ref: '#/definitions/rqrs.Error'
+        type: array
+      Pages:
+        example: 14
+        type: integer
+      PerPage:
+        example: 20
+        type: integer
+      Total:
+        example: 280
+        type: integer
+    type: object
+  secrets.CreateSecret:
+    properties:
+      FolderUID:
+        example: /
+        type: string
+      Name:
+        example: DEBUG
+        type: string
+      Type:
+        example: int
+        type: string
+      Value:
+        example: Test
+        type: string
+    type: object
+  secrets.CreateSecretsRQ:
+    properties:
+      Data:
+        items:
+          $ref: '#/definitions/secrets.CreateSecret'
+        type: array
+    type: object
   secrets.CreateSecretsRS:
     properties:
       Data:
@@ -69,6 +122,17 @@ definitions:
       Total:
         example: 280
         type: integer
+    type: object
+  secrets.DeleteSecretsRQ:
+    properties:
+      FolderUIDs:
+        items:
+          type: string
+        type: array
+      SecretUIDs:
+        items:
+          type: string
+        type: array
     type: object
   secrets.DeleteSecretsRS:
     properties:
@@ -134,6 +198,13 @@ definitions:
         example: 280
         type: integer
     type: object
+  secrets.UpdateSecretsRQ:
+    properties:
+      Data:
+        items:
+          $ref: '#/definitions/api_group_secrets.Secret'
+        type: array
+    type: object
   secrets.UpdateSecretsRS:
     properties:
       Data:
@@ -197,6 +268,13 @@ paths:
     delete:
       description: Delete secrets
       operationId: delete-secrets
+      parameters:
+      - description: Secrets to delete
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/secrets.DeleteSecretsRQ'
       produces:
       - application/json
       responses:
@@ -230,6 +308,13 @@ paths:
     patch:
       description: Update secrets
       operationId: update-secrets
+      parameters:
+      - description: Secrets to update
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/secrets.UpdateSecretsRQ'
       produces:
       - application/json
       responses:
@@ -263,6 +348,13 @@ paths:
     put:
       description: Create secrets
       operationId: create-secrets
+      parameters:
+      - description: Secrets to create
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/secrets.CreateSecretsRQ'
       produces:
       - application/json
       responses:
@@ -291,6 +383,47 @@ paths:
           schema:
             $ref: '#/definitions/secrets.CreateSecretsRS'
       summary: Create secrets
+      tags:
+      - Secrets
+  /secrets/copy-paste:
+    put:
+      description: Copy-paste secrets & folders
+      operationId: copy-paste-secrets
+      parameters:
+      - description: Secrets to copy-and-paste
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/secrets.CopyPasteSecretsRQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/secrets.CopyPasteSecretsRS'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/secrets.CopyPasteSecretsRS'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/secrets.CopyPasteSecretsRS'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/secrets.CopyPasteSecretsRS'
+      summary: Copy-paste secrets & folders
       tags:
       - Secrets
   /secrets/list/:

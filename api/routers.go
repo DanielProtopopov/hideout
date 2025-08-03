@@ -53,6 +53,7 @@ func Serve() {
 	v1Secrets.PUT("/", secrets.CreateSecretsHandler)
 	v1Secrets.PATCH("/", secrets.UpdateSecretsHandler)
 	v1Secrets.DELETE("/", secrets.DeleteSecretsHandler)
+	v1Secrets.PUT("/copy-paste", secrets.CopyPasteSecretsHandler)
 
 	errRun := route.Run(fmt.Sprintf("%s:%d", apiconfig.Settings.Server.Host, apiconfig.Settings.Server.Port))
 	log.Panic(errRun)

@@ -59,10 +59,22 @@ type (
 	}
 
 	DeleteSecretsRQ struct {
-		UIDs []string `json:"UIDs"`
+		SecretUIDs []string `json:"SecretUIDs"`
+		FolderUIDs []string `json:"FolderUIDs"`
 	}
 
 	DeleteSecretsRS struct {
+		rqrs.ResponseListRS
+	}
+
+	CopyPasteSecretsRQ struct {
+		SecretUIDs    []string `json:"SecretUIDs"`
+		FolderUIDs    []string `json:"FolderUIDs"`
+		FromFolderUID string   `json:"FromFolderUID"`
+		ToFolderUID   string   `json:"ToFolderUID"`
+	}
+
+	CopyPasteSecretsRS struct {
 		rqrs.ResponseListRS
 	}
 

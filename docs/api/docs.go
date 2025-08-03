@@ -73,6 +73,17 @@ const docTemplate = `{
                 ],
                 "summary": "Create secrets",
                 "operationId": "create-secrets",
+                "parameters": [
+                    {
+                        "description": "Secrets to create",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/secrets.CreateSecretsRQ"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -122,6 +133,17 @@ const docTemplate = `{
                 ],
                 "summary": "Delete secrets",
                 "operationId": "delete-secrets",
+                "parameters": [
+                    {
+                        "description": "Secrets to delete",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/secrets.DeleteSecretsRQ"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -171,6 +193,17 @@ const docTemplate = `{
                 ],
                 "summary": "Update secrets",
                 "operationId": "update-secrets",
+                "parameters": [
+                    {
+                        "description": "Secrets to update",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/secrets.UpdateSecretsRQ"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -206,6 +239,68 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/secrets.UpdateSecretsRS"
+                        }
+                    }
+                }
+            }
+        },
+        "/secrets/copy-paste": {
+            "put": {
+                "description": "Copy-paste secrets \u0026 folders",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secrets"
+                ],
+                "summary": "Copy-paste secrets \u0026 folders",
+                "operationId": "copy-paste-secrets",
+                "parameters": [
+                    {
+                        "description": "Secrets to copy-and-paste",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/secrets.CopyPasteSecretsRQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.CopyPasteSecretsRS"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.CopyPasteSecretsRS"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.CopyPasteSecretsRS"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.CopyPasteSecretsRS"
                         }
                     }
                 }
@@ -347,6 +442,84 @@ const docTemplate = `{
                 }
             }
         },
+        "secrets.CopyPasteSecretsRQ": {
+            "type": "object",
+            "properties": {
+                "FolderUIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "FromFolderUID": {
+                    "type": "string"
+                },
+                "SecretUIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "ToFolderUID": {
+                    "type": "string"
+                }
+            }
+        },
+        "secrets.CopyPasteSecretsRS": {
+            "type": "object",
+            "properties": {
+                "Errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rqrs.Error"
+                    }
+                },
+                "Pages": {
+                    "type": "integer",
+                    "example": 14
+                },
+                "PerPage": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "Total": {
+                    "type": "integer",
+                    "example": 280
+                }
+            }
+        },
+        "secrets.CreateSecret": {
+            "type": "object",
+            "properties": {
+                "FolderUID": {
+                    "type": "string",
+                    "example": "/"
+                },
+                "Name": {
+                    "type": "string",
+                    "example": "DEBUG"
+                },
+                "Type": {
+                    "type": "string",
+                    "example": "int"
+                },
+                "Value": {
+                    "type": "string",
+                    "example": "Test"
+                }
+            }
+        },
+        "secrets.CreateSecretsRQ": {
+            "type": "object",
+            "properties": {
+                "Data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/secrets.CreateSecret"
+                    }
+                }
+            }
+        },
         "secrets.CreateSecretsRS": {
             "type": "object",
             "properties": {
@@ -373,6 +546,23 @@ const docTemplate = `{
                 "Total": {
                     "type": "integer",
                     "example": 280
+                }
+            }
+        },
+        "secrets.DeleteSecretsRQ": {
+            "type": "object",
+            "properties": {
+                "FolderUIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "SecretUIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -466,6 +656,17 @@ const docTemplate = `{
                 "Total": {
                     "type": "integer",
                     "example": 280
+                }
+            }
+        },
+        "secrets.UpdateSecretsRQ": {
+            "type": "object",
+            "properties": {
+                "Data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api_group_secrets.Secret"
+                    }
                 }
             }
         },

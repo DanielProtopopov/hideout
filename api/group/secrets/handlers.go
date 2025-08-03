@@ -55,24 +55,6 @@ func GetSecretsHandler(c *gin.Context) {
 	var request GetSecretsRQ
 	response := GetSecretsRS{Secrets: []Secret{}, Folders: []Folder{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
-	errBindBody := c.ShouldBindBodyWith(&request, binding.JSON)
-	if errBindBody != nil {
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "RequestBodyMappingError"}})
-		response.ResponseListRS.Errors = append(response.ResponseListRS.Errors, rqrs.Error{Message: msg, Description: errBindBody.Error(), Code: 0})
-		c.JSON(http.StatusBadRequest, response)
-		return
-	}
-
-	errValidate := request.Validate(rqContext, Localizer)
-	if errValidate != nil {
-		log.Printf("Error validating body of the request: %s", errValidate)
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "RequestValidationError"}})
-		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errValidate.Error(), Code: 0})
-		c.JSON(http.StatusBadRequest, response)
-		return
-	}
-	validationSpan.Finish()
-
 	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.Repository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
@@ -81,6 +63,22 @@ func GetSecretsHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
+
+	errBindBody := c.ShouldBindBodyWith(&request, binding.JSON)
+	if errBindBody != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "RequestBodyMappingError"}})
+		response.ResponseListRS.Errors = append(response.ResponseListRS.Errors, rqrs.Error{Message: msg, Description: errBindBody.Error(), Code: 0})
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	errValidate := request.Validate(rqContext, secretsSvc, Localizer)
+	if errValidate != nil {
+		response.Errors = errValidate
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	validationSpan.Finish()
 
 	folderByUID, errGetFolder := secretsSvc.GetFolderByUID(rqContext, request.FolderUID)
 	if errGetFolder != nil {
@@ -142,6 +140,7 @@ func GetSecretsHandler(c *gin.Context) {
 // @ID update-secrets
 // @Tags Secrets
 // @Produce json
+// @Param params body UpdateSecretsRQ true "Secrets to update"
 // @Success 200 {object} UpdateSecretsRS
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 403 {string} string "Forbidden"
@@ -167,13 +166,29 @@ func UpdateSecretsHandler(c *gin.Context) {
 	validationSpan := sentry.StartSpan(rqContext, "update.secrets")
 	validationSpan.Description = "rq.validate"
 
-	response := UpdateSecretsRS{ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
-	var idParam string
+	var request UpdateSecretsRQ
+	response := UpdateSecretsRS{Data: []Secret{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
-	errBindURI := c.ShouldBindUri(&idParam)
-	if errBindURI != nil {
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "RequestURIMappingError"}})
-		response.ResponseListRS.Errors = append(response.ResponseListRS.Errors, rqrs.Error{Message: msg, Description: errBindURI.Error(), Code: 0})
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.Repository, &structs.Folders, &structs.Secrets)
+	if errCreateService != nil {
+		log.Printf("Error creating secrets service: %s", errCreateService.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errCreateService.Error(), Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	errBindBody := c.ShouldBindBodyWith(&request, binding.JSON)
+	if errBindBody != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "RequestBodyMappingError"}})
+		response.ResponseListRS.Errors = append(response.ResponseListRS.Errors, rqrs.Error{Message: msg, Description: errBindBody.Error(), Code: 0})
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	errValidate := request.Validate(rqContext, secretsSvc, Localizer)
+	if errValidate != nil {
+		response.Errors = errValidate
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -193,6 +208,7 @@ func UpdateSecretsHandler(c *gin.Context) {
 // @ID delete-secrets
 // @Tags Secrets
 // @Produce json
+// @Param params body DeleteSecretsRQ true "Secrets to delete"
 // @Success 200 {object} DeleteSecretsRS
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 403 {string} string "Forbidden"
@@ -218,13 +234,29 @@ func DeleteSecretsHandler(c *gin.Context) {
 	validationSpan := sentry.StartSpan(rqContext, "delete.secrets")
 	validationSpan.Description = "rq.validate"
 
+	var request DeleteSecretsRQ
 	response := DeleteSecretsRS{ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
-	var idParam string
 
-	errBindURI := c.ShouldBindUri(&idParam)
-	if errBindURI != nil {
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "RequestURIMappingError"}})
-		response.ResponseListRS.Errors = append(response.ResponseListRS.Errors, rqrs.Error{Message: msg, Description: errBindURI.Error(), Code: 0})
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.Repository, &structs.Folders, &structs.Secrets)
+	if errCreateService != nil {
+		log.Printf("Error creating secrets service: %s", errCreateService.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errCreateService.Error(), Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	errBindBody := c.ShouldBindBodyWith(&request, binding.JSON)
+	if errBindBody != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "RequestBodyMappingError"}})
+		response.ResponseListRS.Errors = append(response.ResponseListRS.Errors, rqrs.Error{Message: msg, Description: errBindBody.Error(), Code: 0})
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	errValidate := request.Validate(rqContext, secretsSvc, Localizer)
+	if errValidate != nil {
+		response.Errors = errValidate
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -244,6 +276,7 @@ func DeleteSecretsHandler(c *gin.Context) {
 // @ID create-secrets
 // @Tags Secrets
 // @Produce json
+// @Param params body CreateSecretsRQ true "Secrets to create"
 // @Success 200 {object} CreateSecretsRS
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 403 {string} string "Forbidden"
@@ -285,6 +318,58 @@ func CreateSecretsHandler(c *gin.Context) {
 	prepareSpan.Description = "prepare"
 
 	// @TODO Implement creating a list of secrets
+
+	c.JSON(http.StatusOK, response)
+}
+
+// CopyPasteSecretsHandler
+// @Summary Copy-paste secrets & folders
+// @Description Copy-paste secrets & folders
+// @ID copy-paste-secrets
+// @Tags Secrets
+// @Produce json
+// @Param params body CopyPasteSecretsRQ true "Secrets to copy-and-paste"
+// @Success 200 {object} CopyPasteSecretsRS
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 403 {string} string "Forbidden"
+// @Failure 400 {object} CopyPasteSecretsRS
+// @Failure 404 {object} CopyPasteSecretsRS
+// @Failure 500 {object} CopyPasteSecretsRS
+// @Router /secrets/copy-paste [put]
+func CopyPasteSecretsHandler(c *gin.Context) {
+	rqContext := c.Request.Context()
+	SentryHub := sentry.GetHubFromContext(rqContext)
+	if SentryHub == nil {
+		SentryHub = sentry.CurrentHub().Clone()
+		rqContext = sentry.SetHubOnContext(rqContext, SentryHub)
+	}
+
+	Language, _ := c.Get("Language")
+	Localizer := i18n.NewLocalizer(apiconfig.Settings.Bundle, Language.(string))
+
+	rqContext = context.WithValue(rqContext, "Sentry", SentryHub)
+	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
+	rqContext = context.WithValue(rqContext, "Language", Language)
+
+	validationSpan := sentry.StartSpan(rqContext, "update.secrets")
+	validationSpan.Description = "rq.validate"
+
+	response := UpdateSecretsRS{ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
+	var idParam string
+
+	errBindURI := c.ShouldBindUri(&idParam)
+	if errBindURI != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "RequestURIMappingError"}})
+		response.ResponseListRS.Errors = append(response.ResponseListRS.Errors, rqrs.Error{Message: msg, Description: errBindURI.Error(), Code: 0})
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	validationSpan.Finish()
+
+	prepareSpan := sentry.StartSpan(rqContext, "update.secrets")
+	prepareSpan.Description = "prepare"
+
+	// @TODO Implement updating a list of secrets
 
 	c.JSON(http.StatusOK, response)
 }
