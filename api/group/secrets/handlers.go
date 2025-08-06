@@ -88,13 +88,15 @@ func GetSecretsHandler(c *gin.Context) {
 	if errGetFolder != nil {
 		if errors.Is(errGetFolder, apperror.ErrRecordNotFound) {
 			log.Printf("Folder with UID of %s was not found", request.FolderUID)
-			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "FolderNotFoundError"}})
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "FolderNotFoundError"},
+				TemplateData: map[string]interface{}{"UID": request.FolderUID}})
 			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
 			c.JSON(http.StatusNotFound, response)
 			return
 		}
 		log.Printf("Error fetching folder with UID of %s: %s", request.FolderUID, errGetFolder.Error())
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderError"}})
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"},
+			TemplateData: map[string]interface{}{"UID": request.FolderUID}})
 		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetFolder.Error(), Code: 0})
 		c.JSON(http.StatusInternalServerError, response)
 		return
@@ -216,7 +218,8 @@ func UpdateSecretsHandler(c *gin.Context) {
 		})
 		if errUpdateSecret != nil {
 			log.Printf("Error updating secret with UID of %s: %s", updateSecretEntry.UID, errUpdateSecret.Error())
-			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "UpdateSecretError"}})
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "UpdateSecretError"},
+				TemplateData: map[string]interface{}{"UID": updateSecretEntry.UID}})
 			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errUpdateSecret.Error(), Code: 0})
 			continue
 		}
@@ -298,14 +301,16 @@ func DeleteSecretsHandler(c *gin.Context) {
 		secretByUID, errGetSecretByUID := secretsSvc.GetSecretByUID(rqContext, deleteSecretUID)
 		if errGetSecretByUID != nil {
 			log.Printf("Error retrieving secret with UID of %s: %s", deleteSecretUID, errGetSecretByUID.Error())
-			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretByUIDError"}})
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretByUIDError"},
+				TemplateData: map[string]interface{}{"UID": deleteSecretUID}})
 			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetSecretByUID.Error(), Code: 0})
 			continue
 		}
 		errDeleteSecret := secretsSvc.DeleteSecret(rqContext, secretByUID.ID, false)
 		if errDeleteSecret != nil {
 			log.Printf("Error deleting secret with UID of %s: %s", deleteSecretUID, errDeleteSecret.Error())
-			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DeleteSecretError"}})
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DeleteSecretError"},
+				TemplateData: map[string]interface{}{"UID": deleteSecretUID}})
 			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errDeleteSecret.Error(), Code: 0})
 		}
 	}
@@ -321,7 +326,7 @@ func DeleteSecretsHandler(c *gin.Context) {
 		errDeleteFolder := secretsSvc.DeleteFolder(rqContext, folderByUID.ID, false)
 		if errDeleteFolder != nil {
 			log.Printf("Error retrieving folder with UID of %s: %s", deleteFolderUID, errDeleteFolder.Error())
-			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DeleteFolderError"}})
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DeleteFolderError"}, TemplateData: map[string]interface{}{"UID": deleteFolderUID}})
 			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errDeleteFolder.Error(), Code: 0})
 		}
 	}
@@ -398,11 +403,12 @@ func CreateSecretsHandler(c *gin.Context) {
 		if errGetFolder != nil {
 			if errors.Is(errGetFolder, apperror.ErrRecordNotFound) {
 				log.Printf("Folder with UID of %s was not found", secretToCreate.FolderUID)
-				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "FolderNotFoundError"}})
+				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "FolderNotFoundError"},
+					TemplateData: map[string]interface{}{"UID": secretToCreate.FolderUID}})
 				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
 			} else {
 				log.Printf("Error fetching folder with UID of %s: %s", secretToCreate.FolderUID, errGetFolder.Error())
-				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderError"}})
+				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"}})
 				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetFolder.Error(), Code: 0})
 			}
 			continue
@@ -534,7 +540,8 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 	if errCopy != nil {
 		log.Printf("Error copying secret(s) and/or folder(s) from folder with UID %s to folder with UID of %s: %s",
 			request.FromFolderUID, request.ToFolderUID, errCopy.Error())
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CopySecretsFoldersError"}})
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CopySecretsFoldersError"},
+			TemplateData: map[string]interface{}{"UID": folderTo.UID}})
 		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errCopy.Error(), Code: 0})
 		c.JSON(http.StatusInternalServerError, response)
 		return
@@ -543,8 +550,9 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 	for _, copiedSecret := range copiedSecrets {
 		copiedSecretFolder, errGetFolderByID := secretsSvc.GetFolderByID(rqContext, copiedSecret.FolderID)
 		if errGetFolderByID != nil {
-			log.Printf("Error retrieving folder with ID of %d: %s", copiedSecret.FolderID, errGetFolderByID.Error())
-			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByIDError"}})
+			log.Printf("Error retrieving folder of copied secret: %s", errGetFolderByID.Error())
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretFolderError"},
+				TemplateData: map[string]interface{}{"UID": copiedSecret.UID}})
 			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetFolderByID.Error(), Code: 0})
 			continue
 		}
