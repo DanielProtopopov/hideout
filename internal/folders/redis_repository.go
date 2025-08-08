@@ -34,14 +34,14 @@ func (m RedisRepository) GetID(ctx context.Context) (uint, error) {
 		return 0, errors.Wrap(errLoadFolders, "Failed to load folders from Redis")
 	}
 
-	var maxID = uint(0)
+	var maxID = uint(1)
 	for _, folder := range folders {
 		if folder.ID >= maxID {
 			maxID = folder.ID
 		}
 	}
 
-	return maxID, nil
+	return maxID + 1, nil
 }
 
 func (m RedisRepository) Load(ctx context.Context) ([]Folder, error) {

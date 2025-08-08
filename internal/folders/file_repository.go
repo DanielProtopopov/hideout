@@ -44,7 +44,7 @@ func (m FileRepository) GetID(ctx context.Context) (uint, error) {
 		}
 	}
 
-	return maxID, nil
+	return maxID + 1, nil
 }
 
 func (m FileRepository) Load(ctx context.Context) ([]Folder, error) {

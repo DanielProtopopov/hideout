@@ -41,7 +41,7 @@ func (m RedisRepository) GetID(ctx context.Context) (uint, error) {
 		}
 	}
 
-	return maxID, nil
+	return maxID + 1, nil
 }
 
 func (m RedisRepository) Load(ctx context.Context) ([]Secret, error) {
