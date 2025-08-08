@@ -262,6 +262,7 @@ func (m FileRepository) encode(data *[]Folder) error {
 	case extra.Encoding_JSON:
 		{
 			encoder := json.NewEncoder(fileWriter)
+			encoder.SetIndent("", " ")
 			return encoder.Encode(data)
 		}
 	case extra.Encoding_CSV:

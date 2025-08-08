@@ -162,7 +162,7 @@ func (m InMemoryRepository) Delete(ctx context.Context, id uint, forceDelete boo
 			if forceDelete {
 				*m.conn = slices.Delete(*m.conn, folderIndex, folderIndex+1)
 			} else {
-				folderEntry.DeletedAt = sql.NullTime{Valid: true, Time: time.Now()}
+				(*m.conn)[folderIndex].DeletedAt = sql.NullTime{Valid: true, Time: time.Now()}
 			}
 			return nil
 		}
