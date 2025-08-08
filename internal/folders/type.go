@@ -9,9 +9,9 @@ import (
 type (
 	Folder struct {
 		model.Model
-		ParentID uint   `json:"ParentID" db:"parent_id" gorm:"column:parent_id" description:"Parent value identifier (link)" example:"0"`
-		UID      string `json:"UID" db:"uid" gorm:"column:uid;unique" description:"Secondary unique identifier" example:"abc-def-ghi"`
-		Name     string `json:"Name" db:"name" gorm:"column:name" description:"Folder folder name" example:"/"`
+		ParentID uint   `json:"ParentID" bson:"ParentID" xml:"ParentID" csv:"ParentID" yaml:"ParentID" db:"parent_id" gorm:"column:parent_id" description:"Parent value identifier (link)" example:"0"`
+		UID      string `json:"UID" bson:"UID" xml:"UID" csv:"UID" db:"uid" yaml:"UID" gorm:"column:uid;unique" description:"Secondary unique identifier" example:"abc-def-ghi"`
+		Name     string `json:"Name" bson:"Name" xml:"Name" csv:"Name" yaml:"Name" db:"name" gorm:"column:name" description:"Folder folder name" example:"/"`
 	}
 
 	Repository interface {
