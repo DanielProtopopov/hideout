@@ -9,6 +9,7 @@ require (
 	github.com/brianvoe/gofakeit/v7 v7.3.0
 	github.com/getsentry/sentry-go v0.34.1
 	github.com/gin-gonic/gin v1.10.1
+	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9

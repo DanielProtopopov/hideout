@@ -250,101 +250,91 @@ func (m InMemoryRepository) Sort(ctx context.Context, data []*Secret, ordering [
 		switch columnMap {
 		case "id":
 			{
-				if order.Order == true {
-					orderParams = append(orderParams, func(p1, p2 *Secret) bool {
-						if order.Order {
-							return p1.ID < p2.ID
-						} else {
-							return p1.ID > p2.ID
-						}
-					})
-				}
+				orderParams = append(orderParams, func(p1, p2 *Secret) bool {
+					if order.Order {
+						return p1.ID < p2.ID
+					} else {
+						return p1.ID > p2.ID
+					}
+				})
 			}
 		case "folder_id":
 			{
-				if order.Order == true {
-					orderParams = append(orderParams, func(p1, p2 *Secret) bool {
-						if order.Order {
-							return p1.FolderID < p2.FolderID
-						} else {
-							return p1.FolderID > p2.FolderID
-						}
-					})
-				}
+				orderParams = append(orderParams, func(p1, p2 *Secret) bool {
+					if order.Order {
+						return p1.FolderID < p2.FolderID
+					} else {
+						return p1.FolderID > p2.FolderID
+					}
+				})
 			}
 		case "uid":
 			{
-				if order.Order == true {
-					orderParams = append(orderParams, func(p1, p2 *Secret) bool {
-						if order.Order {
-							return p1.UID < p2.UID
-						} else {
-							return p1.UID > p2.UID
-						}
-					})
-				}
+				orderParams = append(orderParams, func(p1, p2 *Secret) bool {
+					if order.Order {
+						return p1.UID < p2.UID
+					} else {
+						return p1.UID > p2.UID
+					}
+				})
 			}
 		case "name":
 			{
-				if order.Order == true {
-					orderParams = append(orderParams, func(p1, p2 *Secret) bool {
-						if order.Order {
-							return p1.Name < p2.Name
-						} else {
-							return p1.Name > p2.Name
-						}
-					})
-				}
+				orderParams = append(orderParams, func(p1, p2 *Secret) bool {
+					if order.Order {
+						return p1.Name < p2.Name
+					} else {
+						return p1.Name > p2.Name
+					}
+				})
 			}
 		case "type":
 			{
-				if order.Order == true {
-					orderParams = append(orderParams, func(p1, p2 *Secret) bool {
-						if order.Order {
-							return p1.Type < p2.Type
-						} else {
-							return p1.Type > p2.Type
-						}
-					})
-				}
+				orderParams = append(orderParams, func(p1, p2 *Secret) bool {
+					if order.Order {
+						return p1.Type < p2.Type
+					} else {
+						return p1.Type > p2.Type
+					}
+				})
 			}
 		case "created_at":
 			{
-				if order.Order == true {
-					orderParams = append(orderParams, func(p1, p2 *Secret) bool {
-						if order.Order {
-							return p1.CreatedAt.Before(p2.CreatedAt)
-						} else {
-							return p1.CreatedAt.After(p2.CreatedAt)
-						}
-					})
-				}
+				orderParams = append(orderParams, func(p1, p2 *Secret) bool {
+					if order.Order {
+						return p1.CreatedAt.Before(p2.CreatedAt)
+					} else {
+						return p1.CreatedAt.After(p2.CreatedAt)
+					}
+				})
 			}
 		case "updated_at":
 			{
-				if order.Order == true {
-					orderParams = append(orderParams, func(p1, p2 *Secret) bool {
-						if order.Order {
-							return p1.UpdatedAt.Before(p2.UpdatedAt)
-						} else {
-							return p1.UpdatedAt.After(p2.UpdatedAt)
-						}
-					})
-				}
+				orderParams = append(orderParams, func(p1, p2 *Secret) bool {
+					if order.Order {
+						return p1.UpdatedAt.Before(p2.UpdatedAt)
+					} else {
+						return p1.UpdatedAt.After(p2.UpdatedAt)
+					}
+				})
 			}
 		case "deleted_at":
 			{
-				if order.Order == true {
-					orderParams = append(orderParams, func(p1, p2 *Secret) bool {
-						if order.Order {
-							return p1.DeletedAt.Valid && p2.DeletedAt.Valid && p1.DeletedAt.Time.Before(p2.DeletedAt.Time)
-						} else {
-							return p1.DeletedAt.Valid && p2.DeletedAt.Valid && p1.DeletedAt.Time.After(p2.DeletedAt.Time)
-						}
-					})
-				}
+				orderParams = append(orderParams, func(p1, p2 *Secret) bool {
+					if order.Order {
+						return p1.DeletedAt.Valid && p2.DeletedAt.Valid && p1.DeletedAt.Time.Before(p2.DeletedAt.Time)
+					} else {
+						return p1.DeletedAt.Valid && p2.DeletedAt.Valid && p1.DeletedAt.Time.After(p2.DeletedAt.Time)
+					}
+				})
 			}
 		}
+	}
+
+	if len(orderParams) == 0 {
+		orderParams = append(orderParams, func(p1, p2 *Secret) bool {
+			return p1.ID > p2.ID
+		})
 	}
 
 	OrderedBy(orderParams...).Sort(data)

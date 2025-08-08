@@ -5,6 +5,7 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/pkg/errors"
 	"hideout/config"
+	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
 	"hideout/internal/folders"
 	"hideout/internal/secrets"
@@ -15,91 +16,161 @@ type Config struct {
 }
 
 type SecretsService struct {
-	config  config.RepositoryConfig
-	folders *[]folders.Folder
-	secrets *[]secrets.Secret
+	secretsConfig config.RepositoryConfig
+	foldersConfig config.RepositoryConfig
+	folders       *[]folders.Folder
+	secrets       *[]secrets.Secret
 
 	secretsRepository secrets.Repository
 	foldersRepository folders.Repository
 }
 
 // NewService Creation of the service
-func NewService(ctx context.Context, config config.RepositoryConfig, foldersList *[]folders.Folder, secretsList *[]secrets.Secret) (*SecretsService, error) {
-	switch config.Type {
+func NewService(ctx context.Context, secretsConfig config.RepositoryConfig, foldersConfig config.RepositoryConfig, foldersList *[]folders.Folder, secretsList *[]secrets.Secret) (*SecretsService, error) {
+	secretsService := &SecretsService{secretsConfig: secretsConfig, foldersConfig: foldersConfig}
+	switch secretsConfig.Type {
 	case RepositoryType_InMemory:
 		{
-			return &SecretsService{config: config, folders: foldersList, secrets: secretsList,
-				secretsRepository: secrets.NewInMemoryRepository(&structs.Secrets), foldersRepository: folders.NewInMemoryRepository(&structs.Folders)}, nil
+			secretsService.secretsRepository = secrets.NewInMemoryRepository(&structs.Secrets)
+			secretsService.secrets = secretsList
 		}
 	case RepositoryType_Redis:
 		{
 			var inMemorySecretsRep *secrets.InMemoryRepository = nil
-			var inMemoryFoldersRep *folders.InMemoryRepository = nil
-			if config.PreloadInMemory {
+			if secretsConfig.PreloadInMemory {
 				inMemorySecretsRep = secrets.NewInMemoryRepository(&structs.Secrets)
-				inMemoryFoldersRep = folders.NewInMemoryRepository(&structs.Folders)
 			}
 			redisSecretsRep := secrets.NewRedisRepository(structs.Redis, inMemorySecretsRep)
-			redisFoldersRep := folders.NewRedisRepository(structs.Redis, inMemoryFoldersRep)
-			if config.PreloadInMemory {
+			if secretsConfig.PreloadInMemory {
 				loadedSecrets, errLoadSecrets := redisSecretsRep.Load(ctx)
 				if errLoadSecrets != nil {
-					return nil, errors.Wrap(errLoadSecrets, "Error preloading secrets into in-memory storage in Redis")
+					return nil, errors.Wrap(errLoadSecrets, "Error preloading secrets from Redis storage")
 				}
-				structs.Secrets = loadedSecrets
-				loadedFolders, errLoadFolders := redisFoldersRep.Load(ctx)
-				if errLoadFolders != nil {
-					return nil, errors.Wrap(errLoadFolders, "Error preloading folders into in-memory storage in Redis")
-				}
-				structs.Folders = loadedFolders
+				secretsService.secrets = &loadedSecrets
+				secretsService.secretsRepository = redisSecretsRep
 			}
-			secretsSvc := SecretsService{config: config, folders: foldersList, secrets: secretsList,
-				secretsRepository: redisSecretsRep, foldersRepository: redisFoldersRep}
 
-			if config.PreloadInMemory {
-				errLoad := secretsSvc.Load(ctx)
+			if secretsConfig.PreloadInMemory {
+				errLoad := secretsService.LoadSecrets(ctx)
 				if errLoad != nil {
 					return nil, errors.Wrap(errLoad, "Error loading data into memory")
 				}
 			}
-
-			return &secretsSvc, nil
 		}
 	case RepositoryType_Database:
 		{
 			var inMemorySecretsRep *secrets.InMemoryRepository = nil
-			var inMemoryFoldersRep *folders.InMemoryRepository = nil
-			if config.PreloadInMemory {
+			if secretsConfig.PreloadInMemory {
 				inMemorySecretsRep = secrets.NewInMemoryRepository(&structs.Secrets)
-				inMemoryFoldersRep = folders.NewInMemoryRepository(&structs.Folders)
 			}
 			databaseSecretsRep := secrets.NewDatabaseRepository(structs.Gorm, inMemorySecretsRep)
-			databaseFoldersRep := folders.NewDatabaseRepository(structs.Gorm, inMemoryFoldersRep)
+			secretsService.secretsRepository = databaseSecretsRep
 
-			secretsSvc := SecretsService{config: config, folders: foldersList, secrets: secretsList,
-				secretsRepository: databaseSecretsRep, foldersRepository: databaseFoldersRep}
-
-			if config.PreloadInMemory {
-				errLoad := secretsSvc.Load(ctx)
+			if secretsConfig.PreloadInMemory {
+				errLoad := secretsService.LoadSecrets(ctx)
 				if errLoad != nil {
 					return nil, errors.Wrap(errLoad, "Error loading data into memory")
 				}
 			}
+		}
+	case RepositoryType_File:
+		{
+			var inMemorySecretsRep *secrets.InMemoryRepository = nil
+			if secretsConfig.PreloadInMemory {
+				inMemorySecretsRep = secrets.NewInMemoryRepository(&structs.Secrets)
+			}
+			fileSecretsRep := secrets.NewFileRepository(secretsConfig.FileName, secretsConfig.FileEncoding, inMemorySecretsRep)
+			secretsService.secretsRepository = fileSecretsRep
 
-			return &secretsSvc, nil
+			if secretsConfig.PreloadInMemory {
+				errLoad := secretsService.LoadSecrets(ctx)
+				if errLoad != nil {
+					return nil, errors.Wrap(errLoad, "Error loading data into memory")
+				}
+			}
 		}
 	}
 
-	return nil, errors.New("invalid repository type")
+	switch foldersConfig.Type {
+	case RepositoryType_InMemory:
+		{
+			secretsService.foldersRepository = folders.NewInMemoryRepository(&structs.Folders)
+			secretsService.folders = foldersList
+		}
+	case RepositoryType_Redis:
+		{
+			var inMemoryFoldersRep *folders.InMemoryRepository = nil
+			if foldersConfig.PreloadInMemory {
+				inMemoryFoldersRep = folders.NewInMemoryRepository(&structs.Folders)
+			}
+			redisFoldersRep := folders.NewRedisRepository(structs.Redis, inMemoryFoldersRep)
+			if foldersConfig.PreloadInMemory {
+				loadedFolders, errLoadFolders := redisFoldersRep.Load(ctx)
+				if errLoadFolders != nil {
+					return nil, errors.Wrap(errLoadFolders, "Error preloading folders into in-memory storage in Redis")
+				}
+				secretsService.folders = &loadedFolders
+				secretsService.foldersRepository = redisFoldersRep
+			}
+
+			if foldersConfig.PreloadInMemory {
+				errLoad := secretsService.LoadFolders(ctx)
+				if errLoad != nil {
+					return nil, errors.Wrap(errLoad, "Error loading data into memory")
+				}
+			}
+		}
+	case RepositoryType_Database:
+		{
+			var inMemoryFoldersRep *folders.InMemoryRepository = nil
+			if foldersConfig.PreloadInMemory {
+				inMemoryFoldersRep = folders.NewInMemoryRepository(&structs.Folders)
+			}
+			databaseFoldersRep := folders.NewDatabaseRepository(structs.Gorm, inMemoryFoldersRep)
+			secretsService.foldersRepository = databaseFoldersRep
+
+			if foldersConfig.PreloadInMemory {
+				errLoad := secretsService.LoadFolders(ctx)
+				if errLoad != nil {
+					return nil, errors.Wrap(errLoad, "Error loading data into memory")
+				}
+			}
+		}
+	case RepositoryType_File:
+		{
+			var inMemoryFoldersRep *folders.InMemoryRepository = nil
+			if foldersConfig.PreloadInMemory {
+				inMemoryFoldersRep = folders.NewInMemoryRepository(&structs.Folders)
+			}
+			fileFoldersRep := folders.NewFileRepository(foldersConfig.FileName, foldersConfig.FileEncoding, inMemoryFoldersRep)
+			secretsService.foldersRepository = fileFoldersRep
+
+			if foldersConfig.PreloadInMemory {
+				errLoad := secretsService.LoadFolders(ctx)
+				if errLoad != nil {
+					return nil, errors.Wrap(errLoad, "Error loading data into memory")
+				}
+			}
+		}
+	}
+
+	return secretsService, nil
 }
 
-func (m *SecretsService) Load(ctx context.Context) error {
-	if m.config.PreloadInMemory {
+func (m *SecretsService) LoadSecrets(ctx context.Context) error {
+	if m.secretsConfig.PreloadInMemory {
 		loadedSecrets, errLoadSecrets := m.secretsRepository.Load(ctx)
 		if errLoadSecrets != nil {
-			return errors.Wrap(errLoadSecrets, "Error preloading secrets into in-memory storage in Redis")
+			return errors.Wrap(errLoadSecrets, "Error preloading secrets into in-memory storage")
 		}
 		structs.Secrets = loadedSecrets
+	}
+
+	return nil
+}
+
+func (m *SecretsService) LoadFolders(ctx context.Context) error {
+	if m.foldersConfig.PreloadInMemory {
 		loadedFolders, errLoadFolders := m.foldersRepository.Load(ctx)
 		if errLoadFolders != nil {
 			return errors.Wrap(errLoadFolders, "Error preloading folders into in-memory storage in Redis")
@@ -299,28 +370,15 @@ func (m *SecretsService) copySecrets(ctx context.Context, secretsList []*secrets
 }
 
 func (m *SecretsService) getSecretsByFolder(ctx context.Context, parentFolderID uint) ([]*secrets.Secret, error) {
-	var results []*secrets.Secret
-	parentFolder, errGetFolder := m.foldersRepository.GetByID(ctx, parentFolderID)
-	if errGetFolder != nil {
-		return nil, errGetFolder
-	}
-
-	for _, secret := range *m.secrets {
-		if secret.FolderID == parentFolder.ID {
-			results = append(results, &secret)
-		}
-	}
-
-	return results, nil
+	return m.secretsRepository.Get(ctx, secrets.ListSecretParams{
+		ListParams: generics.ListParams{Deleted: model.No},
+		FolderIDs:  []uint{parentFolderID},
+	})
 }
 
 func (m *SecretsService) getFoldersByFolder(ctx context.Context, parentFolderID uint) ([]*folders.Folder, error) {
-	var results []*folders.Folder
-	for _, folder := range *m.folders {
-		if folder.ParentID == parentFolderID {
-			results = append(results, &folder)
-		}
-	}
-
-	return results, nil
+	return m.foldersRepository.Get(ctx, folders.ListFolderParams{
+		ListParams:     generics.ListParams{Deleted: model.No},
+		ParentFolderID: parentFolderID,
+	})
 }

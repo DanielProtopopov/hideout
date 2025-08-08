@@ -56,7 +56,7 @@ func GetSecretsHandler(c *gin.Context) {
 	var request GetSecretsRQ
 	response := GetSecretsRS{Secrets: []Secret{}, Folders: []Folder{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
-	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.Repository, &structs.Folders, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository, apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
@@ -177,7 +177,7 @@ func UpdateSecretsHandler(c *gin.Context) {
 	var request UpdateSecretsRQ
 	response := UpdateSecretsRS{Data: []Secret{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
-	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.Repository, &structs.Folders, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository, apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
@@ -269,7 +269,7 @@ func DeleteSecretsHandler(c *gin.Context) {
 	var request DeleteSecretsRQ
 	response := DeleteSecretsRS{ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
-	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.Repository, &structs.Folders, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository, apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
@@ -370,7 +370,7 @@ func CreateSecretsHandler(c *gin.Context) {
 	var request CreateSecretsRQ
 	response := CreateSecretsRS{ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
-	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.Repository, &structs.Folders, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository, apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
@@ -468,7 +468,7 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 	var request CopyPasteSecretsRQ
 	response := CopyPasteSecretsRS{Folders: []Folder{}, Secrets: []Secret{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
-	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.Repository, &structs.Folders, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository, apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})

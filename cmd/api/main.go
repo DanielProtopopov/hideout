@@ -6,7 +6,6 @@ import (
 	"github.com/joho/godotenv"
 	"hideout/api"
 	apiconfig "hideout/cmd/api/config"
-	"hideout/internal/common/model"
 	"hideout/internal/folders"
 	secrets2 "hideout/internal/secrets"
 	"hideout/services/secrets"
@@ -34,19 +33,12 @@ func main() {
 		}
 	}()
 
-	secretsSvc, errCreateService := secrets.NewService(ctx, apiconfig.Settings.Repository, &structs.Folders, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(ctx, apiconfig.Settings.SecretsRepository, apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Fatal(errCreateService)
 	}
 
-	if apiconfig.Settings.Repository.PreloadInMemory {
-		errReload := secretsSvc.Load(ctx)
-		if errReload != nil {
-			log.Fatal(errReload)
-		}
-	}
-
-	rootFolder, _ := secretsSvc.CreateFolder(ctx, folders.Folder{Model: model.Model{ID: 0}, Name: ""})
+	rootFolder, _ := secretsSvc.CreateFolder(ctx, folders.Folder{Name: ""})
 	testFolder, _ := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "test"})
 
 	anotherTestFolder, _ := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "another-test"})

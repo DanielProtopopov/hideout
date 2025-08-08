@@ -5,6 +5,10 @@ import (
 	"hideout/internal/folders"
 )
 
+func (m *SecretsService) GetFolderID(ctx context.Context) (uint, error) {
+	return m.foldersRepository.GetID(ctx)
+}
+
 func (m *SecretsService) GetFolders(ctx context.Context, params folders.ListFolderParams) ([]*folders.Folder, error) {
 	return m.foldersRepository.Get(ctx, params)
 }
@@ -30,6 +34,11 @@ func (m *SecretsService) UpdateFolder(ctx context.Context, folder folders.Folder
 }
 
 func (m *SecretsService) CreateFolder(ctx context.Context, folder folders.Folder) (*folders.Folder, error) {
+	folderID, errGetID := m.GetFolderID(ctx)
+	if errGetID != nil {
+		return nil, errGetID
+	}
+	folder.ID = folderID
 	return m.foldersRepository.Create(ctx, folder)
 }
 

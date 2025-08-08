@@ -10,6 +10,8 @@ type (
 	RepositoryConfig struct {
 		Type            uint
 		PreloadInMemory bool
+		FileName        string
+		FileEncoding    uint
 	}
 
 	EnvironmentConfig struct {
