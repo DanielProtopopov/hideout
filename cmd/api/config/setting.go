@@ -85,12 +85,10 @@ func Init(ctx context.Context) {
 		},
 		SecretsRepository: config.RepositoryConfig{
 			FileName:        config.GetEnv("SECRETS_REPOSITORY_FILE_NAME", ""),
-			FileEncoding:    config.GetEnvAsUInt("SECRETS_REPOSITORY_FILE_ENCODING", extra.Encoding_JSON),
 			PreloadInMemory: config.GetEnvAsBool("SECRETS_REPOSITORY_MEMORY_PRELOAD", true),
 		},
 		FoldersRepository: config.RepositoryConfig{
 			FileName:        config.GetEnv("FOLDERS_REPOSITORY_FILE_NAME", ""),
-			FileEncoding:    config.GetEnvAsUInt("FOLDERS_REPOSITORY_FILE_ENCODING", extra.Encoding_JSON),
 			PreloadInMemory: config.GetEnvAsBool("FOLDERS_REPOSITORY_MEMORY_PRELOAD", true),
 		},
 	}
@@ -105,6 +103,16 @@ func Init(ctx context.Context) {
 			secrets2.TypeMapInv[secrets2.RepositoryType_File])
 	}
 	Settings.SecretsRepository.Type = secretsAdapterTypeVal
+	if Settings.SecretsRepository.Type == secrets2.RepositoryType_File {
+		secretsEncodingTypeVal := config.GetEnv("SECRETS_REPOSITORY_FILE_ENCODING", extra.EncodingTypeMap[extra.Encoding_JSON])
+		secretsEncodingType, secretEncodingExists := extra.EncodingTypeMapInv[secretsEncodingTypeVal]
+		if !secretEncodingExists {
+			log.Fatalf("Invalid secrets repository encoding type, allowed: %s, %s, %s, %s, %s, %s", extra.EncodingTypeMap[extra.Encoding_Binary],
+				extra.EncodingTypeMap[extra.Encoding_GOB], extra.EncodingTypeMap[extra.Encoding_CSV], extra.EncodingTypeMap[extra.Encoding_JSON],
+				extra.EncodingTypeMap[extra.Encoding_XML], extra.EncodingTypeMap[extra.Encoding_Archive])
+		}
+		Settings.SecretsRepository.FileEncoding = secretsEncodingType
+	}
 
 	foldersAdapterType := config.GetEnv("FOLDERS_REPOSITORY_TYPE", "memory")
 	foldersAdapterTypeVal, foldersAdapterTypeExists := secrets2.TypeMap[foldersAdapterType]
@@ -116,6 +124,16 @@ func Init(ctx context.Context) {
 			secrets2.TypeMapInv[secrets2.RepositoryType_File])
 	}
 	Settings.FoldersRepository.Type = foldersAdapterTypeVal
+	if Settings.FoldersRepository.Type == secrets2.RepositoryType_File {
+		foldersEncodingTypeVal := config.GetEnv("FOLDERS_REPOSITORY_FILE_ENCODING", extra.EncodingTypeMap[extra.Encoding_JSON])
+		foldersEncodingType, folderEncodingExists := extra.EncodingTypeMapInv[foldersEncodingTypeVal]
+		if !folderEncodingExists {
+			log.Fatalf("Invalid folders repository encoding type, allowed: %s, %s, %s, %s, %s, %s", extra.EncodingTypeMap[extra.Encoding_Binary],
+				extra.EncodingTypeMap[extra.Encoding_GOB], extra.EncodingTypeMap[extra.Encoding_CSV], extra.EncodingTypeMap[extra.Encoding_JSON],
+				extra.EncodingTypeMap[extra.Encoding_XML], extra.EncodingTypeMap[extra.Encoding_Archive])
+		}
+		Settings.FoldersRepository.FileEncoding = foldersEncodingType
+	}
 
 	if Settings.SecretsRepository.Type == secrets2.RepositoryType_Redis || Settings.FoldersRepository.Type == secrets2.RepositoryType_Redis {
 		client := redis.NewClient(&redis.Options{

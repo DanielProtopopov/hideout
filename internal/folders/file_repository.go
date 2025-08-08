@@ -258,6 +258,7 @@ func (m FileRepository) encode(data *[]Folder) error {
 		return errOpenFile
 	}
 	defer fileWriter.Close()
+
 	switch m.EncodingType {
 	case extra.Encoding_JSON:
 		{
@@ -268,6 +269,10 @@ func (m FileRepository) encode(data *[]Folder) error {
 	case extra.Encoding_CSV:
 		{
 			return gocsv.UnmarshalFile(fileWriter, data)
+		}
+	case extra.Encoding_Binary:
+		{
+			return apperror.ErrNotImplemented
 		}
 	case extra.Encoding_GOB:
 		{
@@ -314,6 +319,10 @@ func (m FileRepository) decode(data *[]Folder) error {
 		{
 			decoder := gob.NewDecoder(fileReader)
 			return decoder.Decode(data)
+		}
+	case extra.Encoding_Binary:
+		{
+			return apperror.ErrNotImplemented
 		}
 	case extra.Encoding_XML:
 		{

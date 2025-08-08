@@ -38,16 +38,38 @@ func main() {
 		log.Fatal(errCreateService)
 	}
 
-	rootFolder, _ := secretsSvc.CreateFolder(ctx, folders.Folder{Name: ""})
-	testFolder, _ := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "test"})
-
-	anotherTestFolder, _ := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "another-test"})
-	yetAnotherTestFolder, _ := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "yet-another-test"})
-
-	rootSecret, _ := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: rootFolder.ID, Name: "Root secret", Value: "123", Type: "integer"})
-	_, _ = secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #1", Value: "123", Type: "integer"})
-	_, _ = secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #2", Value: "456", Type: "integer"})
-	_, _ = secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #3", Value: "789", Type: "integer"})
+	rootFolder, errCreateRootFolder := secretsSvc.CreateFolder(ctx, folders.Folder{Name: ""})
+	if errCreateRootFolder != nil {
+		log.Fatal(errCreateRootFolder)
+	}
+	testFolder, errCreateTestFolder := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "test"})
+	if errCreateTestFolder != nil {
+		log.Fatal(errCreateTestFolder)
+	}
+	anotherTestFolder, errCreateAnotherTestFolder := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "another-test"})
+	if errCreateAnotherTestFolder != nil {
+		log.Fatal(errCreateAnotherTestFolder)
+	}
+	yetAnotherTestFolder, errCreateYetAnotherTestFolder := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "yet-another-test"})
+	if errCreateYetAnotherTestFolder != nil {
+		log.Fatal(errCreateYetAnotherTestFolder)
+	}
+	rootSecret, errCreateRootSecret := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: rootFolder.ID, Name: "Root secret", Value: "123", Type: "integer"})
+	if errCreateRootSecret != nil {
+		log.Fatal(errCreateRootSecret)
+	}
+	_, errCreateSecret1 := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #1", Value: "123", Type: "integer"})
+	if errCreateSecret1 != nil {
+		log.Fatal(errCreateSecret1)
+	}
+	_, errCreateSecret2 := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #2", Value: "456", Type: "integer"})
+	if errCreateSecret2 != nil {
+		log.Fatal(errCreateSecret2)
+	}
+	_, errCreateSecret3 := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #3", Value: "789", Type: "integer"})
+	if errCreateSecret3 != nil {
+		log.Fatal(errCreateSecret3)
+	}
 
 	tree, errGetTree := secretsSvc.Tree(ctx, rootFolder.ID)
 	if errGetTree != nil {

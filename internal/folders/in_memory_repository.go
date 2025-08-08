@@ -3,6 +3,7 @@ package folders
 import (
 	"context"
 	"database/sql"
+	"github.com/brianvoe/gofakeit/v7"
 	"hideout/internal/common/apperror"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
@@ -139,6 +140,10 @@ func (m InMemoryRepository) Create(ctx context.Context, folder Folder) (*Folder,
 	}
 
 	folder.CreatedAt = time.Now()
+	folder.UpdatedAt = time.Now()
+	if folder.UID == "" {
+		folder.UID = gofakeit.UUID()
+	}
 	*m.conn = append(*m.conn, folder)
 	return &folder, nil
 }

@@ -3,6 +3,7 @@ package secrets
 import (
 	"context"
 	"database/sql"
+	"github.com/brianvoe/gofakeit/v7"
 	"hideout/internal/common/apperror"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
@@ -170,6 +171,10 @@ func (m InMemoryRepository) Create(ctx context.Context, secret Secret) (*Secret,
 	}
 
 	secret.CreatedAt = time.Now()
+	secret.UpdatedAt = time.Now()
+	if secret.UID == "" {
+		secret.UID = gofakeit.UUID()
+	}
 	*m.conn = append(*m.conn, secret)
 	return &secret, nil
 }

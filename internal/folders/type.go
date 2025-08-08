@@ -9,9 +9,9 @@ import (
 type (
 	Folder struct {
 		model.Model
-		ParentID uint   `json:"ParentID" bson:"ParentID" xml:"ParentID" csv:"ParentID" yaml:"ParentID" db:"parent_id" gorm:"column:parent_id" description:"Parent value identifier (link)" example:"0"`
-		UID      string `json:"UID" bson:"UID" xml:"UID" csv:"UID" db:"uid" yaml:"UID" gorm:"column:uid;unique" description:"Secondary unique identifier" example:"abc-def-ghi"`
-		Name     string `json:"Name" bson:"Name" xml:"Name" csv:"Name" yaml:"Name" db:"name" gorm:"column:name" description:"Folder folder name" example:"/"`
+		ParentID uint   `struc:"uint64" json:"ParentID" bson:"ParentID" csv:"ParentID" xml:"ParentID" yaml:"ParentID" db:"parent_id" gorm:"column:parent_id" description:"Parent value identifier (link)" example:"0"`
+		UID      string `struc:"[]byte" json:"UID" bson:"UID" csv:"UID" xml:"UID" yaml:"UID" db:"uid" gorm:"column:uid;unique" description:"Secondary unique identifier" example:"abc-def-ghi"`
+		Name     string `struc:"[]byte" json:"Name" bson:"Name" csv:"Name" xml:"Name" yaml:"Name" db:"name" gorm:"column:name" description:"Folder folder name" example:"/"`
 	}
 
 	Repository interface {
@@ -38,5 +38,10 @@ type (
 	multiSorter struct {
 		folders []*Folder
 		less    []lessFunc
+	}
+
+	FoldersList struct {
+		Length uint8 `struc:"sizeof=Data"`
+		Data   []Folder
 	}
 )
