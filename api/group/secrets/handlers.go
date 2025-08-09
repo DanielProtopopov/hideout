@@ -159,7 +159,7 @@ func GetSecretsHandler(c *gin.Context) {
 	processSpan.Description = "run"
 	for secretIndex, _ := range response.Secrets {
 		if response.Secrets[secretIndex].IsDynamic {
-			value, errProcessSecret := response.Secrets[secretIndex].Process(rqContext, secretsSvc)
+			value, _, errProcessSecret := response.Secrets[secretIndex].Process(rqContext, secretsSvc)
 			if errProcessSecret != nil {
 				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
 				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})

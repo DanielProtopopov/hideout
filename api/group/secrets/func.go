@@ -2,8 +2,10 @@ package secrets
 
 import (
 	"context"
+	"fmt"
 	"github.com/pkg/errors"
 	"github.com/risor-io/risor"
+	"github.com/risor-io/risor/object"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
 	secrets2 "hideout/internal/secrets"
@@ -11,16 +13,16 @@ import (
 	"slices"
 )
 
-func (s *Secret) Process(ctx context.Context, secretsSvc *secrets.SecretsService) (string, error) {
+func (s *Secret) Process(ctx context.Context, secretsSvc *secrets.SecretsService) (string, string, error) {
 	if secretsSvc == nil {
-		return "", errors.New("Secrets service is non-existent")
+		return "", "", errors.New("Secrets service is non-existent")
 	}
 
 	secretsList, errGetSecretUIDs := secretsSvc.GetSecrets(ctx, secrets2.ListSecretParams{
 		ListParams: generics.ListParams{Deleted: model.No},
 	})
 	if errGetSecretUIDs != nil {
-		return "", errGetSecretUIDs
+		return "", "", errGetSecretUIDs
 	}
 
 	// Delete current one from the list to avoid self-referencing
@@ -37,13 +39,20 @@ func (s *Secret) Process(ctx context.Context, secretsSvc *secrets.SecretsService
 	evaluatedResult, errEvaluate := risor.Eval(ctx, s.Value, risor.WithGlobals(globalValues),
 		risor.WithoutGlobals("errors", "exec", "filepath", "http", "net", "os"))
 	if errEvaluate != nil {
-		return "", errEvaluate
+		return "", "", errEvaluate
 	}
 
 	valueType := evaluatedResult.Type()
-	if valueType == "string" {
-		return evaluatedResult.Interface().(string), nil
+	switch valueType {
+	case object.BOOL:
+		return fmt.Sprintf("%t", evaluatedResult.Interface().(bool)), string(object.BOOL), nil
+	case object.STRING:
+		return fmt.Sprintf("%s", evaluatedResult.Interface().(string)), string(object.STRING), nil
+	case object.INT:
+		return fmt.Sprintf("%d", evaluatedResult.Interface().(int)), string(object.STRING), nil
+	case object.FLOAT:
+		return fmt.Sprintf("%f", evaluatedResult.Interface().(float64)), string(object.STRING), nil
 	}
 
-	return "", errors.New("Evaluated to a non-string value")
+	return "", string(valueType), fmt.Errorf("Cannot process result with type of %s", string(valueType))
 }
