@@ -157,6 +157,20 @@ func NewService(ctx context.Context, secretsConfig config.RepositoryConfig, fold
 	return secretsService, nil
 }
 
+func (m *SecretsService) Load(ctx context.Context) error {
+	errLoadSecrets := m.LoadSecrets(ctx)
+	if errLoadSecrets != nil {
+		return errLoadSecrets
+	}
+
+	errLoadFolders := m.LoadFolders(ctx)
+	if errLoadFolders != nil {
+		return errLoadFolders
+	}
+
+	return nil
+}
+
 func (m *SecretsService) LoadSecrets(ctx context.Context) error {
 	if m.secretsConfig.PreloadInMemory {
 		loadedSecrets, errLoadSecrets := m.secretsRepository.Load(ctx)
