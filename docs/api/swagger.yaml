@@ -92,6 +92,9 @@ definitions:
       FolderUID:
         example: /
         type: string
+      IsDynamic:
+        example: false
+        type: boolean
       Name:
         example: DEBUG
         type: string

@@ -503,6 +503,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "/"
                 },
+                "IsDynamic": {
+                    "type": "boolean",
+                    "example": false
+                },
                 "Name": {
                     "type": "string",
                     "example": "DEBUG"
