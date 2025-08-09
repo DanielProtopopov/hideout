@@ -101,7 +101,22 @@ func (m InMemoryRepository) Get(ctx context.Context, params ListSecretParams) ([
 		}
 	}
 
-	filteredResults := m.Filter(ctx, typeResults, params.ListParams)
+	var dynamicResults []*Secret
+	for _, folderEntry := range typeResults {
+		if params.IsDynamic == model.Yes {
+			if folderEntry.IsDynamic == true {
+				dynamicResults = append(dynamicResults, folderEntry)
+			}
+		} else if params.IsDynamic == model.No {
+			if folderEntry.IsDynamic == false {
+				dynamicResults = append(dynamicResults, folderEntry)
+			}
+		} else {
+			dynamicResults = append(dynamicResults, folderEntry)
+		}
+	}
+
+	filteredResults := m.Filter(ctx, dynamicResults, params.ListParams)
 	if params.Page == 0 && params.PerPage == 0 {
 		return filteredResults, nil
 	}

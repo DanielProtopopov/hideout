@@ -41,10 +41,12 @@ func (rq GetSecretsRQ) Validate(ctx context.Context, secretsService *secrets.Sec
 		}
 	}
 
-	_, errGetFolderByUID := secretsService.GetFolderByUID(ctx, rq.FolderUID)
-	if errGetFolderByUID != nil {
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"}})
-		Errors = append(Errors, rqrs.Error{Message: msg, Description: errGetFolderByUID.Error(), Code: 0})
+	if rq.FolderUID != "" {
+		_, errGetFolderByUID := secretsService.GetFolderByUID(ctx, rq.FolderUID)
+		if errGetFolderByUID != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: errGetFolderByUID.Error(), Code: 0})
+		}
 	}
 
 	return Errors

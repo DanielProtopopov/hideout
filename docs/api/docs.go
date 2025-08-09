@@ -123,6 +123,66 @@ const docTemplate = `{
                     }
                 }
             },
+            "post": {
+                "description": "Getting secrets list",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Брокеры"
+                ],
+                "summary": "Getting secrets list",
+                "operationId": "list-secrets",
+                "parameters": [
+                    {
+                        "description": "Secrets data",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/secrets.GetSecretsRQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.GetSecretsRS"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.GetSecretsRS"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.GetSecretsRS"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/secrets.GetSecretsRS"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "description": "Delete secrets",
                 "produces": [
@@ -305,68 +365,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/secrets/list/": {
-            "post": {
-                "description": "Getting secrets list",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Брокеры"
-                ],
-                "summary": "Getting secrets list",
-                "operationId": "list-secrets",
-                "parameters": [
-                    {
-                        "description": "Secrets data",
-                        "name": "params",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/secrets.GetSecretsRQ"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/secrets.GetSecretsRS"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/secrets.GetSecretsRS"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/secrets.GetSecretsRS"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/secrets.GetSecretsRS"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -376,6 +374,10 @@ const docTemplate = `{
                 "FolderUID": {
                     "type": "string",
                     "example": "/"
+                },
+                "IsDynamic": {
+                    "type": "boolean",
+                    "example": false
                 },
                 "Name": {
                     "type": "string",
@@ -410,18 +412,12 @@ const docTemplate = `{
         },
         "pagination.Pagination": {
             "type": "object",
-            "required": [
-                "Page",
-                "PerPage"
-            ],
             "properties": {
                 "Page": {
-                    "type": "integer",
-                    "minimum": 1
+                    "type": "integer"
                 },
                 "PerPage": {
-                    "type": "integer",
-                    "minimum": 1
+                    "type": "integer"
                 }
             }
         },

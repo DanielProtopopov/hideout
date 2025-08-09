@@ -373,7 +373,7 @@ func (m *SecretsService) copySecrets(ctx context.Context, secretsList []*secrets
 		}
 		newSecret, errCreateSecret := m.secretsRepository.Create(ctx, secrets.Secret{
 			Model: model.Model{ID: id}, FolderID: toFolder.ID, UID: gofakeit.UUID(),
-			Name: secret.Name, Value: secret.Value, Type: secret.Type,
+			Name: secret.Name, Value: secret.Value, Type: secret.Type, IsDynamic: secret.IsDynamic,
 		})
 		if errCreateSecret != nil {
 			return nil, errCreateSecret

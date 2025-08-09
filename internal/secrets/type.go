@@ -9,11 +9,12 @@ import (
 type (
 	Secret struct {
 		model.Model
-		FolderID uint   `json:"FolderID" bson:"FolderID" xml:"FolderID" yaml:"FolderID" csv:"FolderID" db:"folder_id" gorm:"column:folder_id" description:"Folder unique identifier (link)" example:"0"`
-		UID      string `json:"UID" bson:"UID" xml:"UID" csv:"UID" yaml:"UID" db:"uid" gorm:"column:uid;unique" description:"Secondary unique identifier" example:"abc-def-ghi"`
-		Name     string `json:"Name" bson:"Name" xml:"Name" csv:"Name" yaml:"Name" db:"name" gorm:"column:name" description:"Secret name" example:"DEBUG"`
-		Value    string `json:"Value" bson:"Value" xml:"Value" csv:"Value" yaml:"Value" db:"value" gorm:"column:value" description:"Secret value" example:"Test"`
-		Type     string `json:"Type" bson:"Type" xml:"Type" csv:"Type" yaml:"Type" db:"type" gorm:"column:type" description:"Secret value type" example:"int"`
+		FolderID  uint   `json:"FolderID" bson:"FolderID" xml:"FolderID" yaml:"FolderID" csv:"FolderID" db:"folder_id" gorm:"column:folder_id" description:"Folder unique identifier (link)" example:"0"`
+		UID       string `json:"UID" bson:"UID" xml:"UID" csv:"UID" yaml:"UID" db:"uid" gorm:"column:uid;unique" description:"Secondary unique identifier" example:"abc-def-ghi"`
+		Name      string `json:"Name" bson:"Name" xml:"Name" csv:"Name" yaml:"Name" db:"name" gorm:"column:name" description:"Secret name" example:"DEBUG"`
+		Value     string `json:"Value" bson:"Value" xml:"Value" csv:"Value" yaml:"Value" db:"value" gorm:"column:value" description:"Secret value" example:"Test"`
+		Type      string `json:"Type" bson:"Type" xml:"Type" csv:"Type" yaml:"Type" db:"type" gorm:"column:type" description:"Secret value type" example:"int"`
+		IsDynamic bool   `json:"IsDynamic" bson:"IsDynamic" xml:"IsDynamic" csv:"IsDynamic" yaml:"IsDynamic" db:"is_dynamic" description:"Does secret has a dynamic value" example:"true"`
 	}
 
 	Repository interface {
@@ -35,6 +36,7 @@ type (
 		generics.ListParams
 		FolderIDs []uint
 		Name      string
+		IsDynamic uint
 		Types     []string
 	}
 

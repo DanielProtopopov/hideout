@@ -34,7 +34,7 @@ import (
 // @Failure 400 {object} GetSecretsRS
 // @Failure 404 {object} GetSecretsRS
 // @Failure 500 {object} GetSecretsRS
-// @Router /secrets/list/ [post]
+// @Router /secrets/ [post]
 func GetSecretsHandler(c *gin.Context) {
 	rqContext := c.Request.Context()
 	SentryHub := sentry.GetHubFromContext(rqContext)
@@ -84,28 +84,37 @@ func GetSecretsHandler(c *gin.Context) {
 	runSpan := sentry.StartSpan(rqContext, "get.secrets")
 	runSpan.Description = "run"
 
-	folderByUID, errGetFolder := secretsSvc.GetFolderByUID(rqContext, request.FolderUID)
-	if errGetFolder != nil {
-		if errors.Is(errGetFolder, apperror.ErrRecordNotFound) {
-			log.Printf("Folder with UID of %s was not found", request.FolderUID)
-			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "FolderNotFoundError"},
+	var parentFolder *folders.Folder = nil
+	if request.FolderUID != "" {
+		folderByUID, errGetFolder := secretsSvc.GetFolderByUID(rqContext, request.FolderUID)
+		if errGetFolder != nil {
+			if errors.Is(errGetFolder, apperror.ErrRecordNotFound) {
+				log.Printf("Folder with UID of %s was not found", request.FolderUID)
+				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "FolderNotFoundError"},
+					TemplateData: map[string]interface{}{"UID": request.FolderUID}})
+				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+				c.JSON(http.StatusNotFound, response)
+				return
+			}
+			log.Printf("Error fetching folder with UID of %s: %s", request.FolderUID, errGetFolder.Error())
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"},
 				TemplateData: map[string]interface{}{"UID": request.FolderUID}})
-			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
-			c.JSON(http.StatusNotFound, response)
+			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetFolder.Error(), Code: 0})
+			c.JSON(http.StatusInternalServerError, response)
 			return
 		}
-		log.Printf("Error fetching folder with UID of %s: %s", request.FolderUID, errGetFolder.Error())
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"},
-			TemplateData: map[string]interface{}{"UID": request.FolderUID}})
-		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetFolder.Error(), Code: 0})
-		c.JSON(http.StatusInternalServerError, response)
-		return
+
+		parentFolder = folderByUID
 	}
 
-	secretResults, errGetSecrets := secretsSvc.GetSecrets(rqContext, secrets2.ListSecretParams{
-		ListParams: generics.ListParams{Deleted: model.No, Pagination: request.SecretsPagination,
-			Order: request.SecretsOrder, UIDs: []string{request.FolderUID}},
-	})
+	listSecretParams := secrets2.ListSecretParams{
+		ListParams: generics.ListParams{Deleted: model.No, Pagination: request.SecretsPagination, Order: request.SecretsOrder},
+		IsDynamic:  model.YesOrNo,
+	}
+	if parentFolder != nil {
+		listSecretParams.FolderIDs = append(listSecretParams.IDs, parentFolder.ID)
+	}
+	secretResults, errGetSecrets := secretsSvc.GetSecrets(rqContext, listSecretParams)
 	if errGetSecrets != nil {
 		log.Printf("Error fetching secrets: %s", errGetSecrets.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretsError"}})
@@ -114,10 +123,14 @@ func GetSecretsHandler(c *gin.Context) {
 		return
 	}
 
-	folderResults, errGetFolders := secretsSvc.GetFolders(rqContext, folders.ListFolderParams{
-		ListParams:     generics.ListParams{Deleted: model.No, Pagination: request.FoldersPagination, Order: request.FoldersOrder},
-		ParentFolderID: folderByUID.ID,
-	})
+	listFolderParams := folders.ListFolderParams{
+		ListParams: generics.ListParams{Deleted: model.No, Pagination: request.FoldersPagination, Order: request.FoldersOrder},
+	}
+	if parentFolder != nil {
+		listFolderParams.ParentFolderID = parentFolder.ID
+	}
+
+	folderResults, errGetFolders := secretsSvc.GetFolders(rqContext, listFolderParams)
 
 	if errGetFolders != nil {
 		log.Printf("Error fetching folders: %s", errGetFolders.Error())
@@ -128,7 +141,10 @@ func GetSecretsHandler(c *gin.Context) {
 	}
 
 	for _, secret := range secretResults {
-		secretEntry := Secret{UID: secret.UID, FolderUID: folderByUID.UID, Name: secret.Name, Value: secret.Value, Type: secret.Type}
+		secretEntry := Secret{UID: secret.UID, Name: secret.Name, Value: secret.Value, Type: secret.Type, IsDynamic: secret.IsDynamic}
+		if parentFolder != nil {
+			secretEntry.FolderUID = parentFolder.UID
+		}
 		response.Secrets = append(response.Secrets, secretEntry)
 	}
 
@@ -138,6 +154,22 @@ func GetSecretsHandler(c *gin.Context) {
 	}
 
 	runSpan.Finish()
+
+	processSpan := sentry.StartSpan(rqContext, "process.secrets")
+	processSpan.Description = "run"
+	for secretIndex, _ := range response.Secrets {
+		if response.Secrets[secretIndex].IsDynamic {
+			value, errProcessSecret := response.Secrets[secretIndex].Process(rqContext, secretsSvc)
+			if errProcessSecret != nil {
+				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+			} else {
+				response.Secrets[secretIndex].Value = value
+			}
+		}
+	}
+
+	processSpan.Finish()
 
 	c.JSON(http.StatusOK, response)
 }

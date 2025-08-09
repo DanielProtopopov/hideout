@@ -2,8 +2,8 @@ package pagination
 
 type (
 	Pagination struct {
-		PerPage uint `json:"PerPage" validate:"gte=1" binding:"required"`
-		Page    uint `json:"Page" validate:"gte=1" binding:"required"`
+		PerPage uint `json:"PerPage"`
+		Page    uint `json:"Page"`
 	}
 
 	PaginationRS struct {

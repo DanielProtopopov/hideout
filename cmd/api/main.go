@@ -2,12 +2,9 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/joho/godotenv"
 	"hideout/api"
 	apiconfig "hideout/cmd/api/config"
-	"hideout/internal/folders"
-	secrets2 "hideout/internal/secrets"
 	"hideout/services/secrets"
 	"hideout/structs"
 	"log"
@@ -38,99 +35,109 @@ func main() {
 		log.Fatal(errCreateService)
 	}
 
-	rootFolder, errCreateRootFolder := secretsSvc.CreateFolder(ctx, folders.Folder{Name: ""})
-	if errCreateRootFolder != nil {
-		log.Fatal(errCreateRootFolder)
-	}
-	testFolder, errCreateTestFolder := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "test"})
-	if errCreateTestFolder != nil {
-		log.Fatal(errCreateTestFolder)
-	}
-	anotherTestFolder, errCreateAnotherTestFolder := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "another-test"})
-	if errCreateAnotherTestFolder != nil {
-		log.Fatal(errCreateAnotherTestFolder)
-	}
-	yetAnotherTestFolder, errCreateYetAnotherTestFolder := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "yet-another-test"})
-	if errCreateYetAnotherTestFolder != nil {
-		log.Fatal(errCreateYetAnotherTestFolder)
-	}
-	rootSecret, errCreateRootSecret := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: rootFolder.ID, Name: "Root secret", Value: "123", Type: "integer"})
-	if errCreateRootSecret != nil {
-		log.Fatal(errCreateRootSecret)
-	}
-	_, errCreateSecret1 := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #1", Value: "123", Type: "integer"})
-	if errCreateSecret1 != nil {
-		log.Fatal(errCreateSecret1)
-	}
-	_, errCreateSecret2 := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #2", Value: "456", Type: "integer"})
-	if errCreateSecret2 != nil {
-		log.Fatal(errCreateSecret2)
-	}
-	_, errCreateSecret3 := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #3", Value: "789", Type: "integer"})
-	if errCreateSecret3 != nil {
-		log.Fatal(errCreateSecret3)
+	errLoad := secretsSvc.Load(ctx)
+	if errLoad != nil {
+		log.Fatal(errLoad)
 	}
 
-	tree, errGetTree := secretsSvc.Tree(ctx, rootFolder.ID)
-	if errGetTree != nil {
-		log.Fatal(errGetTree)
-	}
+	/*
+		rootFolder, errCreateRootFolder := secretsSvc.CreateFolder(ctx, folders.Folder{Name: ""})
+		if errCreateRootFolder != nil {
+			log.Fatal(errCreateRootFolder)
+		}
+		testFolder, errCreateTestFolder := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "test"})
+		if errCreateTestFolder != nil {
+			log.Fatal(errCreateTestFolder)
+		}
+		anotherTestFolder, errCreateAnotherTestFolder := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "another-test"})
+		if errCreateAnotherTestFolder != nil {
+			log.Fatal(errCreateAnotherTestFolder)
+		}
+		yetAnotherTestFolder, errCreateYetAnotherTestFolder := secretsSvc.CreateFolder(ctx, folders.Folder{ParentID: rootFolder.ID, Name: "yet-another-test"})
+		if errCreateYetAnotherTestFolder != nil {
+			log.Fatal(errCreateYetAnotherTestFolder)
+		}
+		rootSecret, errCreateRootSecret := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: rootFolder.ID, Name: "Root secret", Value: "123", Type: "integer", IsDynamic: false})
+		if errCreateRootSecret != nil {
+			log.Fatal(errCreateRootSecret)
+		}
+		_, errCreateSecret1 := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #1", Value: "123", Type: "integer", IsDynamic: false})
+		if errCreateSecret1 != nil {
+			log.Fatal(errCreateSecret1)
+		}
+		_, errCreateSecret2 := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #2", Value: "456", Type: "integer", IsDynamic: false})
+		if errCreateSecret2 != nil {
+			log.Fatal(errCreateSecret2)
+		}
+		_, errCreateSecret3 := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: testFolder.ID, Name: "Secret #3", Value: "789", Type: "integer", IsDynamic: false})
+		if errCreateSecret3 != nil {
+			log.Fatal(errCreateSecret3)
+		}
+		_, errCreateDynamicSecret := secretsSvc.CreateSecret(ctx, secrets2.Secret{FolderID: rootFolder.ID, Name: "Dynamic Secret #1", Value: "time.now()", Type: "string", IsDynamic: true})
+		if errCreateDynamicSecret != nil {
+			log.Fatal(errCreateDynamicSecret)
+		}
 
-	jsonResult, errMarshal := json.Marshal(tree)
-	if errMarshal != nil {
-		log.Fatal(errMarshal)
-	}
-	log.Println(string(jsonResult))
+		tree, errGetTree := secretsSvc.Tree(ctx, rootFolder.ID)
+		if errGetTree != nil {
+			log.Fatal(errGetTree)
+		}
 
-	_, _, errCopy := secretsSvc.Copy(ctx, []*folders.Folder{testFolder}, []*secrets2.Secret{rootSecret},
-		rootFolder.ID, anotherTestFolder.ID)
-	if errCopy != nil {
-		log.Fatal(errCopy)
-	}
+		jsonResult, errMarshal := json.Marshal(tree)
+		if errMarshal != nil {
+			log.Fatal(errMarshal)
+		}
+		log.Println(string(jsonResult))
 
-	tree, errGetTree = secretsSvc.Tree(ctx, rootFolder.ID)
-	if errGetTree != nil {
-		log.Fatal(errGetTree)
-	}
+		_, _, errCopy := secretsSvc.Copy(ctx, []*folders.Folder{testFolder}, []*secrets2.Secret{rootSecret},
+			rootFolder.ID, anotherTestFolder.ID)
+		if errCopy != nil {
+			log.Fatal(errCopy)
+		}
 
-	jsonResult, errMarshal = json.Marshal(tree)
-	if errMarshal != nil {
-		log.Fatal(errMarshal)
-	}
-	log.Println(string(jsonResult))
+		tree, errGetTree = secretsSvc.Tree(ctx, rootFolder.ID)
+		if errGetTree != nil {
+			log.Fatal(errGetTree)
+		}
 
-	_, _, errCopy = secretsSvc.Copy(ctx, []*folders.Folder{anotherTestFolder, testFolder}, []*secrets2.Secret{rootSecret},
-		rootFolder.ID, yetAnotherTestFolder.ID)
-	if errCopy != nil {
-		log.Fatal(errCopy)
-	}
+		jsonResult, errMarshal = json.Marshal(tree)
+		if errMarshal != nil {
+			log.Fatal(errMarshal)
+		}
+		log.Println(string(jsonResult))
 
-	tree, errGetTree = secretsSvc.Tree(ctx, rootFolder.ID)
-	if errGetTree != nil {
-		log.Fatal(errGetTree)
-	}
+		_, _, errCopy = secretsSvc.Copy(ctx, []*folders.Folder{anotherTestFolder, testFolder}, []*secrets2.Secret{rootSecret},
+			rootFolder.ID, yetAnotherTestFolder.ID)
+		if errCopy != nil {
+			log.Fatal(errCopy)
+		}
 
-	jsonResult, errMarshal = json.Marshal(tree)
-	if errMarshal != nil {
-		log.Fatal(errMarshal)
-	}
-	log.Println(string(jsonResult))
+		tree, errGetTree = secretsSvc.Tree(ctx, rootFolder.ID)
+		if errGetTree != nil {
+			log.Fatal(errGetTree)
+		}
 
-	_, _, errDelete := secretsSvc.Delete(ctx, []*folders.Folder{anotherTestFolder}, nil, rootFolder.ID, false)
-	if errDelete != nil {
-		log.Fatal(errDelete)
-	}
+		jsonResult, errMarshal = json.Marshal(tree)
+		if errMarshal != nil {
+			log.Fatal(errMarshal)
+		}
+		log.Println(string(jsonResult))
 
-	tree, errGetTree = secretsSvc.Tree(ctx, rootFolder.ID)
-	if errGetTree != nil {
-		log.Fatal(errGetTree)
-	}
+		_, _, errDelete := secretsSvc.Delete(ctx, []*folders.Folder{anotherTestFolder}, nil, rootFolder.ID, false)
+		if errDelete != nil {
+			log.Fatal(errDelete)
+		}
 
-	jsonResult, errMarshal = json.Marshal(tree)
-	if errMarshal != nil {
-		log.Fatal(errMarshal)
-	}
-	log.Println(string(jsonResult))
+		tree, errGetTree = secretsSvc.Tree(ctx, rootFolder.ID)
+		if errGetTree != nil {
+			log.Fatal(errGetTree)
+		}
 
+		jsonResult, errMarshal = json.Marshal(tree)
+		if errMarshal != nil {
+			log.Fatal(errMarshal)
+		}
+		log.Println(string(jsonResult))
+	*/
 	api.Serve()
 }

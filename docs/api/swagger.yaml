@@ -4,6 +4,9 @@ definitions:
       FolderUID:
         example: /
         type: string
+      IsDynamic:
+        example: false
+        type: boolean
       Name:
         example: DEBUG
         type: string
@@ -29,14 +32,9 @@ definitions:
   pagination.Pagination:
     properties:
       Page:
-        minimum: 1
         type: integer
       PerPage:
-        minimum: 1
         type: integer
-    required:
-    - Page
-    - PerPage
     type: object
   rqrs.Error:
     properties:
@@ -359,6 +357,46 @@ paths:
       summary: Update secrets
       tags:
       - Secrets
+    post:
+      description: Getting secrets list
+      operationId: list-secrets
+      parameters:
+      - description: Secrets data
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/secrets.GetSecretsRQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/secrets.GetSecretsRS'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/secrets.GetSecretsRS'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/secrets.GetSecretsRS'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/secrets.GetSecretsRS'
+      summary: Getting secrets list
+      tags:
+      - Брокеры
     put:
       description: Create secrets
       operationId: create-secrets
@@ -440,47 +478,6 @@ paths:
       summary: Copy-paste secrets & folders
       tags:
       - Secrets
-  /secrets/list/:
-    post:
-      description: Getting secrets list
-      operationId: list-secrets
-      parameters:
-      - description: Secrets data
-        in: body
-        name: params
-        required: true
-        schema:
-          $ref: '#/definitions/secrets.GetSecretsRQ'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/secrets.GetSecretsRS'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/secrets.GetSecretsRS'
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "403":
-          description: Forbidden
-          schema:
-            type: string
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/secrets.GetSecretsRS'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/secrets.GetSecretsRS'
-      summary: Getting secrets list
-      tags:
-      - Брокеры
 securityDefinitions:
   ApiKeyAuth:
     description: Description for what is this security definition being used
