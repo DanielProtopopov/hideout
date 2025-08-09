@@ -246,7 +246,8 @@ func UpdateSecretsHandler(c *gin.Context) {
 			continue
 		}
 		updatedSecret, errUpdateSecret := secretsSvc.UpdateSecret(rqContext, secrets2.Secret{
-			FolderID: folderByUID.ID, Name: updateSecretEntry.Name, Value: updateSecretEntry.Value, Type: updateSecretEntry.Type,
+			FolderID: folderByUID.ID, Name: updateSecretEntry.Name, Value: updateSecretEntry.Value,
+			Type: updateSecretEntry.Type, IsDynamic: updateSecretEntry.IsDynamic,
 		})
 		if errUpdateSecret != nil {
 			log.Printf("Error updating secret with UID of %s: %s", updateSecretEntry.UID, errUpdateSecret.Error())
@@ -257,7 +258,7 @@ func UpdateSecretsHandler(c *gin.Context) {
 		}
 		response.Data = append(response.Data, Secret{
 			UID: updatedSecret.UID, FolderUID: folderByUID.UID, Name: updatedSecret.Name,
-			Value: updatedSecret.Value, Type: updatedSecret.Type,
+			Value: updatedSecret.Value, Type: updatedSecret.Type, IsDynamic: updatedSecret.IsDynamic,
 		})
 	}
 
@@ -447,7 +448,7 @@ func CreateSecretsHandler(c *gin.Context) {
 		}
 		newSecret, errCreateSecret := secretsSvc.CreateSecret(rqContext, secrets2.Secret{
 			FolderID: folderByUID.ID, UID: gofakeit.UUID(), Name: secretToCreate.Name,
-			Value: secretToCreate.Value, Type: secretToCreate.Type,
+			Value: secretToCreate.Value, Type: secretToCreate.Type, IsDynamic: secretToCreate.IsDynamic,
 		})
 		if errCreateSecret != nil {
 			log.Printf("Error creating secret with name of %s: %s", secretToCreate.Name, errCreateSecret.Error())
@@ -457,7 +458,7 @@ func CreateSecretsHandler(c *gin.Context) {
 		}
 		response.Data = append(response.Data, Secret{
 			UID: newSecret.UID, FolderUID: folderByUID.UID, Name: newSecret.Name,
-			Value: newSecret.Value, Type: newSecret.Type,
+			Value: newSecret.Value, Type: newSecret.Type, IsDynamic: newSecret.IsDynamic,
 		})
 	}
 
@@ -590,7 +591,7 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 		}
 		response.Secrets = append(response.Secrets, Secret{
 			UID: copiedSecret.UID, FolderUID: copiedSecretFolder.UID,
-			Name: copiedSecret.Name, Value: copiedSecret.Value, Type: copiedSecret.Type,
+			Name: copiedSecret.Name, Value: copiedSecret.Value, Type: copiedSecret.Type, IsDynamic: copiedSecret.IsDynamic,
 		})
 	}
 

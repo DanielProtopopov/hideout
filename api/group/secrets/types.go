@@ -27,6 +27,7 @@ type (
 		Name      string `json:"Name" description:"Secret name" example:"DEBUG"`
 		Value     string `json:"Value" description:"Secret value" example:"Test"`
 		Type      string `json:"Type" description:"Secret value type" example:"int"`
+		IsDynamic bool   `json:"IsDynamic" description:"Does secret has dynamic value" example:"false"`
 	}
 
 	GetSecretsRQ struct {
