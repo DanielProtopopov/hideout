@@ -33,7 +33,9 @@ func (s *Secret) Process(ctx context.Context, secretsSvc *secrets.SecretsService
 		globalValues[secretEntry.UID] = secretEntry.Value
 	}
 
-	evaluatedResult, errEvaluate := risor.Eval(ctx, s.Value, risor.WithGlobals(globalValues))
+	// Disable dangerous and unnecessary modules
+	evaluatedResult, errEvaluate := risor.Eval(ctx, s.Value, risor.WithGlobals(globalValues),
+		risor.WithoutGlobals("errors", "exec", "filepath", "http", "net", "os"))
 	if errEvaluate != nil {
 		return "", errEvaluate
 	}
