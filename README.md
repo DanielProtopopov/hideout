@@ -151,10 +151,10 @@ _For more examples, please refer to the [Documentation](https://github.com/Danie
 - [X] Add redis storage adapter
 - [X] Add database storage adapter
 - [X] Add file storage adapter
+- [X] Add dynamic secrets via risor-io
+- [X] Add references (linking) mechanism for secrets (multi-level)
 - [ ] Add virtual filesystem adapter
-- [ ] Add references (linking) mechanism for secrets (multi-level)
 - [ ] Add authentication mechanism
-- [ ] Add dynamic secrets via risor-io
 - [ ] Add access control mechanisms via Casbin
 - [ ] Add zero-knowledge secrets mechanism (encryption/decryption)
 
