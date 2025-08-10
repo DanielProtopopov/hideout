@@ -726,6 +726,7 @@ func ExportSecretsHandler(c *gin.Context) {
 	errValidate := request.Validate(rqContext, secretsSvc, Localizer)
 	if errValidate != nil {
 		response.Errors = errValidate
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 	validationSpan.Finish()

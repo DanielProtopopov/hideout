@@ -193,39 +193,36 @@ func (rq ExportSecretsRQ) Validate(ctx context.Context, secretsService *secrets.
 		}
 	}
 
-	if rq.ArchiveType == "" {
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamMissingError"},
-			TemplateData: map[string]interface{}{"Name": "ArchiveType"}})
-		Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
-	} else {
+	if rq.ArchiveType != "" {
 		_, exportArchiveTypeExists := ArchiveTypesMapInv[rq.ArchiveType]
 		if !exportArchiveTypeExists {
 			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamInvalidError"},
 				TemplateData: map[string]interface{}{"Name": "ArchiveType", "Values": strings.Join([]string{ArchiveTypesMap[ArchiveType_Zip],
 					ArchiveTypesMap[ArchiveType_Tar]}, ",")}})
 			Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+			return Errors
+		} else {
+			if rq.CompressionType == "" {
+				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamMissingError"},
+					TemplateData: map[string]interface{}{"Name": "CompressionType"}})
+				Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+			} else {
+				_, compressionTypeExists := CompressionTypesMapInv[rq.Format]
+				if !compressionTypeExists {
+					msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamInvalidError"},
+						TemplateData: map[string]interface{}{"Name": "CompressionType", "Values": strings.Join([]string{
+							strings.Join(CompressionTypesMap[CompressionType_Brotli], ","), strings.Join(CompressionTypesMap[CompressionType_Bzip2], ","),
+							strings.Join(CompressionTypesMap[CompressionType_Flate], ","), strings.Join(CompressionTypesMap[CompressionType_Gzip], ","),
+							strings.Join(CompressionTypesMap[CompressionType_Lz4], ","), strings.Join(CompressionTypesMap[CompressionType_Lzip], ","),
+							strings.Join(CompressionTypesMap[CompressionType_Minlz], ","), strings.Join(CompressionTypesMap[CompressionType_Snappy], ","),
+							strings.Join(CompressionTypesMap[CompressionType_XZ], ","), strings.Join(CompressionTypesMap[CompressionType_Zlib], ","),
+							strings.Join(CompressionTypesMap[CompressionType_Zstandard], ","),
+						}, ", ")}})
+					Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+				}
+			}
 		}
 	}
 
-	if rq.CompressionType == "" {
-		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamMissingError"},
-			TemplateData: map[string]interface{}{"Name": "CompressionType"}})
-		Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
-	} else {
-		_, compressionTypeExists := CompressionTypesMapInv[rq.Format]
-		if !compressionTypeExists {
-			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamInvalidError"},
-				TemplateData: map[string]interface{}{"Name": "CompressionType", "Values": strings.Join([]string{
-					strings.Join(CompressionTypesMap[CompressionType_Brotli], ","), strings.Join(CompressionTypesMap[CompressionType_Bzip2], ","),
-					strings.Join(CompressionTypesMap[CompressionType_Flate], ","), strings.Join(CompressionTypesMap[CompressionType_Gzip], ","),
-					strings.Join(CompressionTypesMap[CompressionType_Lz4], ","), strings.Join(CompressionTypesMap[CompressionType_Lzip], ","),
-					strings.Join(CompressionTypesMap[CompressionType_Minlz], ","), strings.Join(CompressionTypesMap[CompressionType_Snappy], ","),
-					strings.Join(CompressionTypesMap[CompressionType_XZ], ","), strings.Join(CompressionTypesMap[CompressionType_Zlib], ","),
-					strings.Join(CompressionTypesMap[CompressionType_Zstandard], ","),
-				}, ", ")}})
-			Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
-		}
-	}
-
-	return nil
+	return Errors
 }
