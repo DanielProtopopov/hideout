@@ -28,6 +28,11 @@ description = "Error"
 hash = "sha1-c6ac8c5c49efd84a4677b91b73e1af19373def08"
 other = "Error deleting secret with UID of {{.UID}}"
 
+[DynamicSecretError]
+description = "Error"
+hash = "sha1-b76f0e74ead24da5e35b052fc71ee0caf77c25ac"
+other = "Error evaluating dynamic secret"
+
 [FolderNotFoundError]
 description = "Error"
 hash = "sha1-4a332bbcfee88c0afb0d141af6fb393d4cc786fa"
@@ -108,7 +113,12 @@ description = "Error"
 hash = "sha1-b78f15a222839716614eacc0bfa31a6599854dec"
 other = "Error updating secret with UID of {{.UID}}"
 
-[DynamicSecretError]
+[ArchiveSecretsError]
 description = "Error"
-hash = "sha1-b76f0e74ead24da5e35b052fc71ee0caf77c25ac"
-other = "Error evaluating dynamic secret"
+hash = "sha1-b9357a6bfbddec872d946f857f497b5329e0162e"
+other = "Error archiving secrets"
+
+[ExportSecretsError]
+description = "Error"
+hash = "sha1-e89acb1c5d2ef04d5cc23f969a7df43aa56c3166"
+other = "Error exporting secrets"
