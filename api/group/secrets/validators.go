@@ -9,6 +9,7 @@ import (
 	"hideout/internal/common/rqrs"
 	secrets2 "hideout/internal/secrets"
 	"hideout/services/secrets"
+	"regexp"
 	"strings"
 )
 
@@ -55,8 +56,21 @@ func (rq GetSecretsRQ) Validate(ctx context.Context, secretsService *secrets.Sec
 func (rq CreateSecretsRQ) Validate(ctx context.Context, secretsService *secrets.SecretsService, Localizer *i18n.Localizer) (Errors []rqrs.Error) {
 	if len(rq.Data) == 0 {
 		Errors = append(Errors, rqrs.Error{Message: "No data for creation of folder(s)/secret(s) supplied", Description: "", Code: 0})
+		return Errors
+	}
+	regexValue, errCompile := regexp.Compile(`^[A-Za-z0-9_].+=.+$`)
+	if errCompile != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CompileSecretValueRegexError"}})
+		Errors = append(Errors, rqrs.Error{Message: msg, Description: errCompile.Error(), Code: 0})
+		return Errors
 	}
 	for _, createSecretEntry := range rq.Data {
+		isValidName := regexValue.MatchString(createSecretEntry.Value)
+		if !isValidName {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "InvalidSecretNameError"},
+				TemplateData: map[string]interface{}{"UID": createSecretEntry.Name}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+		}
 		folderByUID, errGetFolderByUID := secretsService.GetFolderByUID(ctx, createSecretEntry.FolderUID)
 		if errGetFolderByUID != nil {
 			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"}})
@@ -87,7 +101,20 @@ func (rq CreateSecretsRQ) Validate(ctx context.Context, secretsService *secrets.
 }
 
 func (rq UpdateSecretsRQ) Validate(ctx context.Context, secretsService *secrets.SecretsService, Localizer *i18n.Localizer) (Errors []rqrs.Error) {
+	regexValue, errCompile := regexp.Compile(`^[A-Za-z0-9_].+=.+$`)
+	if errCompile != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CompileSecretValueRegexError"}})
+		Errors = append(Errors, rqrs.Error{Message: msg, Description: errCompile.Error(), Code: 0})
+		return Errors
+	}
+
 	for _, updateSecretEntry := range rq.Data {
+		isValidName := regexValue.MatchString(updateSecretEntry.Value)
+		if !isValidName {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "InvalidSecretNameError"},
+				TemplateData: map[string]interface{}{"UID": updateSecretEntry.Name}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+		}
 		_, errGetFolderByUID := secretsService.GetFolderByUID(ctx, updateSecretEntry.FolderUID)
 		if errGetFolderByUID != nil {
 			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"}})

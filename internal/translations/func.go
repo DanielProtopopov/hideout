@@ -254,3 +254,23 @@ func _() string {
 		},
 	})
 }
+
+func _() string {
+	return i18n.NewLocalizer(i18n.NewBundle(language.English)).MustLocalize(&i18n.LocalizeConfig{
+		DefaultMessage: &i18n.Message{
+			ID:          "CompileSecretValueRegexError",
+			Description: "Error",
+			Other:       "Error compiling regular expression for secret name validation",
+		},
+	})
+}
+
+func _() string {
+	return i18n.NewLocalizer(i18n.NewBundle(language.English)).MustLocalize(&i18n.LocalizeConfig{
+		DefaultMessage: &i18n.Message{
+			ID:          "InvalidSecretNameError",
+			Description: "Error",
+			Other:       "Invalid name of secret",
+		},
+	})
+}

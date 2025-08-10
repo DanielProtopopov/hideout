@@ -2,7 +2,10 @@ package secrets
 
 import (
 	"context"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"github.com/pkg/errors"
 	"hideout/internal/secrets"
+	"regexp"
 )
 
 func (m *SecretsService) GetSecretID(ctx context.Context) (uint, error) {
@@ -29,11 +32,23 @@ func (m *SecretsService) GetSecretByID(ctx context.Context, id uint) (*secrets.S
 	return m.secretsRepository.GetByID(ctx, id)
 }
 
-func (m *SecretsService) UpdateSecret(ctx context.Context, secret secrets.Secret) (*secrets.Secret, error) {
+func (m *SecretsService) UpdateSecret(ctx context.Context, Localizer *i18n.Localizer, secret secrets.Secret) (*secrets.Secret, error) {
+	_, errCompile := regexp.Compile(`^[A-Za-z0-9_].+=.+$`)
+	if errCompile != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CompileSecretValueRegexError"}})
+		return nil, errors.Wrap(errCompile, msg)
+	}
+
 	return m.secretsRepository.Update(ctx, secret)
 }
 
-func (m *SecretsService) CreateSecret(ctx context.Context, secret secrets.Secret) (*secrets.Secret, error) {
+func (m *SecretsService) CreateSecret(ctx context.Context, Localizer *i18n.Localizer, secret secrets.Secret) (*secrets.Secret, error) {
+	_, errCompile := regexp.Compile(`^[A-Za-z0-9_].+=.+$`)
+	if errCompile != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CompileSecretValueRegexError"}})
+		return nil, errors.Wrap(errCompile, msg)
+	}
+
 	secretID, errGetID := m.GetSecretID(ctx)
 	if errGetID != nil {
 		return nil, errGetID

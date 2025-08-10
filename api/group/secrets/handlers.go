@@ -254,7 +254,7 @@ func UpdateSecretsHandler(c *gin.Context) {
 			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetFolderByUID.Error(), Code: 0})
 			continue
 		}
-		updatedSecret, errUpdateSecret := secretsSvc.UpdateSecret(rqContext, secrets2.Secret{
+		updatedSecret, errUpdateSecret := secretsSvc.UpdateSecret(rqContext, Localizer, secrets2.Secret{
 			FolderID: folderByUID.ID, Name: updateSecretEntry.Name, Value: updateSecretEntry.Value,
 			Type: updateSecretEntry.Type, IsDynamic: updateSecretEntry.IsDynamic,
 		})
@@ -473,7 +473,7 @@ func CreateSecretsHandler(c *gin.Context) {
 			}
 			continue
 		}
-		newSecret, errCreateSecret := secretsSvc.CreateSecret(rqContext, secrets2.Secret{
+		newSecret, errCreateSecret := secretsSvc.CreateSecret(rqContext, Localizer, secrets2.Secret{
 			FolderID: folderByUID.ID, UID: gofakeit.UUID(), Name: secretToCreate.Name,
 			Value: secretToCreate.Value, Type: secretToCreate.Type, IsDynamic: secretToCreate.IsDynamic,
 		})
