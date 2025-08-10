@@ -31,6 +31,7 @@ func (s *Secret) Process(ctx context.Context, secretsSvc *secrets.SecretsService
 	})
 
 	var globalValues = map[string]any{}
+	// Reference secrets by {{id}} and {{uid}} constructs
 	for _, secretEntry := range secretsList {
 		globalValues[fmt.Sprintf("{{%s}}", secretEntry.UID)] = secretEntry.Value
 		globalValues[fmt.Sprintf("{{%d}}", secretEntry.ID)] = secretEntry.Value
