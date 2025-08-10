@@ -157,6 +157,7 @@ _For more examples, please refer to the [Documentation](https://github.com/Danie
 - [ ] Add authentication mechanism
 - [ ] Add access control mechanisms via Casbin
 - [ ] Add zero-knowledge secrets mechanism (encryption/decryption)
+- [ ] Exporting & archiving secrets
 
 See the [open issues](https://github.com/DanielProtopopov/hideout/issues) for a full list of proposed features (and known issues).
 

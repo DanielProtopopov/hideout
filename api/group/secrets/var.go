@@ -16,4 +16,6 @@ var (
 	ExportFormatsMap = map[uint]string{ExportFormat_DotEnv: "dotenv"}
 
 	ExportFormatsMapInv = map[string]uint{"dotenv": ExportFormat_DotEnv}
+
+	ExportExtensionsMap = map[uint]string{ExportFormat_DotEnv: ".env"}
 )

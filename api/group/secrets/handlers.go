@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -18,8 +19,11 @@ import (
 	secrets2 "hideout/internal/secrets"
 	"hideout/services/secrets"
 	"hideout/structs"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -801,7 +805,7 @@ func ExportSecretsHandler(c *gin.Context) {
 	switch request.Format {
 	case ExportFormatsMap[ExportFormat_DotEnv]:
 		{
-			exportedDataVal, errExportToDotEnv := ExportToDotEnv(response.Secrets)
+			exportedDataVal, errExportToDotEnv := ExportToDotEnv(rqContext, response.Secrets)
 			if errExportToDotEnv != nil {
 				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "ExportSecretsError"}})
 				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errExportToDotEnv.Error(), Code: 0})
@@ -814,7 +818,17 @@ func ExportSecretsHandler(c *gin.Context) {
 
 	archiveType, _ := ArchiveTypesMapInv[request.ArchiveType]
 	compressionType, _ := CompressionTypesMapInv[request.CompressionType]
-	archiveFilename, archiveFileExtension, archiveFileData, errArchiveData := ArchiveExport(exportedData, archiveType, compressionType)
+	exportType, _ := ExportFormatsMapInv[request.Format]
+	if archiveType == ArchiveType_None {
+		var uuid = gofakeit.UUID()
+		exportTypeVal, _ := ExportExtensionsMap[exportType]
+		secretsFile := fmt.Sprintf("secrets-%s%s", strings.ReplaceAll(uuid, "-", ""), exportTypeVal)
+		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", secretsFile))
+		c.Data(http.StatusOK, "application/octet-stream", exportedData)
+		return
+	}
+
+	archiveFilename, errArchiveData := ArchiveExport(rqContext, exportedData, archiveType, compressionType, exportType)
 	if errArchiveData != nil {
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "ArchiveSecretsError"}})
 		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errArchiveData.Error(), Code: 0})
@@ -822,10 +836,30 @@ func ExportSecretsHandler(c *gin.Context) {
 		return
 	}
 
-	exportFilename := fmt.Sprintf("%s-%s.%s", archiveFilename, strings.ReplaceAll(gofakeit.UUID(), "-", ""),
-		archiveFileExtension)
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", exportFilename))
-	c.Data(http.StatusOK, "application/octet-stream", archiveFileData)
+	archiveFile, errOpenSecretsArchive := os.Open(archiveFilename)
+	if errOpenSecretsArchive != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "OpenSecretsArchiveError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errOpenSecretsArchive.Error(), Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	defer func() {
+		archiveFile.Close()
+		os.Remove(archiveFilename)
+	}()
+
+	var buffer bytes.Buffer
+	_, errReadArchiveSecretsFile := io.Copy(&buffer, archiveFile)
+	if errReadArchiveSecretsFile != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "ReadSecretsArchiveError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errReadArchiveSecretsFile.Error(), Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filepath.Base(archiveFilename)))
+	c.Data(http.StatusOK, "application/octet-stream", buffer.Bytes())
 
 	exportSpan.Finish()
 }
