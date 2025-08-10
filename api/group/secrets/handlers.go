@@ -141,7 +141,7 @@ func GetSecretsHandler(c *gin.Context) {
 	}
 
 	for _, secret := range secretResults {
-		secretEntry := Secret{UID: secret.UID, Name: secret.Name, Value: secret.Value, Type: secret.Type, IsDynamic: secret.IsDynamic}
+		secretEntry := Secret{ID: secret.ID, UID: secret.UID, Name: secret.Name, Value: secret.Value, Type: secret.Type, IsDynamic: secret.IsDynamic}
 		if parentFolder != nil {
 			secretEntry.FolderUID = parentFolder.UID
 		}
@@ -257,7 +257,7 @@ func UpdateSecretsHandler(c *gin.Context) {
 			continue
 		}
 		response.Data = append(response.Data, Secret{
-			UID: updatedSecret.UID, FolderUID: folderByUID.UID, Name: updatedSecret.Name,
+			ID: updatedSecret.ID, UID: updatedSecret.UID, FolderUID: folderByUID.UID, Name: updatedSecret.Name,
 			Value: updatedSecret.Value, Type: updatedSecret.Type, IsDynamic: updatedSecret.IsDynamic,
 		})
 	}
@@ -472,7 +472,7 @@ func CreateSecretsHandler(c *gin.Context) {
 			continue
 		}
 		response.Data = append(response.Data, Secret{
-			UID: newSecret.UID, FolderUID: folderByUID.UID, Name: newSecret.Name,
+			ID: newSecret.ID, UID: newSecret.UID, FolderUID: folderByUID.UID, Name: newSecret.Name,
 			Value: newSecret.Value, Type: newSecret.Type, IsDynamic: newSecret.IsDynamic,
 		})
 	}
@@ -621,7 +621,7 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 			continue
 		}
 		response.Secrets = append(response.Secrets, Secret{
-			UID: copiedSecret.UID, FolderUID: copiedSecretFolder.UID,
+			ID: copiedSecret.ID, UID: copiedSecret.UID, FolderUID: copiedSecretFolder.UID,
 			Name: copiedSecret.Name, Value: copiedSecret.Value, Type: copiedSecret.Type, IsDynamic: copiedSecret.IsDynamic,
 		})
 	}
@@ -635,7 +635,7 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 			continue
 		}
 		response.Folders = append(response.Folders, Folder{
-			UID: copiedFolder.UID, ParentUID: copiedFolderParent.UID, Name: copiedFolder.Name,
+			ID: copiedFolder.ID, UID: copiedFolder.UID, ParentUID: copiedFolderParent.UID, Name: copiedFolder.Name,
 		})
 	}
 

@@ -33,6 +33,7 @@ func (s *Secret) Process(ctx context.Context, secretsSvc *secrets.SecretsService
 	var globalValues = map[string]any{}
 	for _, secretEntry := range secretsList {
 		globalValues[secretEntry.UID] = secretEntry.Value
+		globalValues[fmt.Sprintf("%d", secretEntry.ID)] = secretEntry.Value
 	}
 
 	// Disable dangerous and unnecessary modules

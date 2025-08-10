@@ -8,6 +8,7 @@ import (
 
 type (
 	Secret struct {
+		ID        uint   `json:"ID" description:"Secret primary unique identifier" example:"1"`
 		UID       string `json:"UID" description:"Secondary unique identifier" example:"abc-def-ghi"`
 		FolderUID string `json:"FolderUID" description:"Folder unique identifier" example:"/"`
 		Name      string `json:"Name" description:"Secret name" example:"DEBUG"`
@@ -17,6 +18,7 @@ type (
 	}
 
 	Folder struct {
+		ID        uint   `json:"ID" description:"Folder primary unique identifier" example:"1"`
 		UID       string `json:"UID" description:"Secondary unique identifier" example:"abc-def-ghi"`
 		ParentUID string `json:"ParentUID" description:"Secondary unique identifier" example:"abc-def-ghi"`
 		Name      string `json:"Name" description:"Folder name" example:"Folder #1"`
