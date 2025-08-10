@@ -154,3 +154,78 @@ func (rq CopyPasteSecretsRQ) Validate(ctx context.Context, secretsService *secre
 
 	return Errors
 }
+
+func (rq ExportSecretsRQ) Validate(ctx context.Context, secretsService *secrets.SecretsService, Localizer *i18n.Localizer) (Errors []rqrs.Error) {
+	if rq.FolderUID != "" {
+		_, errGetFolderByUID := secretsService.GetFolderByUID(ctx, rq.FolderUID)
+		if errGetFolderByUID != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: errGetFolderByUID.Error(), Code: 0})
+		}
+	}
+
+	errSecretsPagination := rq.Pagination.Validate(ctx)
+	if errSecretsPagination != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "PaginationError"}})
+		Errors = append(Errors, rqrs.Error{Message: msg, Description: errors.Wrap(errSecretsPagination,
+			"Secrets pagination validation failed").Error(), Code: 0})
+	}
+
+	for _, orderVal := range rq.Order {
+		errSecretOrdering := orderVal.Validate(ctx, Localizer)
+		if errSecretOrdering != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "OrderError"}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: errors.Wrap(errSecretOrdering,
+				"Secret order validation failed").Error(), Code: 0})
+		}
+	}
+
+	if rq.Format == "" {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamMissingError"},
+			TemplateData: map[string]interface{}{"Name": "Format"}})
+		Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+	} else {
+		_, exportFormatExists := ExportFormatsMapInv[rq.Format]
+		if !exportFormatExists {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamInvalidError"},
+				TemplateData: map[string]interface{}{"Name": "Format", "Values": strings.Join([]string{ExportFormatsMap[ExportFormat_DotEnv]}, ",")}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+		}
+	}
+
+	if rq.ArchiveType == "" {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamMissingError"},
+			TemplateData: map[string]interface{}{"Name": "ArchiveType"}})
+		Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+	} else {
+		_, exportArchiveTypeExists := ArchiveTypesMapInv[rq.ArchiveType]
+		if !exportArchiveTypeExists {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamInvalidError"},
+				TemplateData: map[string]interface{}{"Name": "ArchiveType", "Values": strings.Join([]string{ArchiveTypesMap[ArchiveType_Zip],
+					ArchiveTypesMap[ArchiveType_Tar]}, ",")}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+		}
+	}
+
+	if rq.CompressionType == "" {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamMissingError"},
+			TemplateData: map[string]interface{}{"Name": "CompressionType"}})
+		Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+	} else {
+		_, compressionTypeExists := CompressionTypesMapInv[rq.Format]
+		if !compressionTypeExists {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamInvalidError"},
+				TemplateData: map[string]interface{}{"Name": "CompressionType", "Values": strings.Join([]string{
+					strings.Join(CompressionTypesMap[CompressionType_Brotli], ","), strings.Join(CompressionTypesMap[CompressionType_Bzip2], ","),
+					strings.Join(CompressionTypesMap[CompressionType_Flate], ","), strings.Join(CompressionTypesMap[CompressionType_Gzip], ","),
+					strings.Join(CompressionTypesMap[CompressionType_Lz4], ","), strings.Join(CompressionTypesMap[CompressionType_Lzip], ","),
+					strings.Join(CompressionTypesMap[CompressionType_Minlz], ","), strings.Join(CompressionTypesMap[CompressionType_Snappy], ","),
+					strings.Join(CompressionTypesMap[CompressionType_XZ], ","), strings.Join(CompressionTypesMap[CompressionType_Zlib], ","),
+					strings.Join(CompressionTypesMap[CompressionType_Zstandard], ","),
+				}, ", ")}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+		}
+	}
+
+	return nil
+}

@@ -86,6 +86,19 @@ type (
 		rqrs.ResponseListRS
 	}
 
+	ExportSecretsRQ struct {
+		Format          string                `json:"Format"`
+		CompressionType string                `json:"CompressionType"`
+		ArchiveType     string                `json:"ArchiveType"`
+		FolderUID       string                `json:"FolderUID" description:"Folder unique identifier" example:"abc-def-ghi"`
+		Pagination      pagination.Pagination `json:"Pagination" description:"Secrets pagination"`
+		Order           []ordering.Order      `json:"SOrder" description:"Secrets order"`
+	}
+
+	ExportSecretsRS struct {
+		Secrets []Secret `json:"Secrets"`
+		rqrs.ResponseListRS
+	}
 	ListSecretParams struct {
 		Pagination pagination.Pagination
 		Order      []ordering.Order

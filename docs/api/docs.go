@@ -75,7 +75,7 @@ const docTemplate = `{
                 "operationId": "create-secrets",
                 "parameters": [
                     {
-                        "description": "Secrets to create",
+                        "description": "Secrets create request",
                         "name": "params",
                         "in": "body",
                         "required": true,
@@ -129,13 +129,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Брокеры"
+                    "Secrets"
                 ],
                 "summary": "Getting secrets list",
                 "operationId": "list-secrets",
                 "parameters": [
                     {
-                        "description": "Secrets data",
+                        "description": "Secrets request",
                         "name": "params",
                         "in": "body",
                         "required": true,
@@ -195,7 +195,7 @@ const docTemplate = `{
                 "operationId": "delete-secrets",
                 "parameters": [
                     {
-                        "description": "Secrets to delete",
+                        "description": "Secrets delete request",
                         "name": "params",
                         "in": "body",
                         "required": true,
@@ -255,7 +255,7 @@ const docTemplate = `{
                 "operationId": "update-secrets",
                 "parameters": [
                     {
-                        "description": "Secrets to update",
+                        "description": "Secrets update request",
                         "name": "params",
                         "in": "body",
                         "required": true,
@@ -304,7 +304,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/secrets/copy-paste": {
+        "/secrets/copy-paste/": {
             "put": {
                 "description": "Copy-paste secrets \u0026 folders",
                 "produces": [
@@ -317,7 +317,7 @@ const docTemplate = `{
                 "operationId": "copy-paste-secrets",
                 "parameters": [
                     {
-                        "description": "Secrets to copy-and-paste",
+                        "description": "Secrets copy-and-paste request",
                         "name": "params",
                         "in": "body",
                         "required": true,
@@ -365,6 +365,56 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/secrets/export/": {
+            "post": {
+                "description": "Export secrets into various formats",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "Secrets"
+                ],
+                "summary": "Export secrets into various formats",
+                "operationId": "export-secrets",
+                "parameters": [
+                    {
+                        "description": "Secrets export request",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/secrets.ExportSecretsRQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -374,6 +424,10 @@ const docTemplate = `{
                 "FolderUID": {
                     "type": "string",
                     "example": "/"
+                },
+                "ID": {
+                    "type": "integer",
+                    "example": 1
                 },
                 "IsDynamic": {
                     "type": "boolean",
@@ -601,9 +655,40 @@ const docTemplate = `{
                 }
             }
         },
+        "secrets.ExportSecretsRQ": {
+            "type": "object",
+            "properties": {
+                "ArchiveType": {
+                    "type": "string"
+                },
+                "CompressionType": {
+                    "type": "string"
+                },
+                "FolderUID": {
+                    "type": "string",
+                    "example": "abc-def-ghi"
+                },
+                "Format": {
+                    "type": "string"
+                },
+                "Pagination": {
+                    "$ref": "#/definitions/pagination.Pagination"
+                },
+                "SOrder": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ordering.Order"
+                    }
+                }
+            }
+        },
         "secrets.Folder": {
             "type": "object",
             "properties": {
+                "ID": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "Name": {
                     "type": "string",
                     "example": "Folder #1"

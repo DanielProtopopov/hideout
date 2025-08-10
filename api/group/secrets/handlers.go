@@ -3,6 +3,7 @@ package secrets
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
@@ -19,15 +20,16 @@ import (
 	"hideout/structs"
 	"log"
 	"net/http"
+	"strings"
 )
 
 // GetSecretsHandler
 // @Summary Getting secrets list
 // @Description Getting secrets list
 // @ID list-secrets
-// @Tags Брокеры
+// @Tags Secrets
 // @Produce json
-// @Param params body GetSecretsRQ true "Secrets data"
+// @Param params body GetSecretsRQ true "Secrets request"
 // @Success 200 {object} GetSecretsRS
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 403 {string} string "Forbidden"
@@ -56,7 +58,8 @@ func GetSecretsHandler(c *gin.Context) {
 	var request GetSecretsRQ
 	response := GetSecretsRS{Secrets: []Secret{}, Folders: []Folder{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
-	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository, apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository,
+		apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
@@ -141,7 +144,8 @@ func GetSecretsHandler(c *gin.Context) {
 	}
 
 	for _, secret := range secretResults {
-		secretEntry := Secret{ID: secret.ID, UID: secret.UID, Name: secret.Name, Value: secret.Value, Type: secret.Type, IsDynamic: secret.IsDynamic}
+		secretEntry := Secret{ID: secret.ID, UID: secret.UID, Name: secret.Name, Value: secret.Value, Type: secret.Type,
+			IsDynamic: secret.IsDynamic}
 		if parentFolder != nil {
 			secretEntry.FolderUID = parentFolder.UID
 		}
@@ -180,7 +184,7 @@ func GetSecretsHandler(c *gin.Context) {
 // @ID update-secrets
 // @Tags Secrets
 // @Produce json
-// @Param params body UpdateSecretsRQ true "Secrets to update"
+// @Param params body UpdateSecretsRQ true "Secrets update request"
 // @Success 200 {object} UpdateSecretsRS
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 403 {string} string "Forbidden"
@@ -209,7 +213,8 @@ func UpdateSecretsHandler(c *gin.Context) {
 	var request UpdateSecretsRQ
 	response := UpdateSecretsRS{Data: []Secret{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
-	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository, apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository,
+		apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
@@ -288,7 +293,7 @@ func UpdateSecretsHandler(c *gin.Context) {
 // @ID delete-secrets
 // @Tags Secrets
 // @Produce json
-// @Param params body DeleteSecretsRQ true "Secrets to delete"
+// @Param params body DeleteSecretsRQ true "Secrets delete request"
 // @Success 200 {object} DeleteSecretsRS
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 403 {string} string "Forbidden"
@@ -317,7 +322,8 @@ func DeleteSecretsHandler(c *gin.Context) {
 	var request DeleteSecretsRQ
 	response := DeleteSecretsRS{ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
-	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository, apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository,
+		apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
@@ -374,7 +380,8 @@ func DeleteSecretsHandler(c *gin.Context) {
 		errDeleteFolder := secretsSvc.DeleteFolder(rqContext, folderByUID.ID, false)
 		if errDeleteFolder != nil {
 			log.Printf("Error retrieving folder with UID of %s: %s", deleteFolderUID, errDeleteFolder.Error())
-			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DeleteFolderError"}, TemplateData: map[string]interface{}{"UID": deleteFolderUID}})
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DeleteFolderError"},
+				TemplateData: map[string]interface{}{"UID": deleteFolderUID}})
 			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errDeleteFolder.Error(), Code: 0})
 		}
 	}
@@ -389,7 +396,7 @@ func DeleteSecretsHandler(c *gin.Context) {
 // @ID create-secrets
 // @Tags Secrets
 // @Produce json
-// @Param params body CreateSecretsRQ true "Secrets to create"
+// @Param params body CreateSecretsRQ true "Secrets create request"
 // @Success 200 {object} CreateSecretsRS
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 403 {string} string "Forbidden"
@@ -418,7 +425,8 @@ func CreateSecretsHandler(c *gin.Context) {
 	var request CreateSecretsRQ
 	response := CreateSecretsRS{ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
-	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository, apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository,
+		apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
@@ -503,14 +511,14 @@ func CreateSecretsHandler(c *gin.Context) {
 // @ID copy-paste-secrets
 // @Tags Secrets
 // @Produce json
-// @Param params body CopyPasteSecretsRQ true "Secrets to copy-and-paste"
+// @Param params body CopyPasteSecretsRQ true "Secrets copy-and-paste request"
 // @Success 200 {object} CopyPasteSecretsRS
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 403 {string} string "Forbidden"
 // @Failure 400 {object} CopyPasteSecretsRS
 // @Failure 404 {object} CopyPasteSecretsRS
 // @Failure 500 {object} CopyPasteSecretsRS
-// @Router /secrets/copy-paste [put]
+// @Router /secrets/copy-paste/ [put]
 func CopyPasteSecretsHandler(c *gin.Context) {
 	rqContext := c.Request.Context()
 	SentryHub := sentry.GetHubFromContext(rqContext)
@@ -532,7 +540,8 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 	var request CopyPasteSecretsRQ
 	response := CopyPasteSecretsRS{Folders: []Folder{}, Secrets: []Secret{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
 
-	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository, apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository,
+		apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
 	if errCreateService != nil {
 		log.Printf("Error creating secrets service: %s", errCreateService.Error())
 		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
@@ -657,4 +666,166 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 
 	runSpan.Finish()
 	c.JSON(http.StatusOK, response)
+}
+
+// ExportSecretsHandler
+// @Summary Export secrets into various formats
+// @Description Export secrets into various formats
+// @ID export-secrets
+// @Tags Secrets
+// @Param params body ExportSecretsRQ true "Secrets export request"
+// @Produce application/octet-stream
+// @Success 200 {string} string ""
+// @Failure 401 {string} string ""
+// @Failure 404 {string} string ""
+// @Failure 500 {string} string ""
+// @Router /secrets/export/ [post]
+func ExportSecretsHandler(c *gin.Context) {
+	rqContext := c.Request.Context()
+	SentryHub := sentry.GetHubFromContext(rqContext)
+	if SentryHub == nil {
+		SentryHub = sentry.CurrentHub().Clone()
+		rqContext = sentry.SetHubOnContext(rqContext, SentryHub)
+	}
+
+	Language, _ := c.Get("Language")
+	Localizer := i18n.NewLocalizer(apiconfig.Settings.Bundle, Language.(string))
+
+	rqContext = context.WithValue(rqContext, "Sentry", SentryHub)
+	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
+	rqContext = context.WithValue(rqContext, "Language", Language)
+
+	validationSpan := sentry.StartSpan(rqContext, "validate.get.secrets")
+	validationSpan.Description = "rq.validate"
+
+	var request ExportSecretsRQ
+	response := ExportSecretsRS{Secrets: []Secret{}, ResponseListRS: rqrs.ResponseListRS{Errors: []rqrs.Error{}}}
+
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository,
+		apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
+	if errCreateService != nil {
+		log.Printf("Error creating secrets service: %s", errCreateService.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	errBindBody := c.ShouldBindBodyWith(&request, binding.JSON)
+	if errBindBody != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "RequestBodyMappingError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	errValidate := request.Validate(rqContext, secretsSvc, Localizer)
+	if errValidate != nil {
+		response.Errors = errValidate
+		return
+	}
+	validationSpan.Finish()
+
+	runSpan := sentry.StartSpan(rqContext, "get.secrets")
+	runSpan.Description = "run"
+
+	var parentFolder *folders.Folder = nil
+	if request.FolderUID != "" {
+		folderByUID, errGetFolder := secretsSvc.GetFolderByUID(rqContext, request.FolderUID)
+		if errGetFolder != nil {
+			if errors.Is(errGetFolder, apperror.ErrRecordNotFound) {
+				log.Printf("Folder with UID of %s was not found", request.FolderUID)
+				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "FolderNotFoundError"},
+					TemplateData: map[string]interface{}{"UID": request.FolderUID}})
+				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+				c.JSON(http.StatusNotFound, response)
+				return
+			}
+			log.Printf("Error fetching folder with UID of %s: %s", request.FolderUID, errGetFolder.Error())
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"},
+				TemplateData: map[string]interface{}{"UID": request.FolderUID}})
+			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+			c.JSON(http.StatusInternalServerError, response)
+			return
+		}
+
+		parentFolder = folderByUID
+	}
+
+	listSecretParams := secrets2.ListSecretParams{
+		ListParams: generics.ListParams{Deleted: model.No, Pagination: request.Pagination, Order: request.Order},
+		IsDynamic:  model.YesOrNo,
+	}
+	if parentFolder != nil {
+		listSecretParams.FolderIDs = append(listSecretParams.IDs, parentFolder.ID)
+	}
+	secretResults, errGetSecrets := secretsSvc.GetSecrets(rqContext, listSecretParams)
+	if errGetSecrets != nil {
+		log.Printf("Error fetching secrets: %s", errGetSecrets.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretsError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	for _, secret := range secretResults {
+		secretEntry := Secret{ID: secret.ID, UID: secret.UID, Name: secret.Name, Value: secret.Value, Type: secret.Type,
+			IsDynamic: secret.IsDynamic}
+		if parentFolder != nil {
+			secretEntry.FolderUID = parentFolder.UID
+		}
+		response.Secrets = append(response.Secrets, secretEntry)
+	}
+
+	runSpan.Finish()
+
+	processSpan := sentry.StartSpan(rqContext, "process.secrets")
+	processSpan.Description = "run"
+	for secretIndex, _ := range response.Secrets {
+		if response.Secrets[secretIndex].IsDynamic {
+			value, _, errProcessSecret := response.Secrets[secretIndex].Process(rqContext, secretsSvc)
+			if errProcessSecret != nil {
+				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+			} else {
+				response.Secrets[secretIndex].Value = value
+			}
+		}
+	}
+
+	processSpan.Finish()
+
+	exportSpan := sentry.StartSpan(rqContext, "export.secrets")
+	exportSpan.Description = "run"
+	var exportedData []byte
+	switch request.Format {
+	case ExportFormatsMap[ExportFormat_DotEnv]:
+		{
+			exportedDataVal, errExportToDotEnv := ExportToDotEnv(response.Secrets)
+			if errExportToDotEnv != nil {
+				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "ExportSecretsError"}})
+				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errExportToDotEnv.Error(), Code: 0})
+				c.JSON(http.StatusInternalServerError, response)
+				return
+			}
+			exportedData = []byte(exportedDataVal)
+		}
+	}
+
+	archiveType, _ := ArchiveTypesMapInv[request.ArchiveType]
+	compressionType, _ := CompressionTypesMapInv[request.CompressionType]
+	archiveFilename, archiveFileExtension, archiveFileData, errArchiveData := ArchiveExport(exportedData, archiveType, compressionType)
+	if errArchiveData != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "ArchiveSecretsError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errArchiveData.Error(), Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	exportFilename := fmt.Sprintf("%s-%s.%s", archiveFilename, strings.ReplaceAll(gofakeit.UUID(), "-", ""),
+		archiveFileExtension)
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", exportFilename))
+	c.Data(http.StatusOK, "application/octet-stream", archiveFileData)
+
+	exportSpan.Finish()
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/risor-io/risor"
 	"github.com/risor-io/risor/object"
+	"hideout/internal/common/apperror"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
 	secrets2 "hideout/internal/secrets"
@@ -57,4 +58,12 @@ func (s *Secret) Process(ctx context.Context, secretsSvc *secrets.SecretsService
 	}
 
 	return "", string(valueType), fmt.Errorf("Cannot process result with type of %s", string(valueType))
+}
+
+func ExportToDotEnv(secrets []Secret) (string, error) {
+	return "", apperror.ErrNotImplemented
+}
+
+func ArchiveExport(data []byte, archiveType uint, compressionType uint) (string, string, []byte, error) {
+	return "", "", nil, apperror.ErrNotImplemented
 }

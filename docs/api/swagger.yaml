@@ -4,6 +4,9 @@ definitions:
       FolderUID:
         example: /
         type: string
+      ID:
+        example: 1
+        type: integer
       IsDynamic:
         example: false
         type: boolean
@@ -159,8 +162,29 @@ definitions:
         example: 280
         type: integer
     type: object
+  secrets.ExportSecretsRQ:
+    properties:
+      ArchiveType:
+        type: string
+      CompressionType:
+        type: string
+      FolderUID:
+        example: abc-def-ghi
+        type: string
+      Format:
+        type: string
+      Pagination:
+        $ref: '#/definitions/pagination.Pagination'
+      SOrder:
+        items:
+          $ref: '#/definitions/ordering.Order'
+        type: array
+    type: object
   secrets.Folder:
     properties:
+      ID:
+        example: 1
+        type: integer
       Name:
         example: 'Folder #1'
         type: string
@@ -284,7 +308,7 @@ paths:
       description: Delete secrets
       operationId: delete-secrets
       parameters:
-      - description: Secrets to delete
+      - description: Secrets delete request
         in: body
         name: params
         required: true
@@ -324,7 +348,7 @@ paths:
       description: Update secrets
       operationId: update-secrets
       parameters:
-      - description: Secrets to update
+      - description: Secrets update request
         in: body
         name: params
         required: true
@@ -364,7 +388,7 @@ paths:
       description: Getting secrets list
       operationId: list-secrets
       parameters:
-      - description: Secrets data
+      - description: Secrets request
         in: body
         name: params
         required: true
@@ -399,12 +423,12 @@ paths:
             $ref: '#/definitions/secrets.GetSecretsRS'
       summary: Getting secrets list
       tags:
-      - Брокеры
+      - Secrets
     put:
       description: Create secrets
       operationId: create-secrets
       parameters:
-      - description: Secrets to create
+      - description: Secrets create request
         in: body
         name: params
         required: true
@@ -440,12 +464,12 @@ paths:
       summary: Create secrets
       tags:
       - Secrets
-  /secrets/copy-paste:
+  /secrets/copy-paste/:
     put:
       description: Copy-paste secrets & folders
       operationId: copy-paste-secrets
       parameters:
-      - description: Secrets to copy-and-paste
+      - description: Secrets copy-and-paste request
         in: body
         name: params
         required: true
@@ -479,6 +503,39 @@ paths:
           schema:
             $ref: '#/definitions/secrets.CopyPasteSecretsRS'
       summary: Copy-paste secrets & folders
+      tags:
+      - Secrets
+  /secrets/export/:
+    post:
+      description: Export secrets into various formats
+      operationId: export-secrets
+      parameters:
+      - description: Secrets export request
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/secrets.ExportSecretsRQ'
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Export secrets into various formats
       tags:
       - Secrets
 securityDefinitions:
