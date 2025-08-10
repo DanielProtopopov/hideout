@@ -107,3 +107,8 @@ other = "Secret with name of \"{{.Name}}\" already exists in folder with UID of 
 description = "Error"
 hash = "sha1-b78f15a222839716614eacc0bfa31a6599854dec"
 other = "Error updating secret with UID of {{.UID}}"
+
+[DynamicSecretError]
+description = "Error"
+hash = "sha1-b76f0e74ead24da5e35b052fc71ee0caf77c25ac"
+other = "Error evaluating dynamic secret"

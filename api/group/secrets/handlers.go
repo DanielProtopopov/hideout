@@ -262,6 +262,21 @@ func UpdateSecretsHandler(c *gin.Context) {
 		})
 	}
 
+	processSpan := sentry.StartSpan(rqContext, "process.secrets")
+	processSpan.Description = "run"
+	for secretIndex, _ := range response.Data {
+		if response.Data[secretIndex].IsDynamic {
+			value, _, errProcessSecret := response.Data[secretIndex].Process(rqContext, secretsSvc)
+			if errProcessSecret != nil {
+				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+			} else {
+				response.Data[secretIndex].Value = value
+			}
+		}
+	}
+
+	processSpan.Finish()
 	runSpan.Finish()
 
 	c.JSON(http.StatusOK, response)
@@ -462,6 +477,22 @@ func CreateSecretsHandler(c *gin.Context) {
 		})
 	}
 
+	processSpan := sentry.StartSpan(rqContext, "process.secrets")
+	processSpan.Description = "run"
+	for secretIndex, _ := range response.Data {
+		if response.Data[secretIndex].IsDynamic {
+			value, _, errProcessSecret := response.Data[secretIndex].Process(rqContext, secretsSvc)
+			if errProcessSecret != nil {
+				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+			} else {
+				response.Data[secretIndex].Value = value
+			}
+		}
+	}
+
+	processSpan.Finish()
+
 	runSpan.Finish()
 	c.JSON(http.StatusOK, response)
 }
@@ -607,6 +638,22 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 			UID: copiedFolder.UID, ParentUID: copiedFolderParent.UID, Name: copiedFolder.Name,
 		})
 	}
+
+	processSpan := sentry.StartSpan(rqContext, "process.secrets")
+	processSpan.Description = "run"
+	for secretIndex, _ := range response.Secrets {
+		if response.Secrets[secretIndex].IsDynamic {
+			value, _, errProcessSecret := response.Secrets[secretIndex].Process(rqContext, secretsSvc)
+			if errProcessSecret != nil {
+				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+			} else {
+				response.Secrets[secretIndex].Value = value
+			}
+		}
+	}
+
+	processSpan.Finish()
 
 	runSpan.Finish()
 	c.JSON(http.StatusOK, response)
