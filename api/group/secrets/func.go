@@ -25,7 +25,7 @@ func (s *Secret) Process(ctx context.Context, secretsSvc *secrets.SecretsService
 	}
 
 	if s.Script == "" {
-		return "", string(object.STRING), nil
+		return s.Value, string(object.STRING), nil
 	}
 
 	secretsList, errGetSecretUIDs := secretsSvc.GetSecrets(ctx, secrets2.ListSecretParams{
