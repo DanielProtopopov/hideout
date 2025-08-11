@@ -274,3 +274,13 @@ func _() string {
 		},
 	})
 }
+
+func _() string {
+	return i18n.NewLocalizer(i18n.NewBundle(language.English)).MustLocalize(&i18n.LocalizeConfig{
+		DefaultMessage: &i18n.Message{
+			ID:          "OnlySecretOrValueError",
+			Description: "Error",
+			Other:       "Provide only scriptable (Script) or static value (Value)",
+		},
+	})
+}

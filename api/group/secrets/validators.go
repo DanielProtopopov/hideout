@@ -66,6 +66,11 @@ func (rq CreateSecretsRQ) Validate(ctx context.Context, secretsService *secrets.
 		return Errors
 	}
 	for _, createSecretEntry := range rq.Data {
+		if createSecretEntry.Script != "" && createSecretEntry.Value != "" {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "OnlySecretOrValueError"},
+				TemplateData: map[string]interface{}{"UID": createSecretEntry.Name}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+		}
 		isValidName := regexValue.MatchString(createSecretEntry.Value)
 		if !isValidName {
 			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "InvalidSecretNameError"},
@@ -120,6 +125,11 @@ func (rq UpdateSecretsRQ) Validate(ctx context.Context, secretsService *secrets.
 	}
 
 	for _, updateSecretEntry := range rq.Data {
+		if updateSecretEntry.Script != "" && updateSecretEntry.Value != "" {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "OnlySecretOrValueError"},
+				TemplateData: map[string]interface{}{"UID": updateSecretEntry.Name}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+		}
 		isValidName := regexValue.MatchString(updateSecretEntry.Value)
 		if !isValidName {
 			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "InvalidSecretNameError"},

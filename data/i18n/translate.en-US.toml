@@ -1,3 +1,8 @@
+[ArchiveSecretsError]
+description = "Error"
+hash = "sha1-b9357a6bfbddec872d946f857f497b5329e0162e"
+other = "Error archiving secrets"
+
 [BodyParamInvalidError]
 description = "Error"
 hash = "sha1-1b2cd4dfc0a264f1349c4f76d89b572458a623bb"
@@ -32,6 +37,11 @@ other = "Error deleting secret with UID of {{.UID}}"
 description = "Error"
 hash = "sha1-b76f0e74ead24da5e35b052fc71ee0caf77c25ac"
 other = "Error evaluating dynamic secret"
+
+[ExportSecretsError]
+description = "Error"
+hash = "sha1-e89acb1c5d2ef04d5cc23f969a7df43aa56c3166"
+other = "Error exporting secrets"
 
 [FolderNotFoundError]
 description = "Error"
@@ -113,12 +123,17 @@ description = "Error"
 hash = "sha1-b78f15a222839716614eacc0bfa31a6599854dec"
 other = "Error updating secret with UID of {{.UID}}"
 
-[ArchiveSecretsError]
+[CompileSecretValueRegexError]
 description = "Error"
-hash = "sha1-b9357a6bfbddec872d946f857f497b5329e0162e"
-other = "Error archiving secrets"
+hash = "sha1-bf31a83b8435250998ada75315be027f2e475646"
+other = "Error compiling regular expression for secret name validation"
 
-[ExportSecretsError]
+[InvalidSecretNameError]
 description = "Error"
-hash = "sha1-e89acb1c5d2ef04d5cc23f969a7df43aa56c3166"
-other = "Error exporting secrets"
+hash = "sha1-68bc4fa9319f6aee62f074c65b58248f36f3d6b8"
+other = "Invalid name of secret"
+
+[OnlySecretOrValueError]
+description = "Error"
+hash = "sha1-4a2fb30b0a683e103c7371b9e287ebedf93ee078"
+other = "Provide only scriptable (Script) or static value (Value)"
