@@ -2,6 +2,7 @@ package secrets
 
 import (
 	"context"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"github.com/pkg/errors"
 	"hideout/internal/common/generics"
@@ -71,12 +72,22 @@ func (rq CreateSecretsRQ) Validate(ctx context.Context, secretsService *secrets.
 				TemplateData: map[string]interface{}{"UID": createSecretEntry.Name}})
 			Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
 		}
+
+		secretEntry := Secret{
+			UID: gofakeit.UUID(), FolderUID: createSecretEntry.FolderUID, Name: createSecretEntry.Name,
+			Value: createSecretEntry.Value, Script: createSecretEntry.Script,
+		}
+		_, _, errProcessSecret := secretEntry.Process(ctx, secretsService)
+		if errProcessSecret != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+		}
+
 		folderByUID, errGetFolderByUID := secretsService.GetFolderByUID(ctx, createSecretEntry.FolderUID)
 		if errGetFolderByUID != nil {
 			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"}})
 			Errors = append(Errors, rqrs.Error{Message: msg, Description: errGetFolderByUID.Error(), Code: 0})
 		}
-
 		if folderByUID != nil {
 			secretsInFolder, errGetSecrets := secretsService.GetSecrets(ctx, secrets2.ListSecretParams{
 				ListParams: generics.ListParams{Deleted: model.No}, FolderIDs: []uint{folderByUID.ID},
@@ -114,6 +125,11 @@ func (rq UpdateSecretsRQ) Validate(ctx context.Context, secretsService *secrets.
 			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "InvalidSecretNameError"},
 				TemplateData: map[string]interface{}{"UID": updateSecretEntry.Name}})
 			Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+		}
+		_, _, errProcessSecret := updateSecretEntry.Process(ctx, secretsService)
+		if errProcessSecret != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
 		}
 		_, errGetFolderByUID := secretsService.GetFolderByUID(ctx, updateSecretEntry.FolderUID)
 		if errGetFolderByUID != nil {

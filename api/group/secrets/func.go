@@ -15,7 +15,6 @@ import (
 	"hideout/services/secrets"
 	"log"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 )
@@ -25,6 +24,10 @@ func (s *Secret) Process(ctx context.Context, secretsSvc *secrets.SecretsService
 		return "", "", errors.New("Secrets service is non-existent")
 	}
 
+	if s.Script == "" {
+		return "", string(object.STRING), nil
+	}
+
 	secretsList, errGetSecretUIDs := secretsSvc.GetSecrets(ctx, secrets2.ListSecretParams{
 		ListParams: generics.ListParams{Deleted: model.No},
 	})
@@ -32,20 +35,18 @@ func (s *Secret) Process(ctx context.Context, secretsSvc *secrets.SecretsService
 		return "", "", errGetSecretUIDs
 	}
 
-	// Delete current one from the list to avoid self-referencing
-	secretsList = slices.DeleteFunc(secretsList, func(dp *secrets2.Secret) bool {
-		return dp.UID == s.UID
-	})
-
 	var globalValues = map[string]any{}
 	// Reference secrets by {{id}} and {{uid}} constructs
 	for _, secretEntry := range secretsList {
+		if secretEntry.UID == s.UID {
+			continue
+		}
 		globalValues[fmt.Sprintf("{{%s}}", secretEntry.UID)] = secretEntry.Value
 		globalValues[fmt.Sprintf("{{%d}}", secretEntry.ID)] = secretEntry.Value
 	}
 
 	// Disable dangerous and unnecessary modules
-	evaluatedResult, errEvaluate := risor.Eval(ctx, s.Value, risor.WithGlobals(globalValues),
+	evaluatedResult, errEvaluate := risor.Eval(ctx, s.Script, risor.WithGlobals(globalValues),
 		risor.WithoutGlobals("errors", "exec", "filepath", "http", "net", "os"))
 	if errEvaluate != nil {
 		return "", "", errEvaluate
@@ -58,9 +59,9 @@ func (s *Secret) Process(ctx context.Context, secretsSvc *secrets.SecretsService
 	case object.STRING:
 		return fmt.Sprintf("%s", evaluatedResult.Interface().(string)), string(object.STRING), nil
 	case object.INT:
-		return fmt.Sprintf("%d", evaluatedResult.Interface().(int)), string(object.STRING), nil
+		return fmt.Sprintf("%d", evaluatedResult.Interface().(int)), string(object.INT), nil
 	case object.FLOAT:
-		return fmt.Sprintf("%f", evaluatedResult.Interface().(float64)), string(object.STRING), nil
+		return fmt.Sprintf("%f", evaluatedResult.Interface().(float64)), string(object.FLOAT), nil
 	}
 
 	return "", string(valueType), fmt.Errorf("Cannot process result with type of %s", string(valueType))

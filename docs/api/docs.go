@@ -429,17 +429,13 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
-                "IsDynamic": {
-                    "type": "boolean",
-                    "example": false
-                },
                 "Name": {
                     "type": "string",
                     "example": "DEBUG"
                 },
-                "Type": {
+                "Script": {
                     "type": "string",
-                    "example": "int"
+                    "example": "time.RFC3339"
                 },
                 "UID": {
                     "type": "string",
@@ -557,17 +553,13 @@ const docTemplate = `{
                     "type": "string",
                     "example": "/"
                 },
-                "IsDynamic": {
-                    "type": "boolean",
-                    "example": false
-                },
                 "Name": {
                     "type": "string",
                     "example": "DEBUG"
                 },
-                "Type": {
+                "Script": {
                     "type": "string",
-                    "example": "int"
+                    "example": "time.RFC3339"
                 },
                 "Value": {
                     "type": "string",

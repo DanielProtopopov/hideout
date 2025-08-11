@@ -7,14 +7,11 @@ definitions:
       ID:
         example: 1
         type: integer
-      IsDynamic:
-        example: false
-        type: boolean
       Name:
         example: DEBUG
         type: string
-      Type:
-        example: int
+      Script:
+        example: time.RFC3339
         type: string
       UID:
         example: abc-def-ghi
@@ -95,14 +92,11 @@ definitions:
       FolderUID:
         example: /
         type: string
-      IsDynamic:
-        example: false
-        type: boolean
       Name:
         example: DEBUG
         type: string
-      Type:
-        example: int
+      Script:
+        example: time.RFC3339
         type: string
       Value:
         example: Test

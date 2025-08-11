@@ -116,7 +116,7 @@ func GetSecretsHandler(c *gin.Context) {
 
 	listSecretParams := secrets2.ListSecretParams{
 		ListParams: generics.ListParams{Deleted: model.No, Pagination: request.SecretsPagination, Order: request.SecretsOrder},
-		IsDynamic:  model.YesOrNo,
+		Scriptable: model.YesOrNo,
 	}
 	if parentFolder != nil {
 		listSecretParams.FolderIDs = append(listSecretParams.IDs, parentFolder.ID)
@@ -148,8 +148,7 @@ func GetSecretsHandler(c *gin.Context) {
 	}
 
 	for _, secret := range secretResults {
-		secretEntry := Secret{ID: secret.ID, UID: secret.UID, Name: secret.Name, Value: secret.Value, Type: secret.Type,
-			IsDynamic: secret.IsDynamic}
+		secretEntry := Secret{ID: secret.ID, UID: secret.UID, Name: secret.Name, Value: secret.Value, Script: secret.Script}
 		if parentFolder != nil {
 			secretEntry.FolderUID = parentFolder.UID
 		}
@@ -166,14 +165,12 @@ func GetSecretsHandler(c *gin.Context) {
 	processSpan := sentry.StartSpan(rqContext, "process.secrets")
 	processSpan.Description = "run"
 	for secretIndex, _ := range response.Secrets {
-		if response.Secrets[secretIndex].IsDynamic {
-			value, _, errProcessSecret := response.Secrets[secretIndex].Process(rqContext, secretsSvc)
-			if errProcessSecret != nil {
-				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
-				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
-			} else {
-				response.Secrets[secretIndex].Value = value
-			}
+		value, _, errProcessSecret := response.Secrets[secretIndex].Process(rqContext, secretsSvc)
+		if errProcessSecret != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+		} else {
+			response.Secrets[secretIndex].Value = value
 		}
 	}
 
@@ -256,7 +253,7 @@ func UpdateSecretsHandler(c *gin.Context) {
 		}
 		updatedSecret, errUpdateSecret := secretsSvc.UpdateSecret(rqContext, Localizer, secrets2.Secret{
 			FolderID: folderByUID.ID, Name: updateSecretEntry.Name, Value: updateSecretEntry.Value,
-			Type: updateSecretEntry.Type, IsDynamic: updateSecretEntry.IsDynamic,
+			Script: updateSecretEntry.Script,
 		})
 		if errUpdateSecret != nil {
 			log.Printf("Error updating secret with UID of %s: %s", updateSecretEntry.UID, errUpdateSecret.Error())
@@ -267,21 +264,19 @@ func UpdateSecretsHandler(c *gin.Context) {
 		}
 		response.Data = append(response.Data, Secret{
 			ID: updatedSecret.ID, UID: updatedSecret.UID, FolderUID: folderByUID.UID, Name: updatedSecret.Name,
-			Value: updatedSecret.Value, Type: updatedSecret.Type, IsDynamic: updatedSecret.IsDynamic,
+			Value: updatedSecret.Value, Script: updatedSecret.Script,
 		})
 	}
 
 	processSpan := sentry.StartSpan(rqContext, "process.secrets")
 	processSpan.Description = "run"
 	for secretIndex, _ := range response.Data {
-		if response.Data[secretIndex].IsDynamic {
-			value, _, errProcessSecret := response.Data[secretIndex].Process(rqContext, secretsSvc)
-			if errProcessSecret != nil {
-				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
-				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
-			} else {
-				response.Data[secretIndex].Value = value
-			}
+		value, _, errProcessSecret := response.Data[secretIndex].Process(rqContext, secretsSvc)
+		if errProcessSecret != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+		} else {
+			response.Data[secretIndex].Value = value
 		}
 	}
 
@@ -475,7 +470,7 @@ func CreateSecretsHandler(c *gin.Context) {
 		}
 		newSecret, errCreateSecret := secretsSvc.CreateSecret(rqContext, Localizer, secrets2.Secret{
 			FolderID: folderByUID.ID, UID: gofakeit.UUID(), Name: secretToCreate.Name,
-			Value: secretToCreate.Value, Type: secretToCreate.Type, IsDynamic: secretToCreate.IsDynamic,
+			Value: secretToCreate.Value, Script: secretToCreate.Script,
 		})
 		if errCreateSecret != nil {
 			log.Printf("Error creating secret with name of %s: %s", secretToCreate.Name, errCreateSecret.Error())
@@ -485,21 +480,19 @@ func CreateSecretsHandler(c *gin.Context) {
 		}
 		response.Data = append(response.Data, Secret{
 			ID: newSecret.ID, UID: newSecret.UID, FolderUID: folderByUID.UID, Name: newSecret.Name,
-			Value: newSecret.Value, Type: newSecret.Type, IsDynamic: newSecret.IsDynamic,
+			Value: newSecret.Value, Script: newSecret.Script,
 		})
 	}
 
 	processSpan := sentry.StartSpan(rqContext, "process.secrets")
 	processSpan.Description = "run"
 	for secretIndex, _ := range response.Data {
-		if response.Data[secretIndex].IsDynamic {
-			value, _, errProcessSecret := response.Data[secretIndex].Process(rqContext, secretsSvc)
-			if errProcessSecret != nil {
-				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
-				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
-			} else {
-				response.Data[secretIndex].Value = value
-			}
+		value, _, errProcessSecret := response.Data[secretIndex].Process(rqContext, secretsSvc)
+		if errProcessSecret != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+		} else {
+			response.Data[secretIndex].Value = value
 		}
 	}
 
@@ -635,7 +628,7 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 		}
 		response.Secrets = append(response.Secrets, Secret{
 			ID: copiedSecret.ID, UID: copiedSecret.UID, FolderUID: copiedSecretFolder.UID,
-			Name: copiedSecret.Name, Value: copiedSecret.Value, Type: copiedSecret.Type, IsDynamic: copiedSecret.IsDynamic,
+			Name: copiedSecret.Name, Value: copiedSecret.Value, Script: copiedSecret.Script,
 		})
 	}
 
@@ -655,14 +648,12 @@ func CopyPasteSecretsHandler(c *gin.Context) {
 	processSpan := sentry.StartSpan(rqContext, "process.secrets")
 	processSpan.Description = "run"
 	for secretIndex, _ := range response.Secrets {
-		if response.Secrets[secretIndex].IsDynamic {
-			value, _, errProcessSecret := response.Secrets[secretIndex].Process(rqContext, secretsSvc)
-			if errProcessSecret != nil {
-				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
-				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
-			} else {
-				response.Secrets[secretIndex].Value = value
-			}
+		value, _, errProcessSecret := response.Secrets[secretIndex].Process(rqContext, secretsSvc)
+		if errProcessSecret != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+		} else {
+			response.Secrets[secretIndex].Value = value
 		}
 	}
 
@@ -759,7 +750,7 @@ func ExportSecretsHandler(c *gin.Context) {
 
 	listSecretParams := secrets2.ListSecretParams{
 		ListParams: generics.ListParams{Deleted: model.No, Pagination: request.Pagination, Order: request.Order},
-		IsDynamic:  model.YesOrNo,
+		Scriptable: model.YesOrNo,
 	}
 	if parentFolder != nil {
 		listSecretParams.FolderIDs = append(listSecretParams.IDs, parentFolder.ID)
@@ -774,8 +765,7 @@ func ExportSecretsHandler(c *gin.Context) {
 	}
 
 	for _, secret := range secretResults {
-		secretEntry := Secret{ID: secret.ID, UID: secret.UID, Name: secret.Name, Value: secret.Value, Type: secret.Type,
-			IsDynamic: secret.IsDynamic}
+		secretEntry := Secret{ID: secret.ID, UID: secret.UID, Name: secret.Name, Value: secret.Value, Script: secret.Script}
 		if parentFolder != nil {
 			secretEntry.FolderUID = parentFolder.UID
 		}
@@ -787,14 +777,12 @@ func ExportSecretsHandler(c *gin.Context) {
 	processSpan := sentry.StartSpan(rqContext, "process.secrets")
 	processSpan.Description = "run"
 	for secretIndex, _ := range response.Secrets {
-		if response.Secrets[secretIndex].IsDynamic {
-			value, _, errProcessSecret := response.Secrets[secretIndex].Process(rqContext, secretsSvc)
-			if errProcessSecret != nil {
-				msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
-				response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
-			} else {
-				response.Secrets[secretIndex].Value = value
-			}
+		value, _, errProcessSecret := response.Secrets[secretIndex].Process(rqContext, secretsSvc)
+		if errProcessSecret != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+		} else {
+			response.Secrets[secretIndex].Value = value
 		}
 	}
 

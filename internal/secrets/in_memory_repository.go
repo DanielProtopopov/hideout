@@ -90,33 +90,22 @@ func (m InMemoryRepository) Get(ctx context.Context, params ListSecretParams) ([
 		}
 	}
 
-	var typeResults []*Secret
-	for _, nameEntry := range nameResults {
-		if len(params.Types) > 0 {
-			if slices.Index(params.Types, nameEntry.Type) != -1 {
-				typeResults = append(typeResults, nameEntry)
+	var scriptableResults []*Secret
+	for _, folderEntry := range folderResults {
+		if params.Scriptable == model.Yes {
+			if folderEntry.Script != "" {
+				scriptableResults = append(scriptableResults, folderEntry)
+			}
+		} else if params.Scriptable == model.No {
+			if folderEntry.Script == "" {
+				scriptableResults = append(scriptableResults, folderEntry)
 			}
 		} else {
-			typeResults = append(typeResults, nameEntry)
+			scriptableResults = append(scriptableResults, folderEntry)
 		}
 	}
 
-	var dynamicResults []*Secret
-	for _, folderEntry := range typeResults {
-		if params.IsDynamic == model.Yes {
-			if folderEntry.IsDynamic == true {
-				dynamicResults = append(dynamicResults, folderEntry)
-			}
-		} else if params.IsDynamic == model.No {
-			if folderEntry.IsDynamic == false {
-				dynamicResults = append(dynamicResults, folderEntry)
-			}
-		} else {
-			dynamicResults = append(dynamicResults, folderEntry)
-		}
-	}
-
-	filteredResults := m.Filter(ctx, dynamicResults, params.ListParams)
+	filteredResults := m.Filter(ctx, scriptableResults, params.ListParams)
 	if params.Page == 0 && params.PerPage == 0 {
 		return filteredResults, nil
 	}
@@ -169,7 +158,7 @@ func (m InMemoryRepository) Update(ctx context.Context, secret Secret) (*Secret,
 			secretEntry.FolderID = secret.FolderID
 			secretEntry.Name = secret.Name
 			secretEntry.Value = secret.Value
-			secretEntry.Type = secret.Type
+			secretEntry.Script = secret.Script
 			secretEntry.UpdatedAt = time.Now()
 			return &secretEntry, nil
 		}
@@ -305,16 +294,6 @@ func (m InMemoryRepository) Sort(ctx context.Context, data []*Secret, ordering [
 						return p1.Name < p2.Name
 					} else {
 						return p1.Name > p2.Name
-					}
-				})
-			}
-		case "type":
-			{
-				orderParams = append(orderParams, func(p1, p2 *Secret) bool {
-					if order.Order {
-						return p1.Type < p2.Type
-					} else {
-						return p1.Type > p2.Type
 					}
 				})
 			}
