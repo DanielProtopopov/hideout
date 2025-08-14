@@ -159,13 +159,31 @@ definitions:
   secrets.ExportSecretsRQ:
     properties:
       ArchiveType:
+        enum:
+        - tar
+        - zip
         type: string
       CompressionType:
+        enum:
+        - brotli
+        - bzip2
+        - zip
+        - gzip
+        - lz4
+        - lz
+        - mz
+        - sz
+        - s2
+        - xz
+        - zz
+        - zst
         type: string
       FolderUID:
         example: abc-def-ghi
         type: string
       Format:
+        enum:
+        - dotenv
         type: string
       Pagination:
         $ref: '#/definitions/pagination.Pagination'

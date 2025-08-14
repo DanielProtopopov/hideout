@@ -85,9 +85,9 @@ type (
 	}
 
 	ExportSecretsRQ struct {
-		Format          string                `json:"Format"`
-		CompressionType string                `json:"CompressionType"`
-		ArchiveType     string                `json:"ArchiveType"`
+		Format          string                `json:"Format" enums:"dotenv"`
+		CompressionType string                `json:"CompressionType" enums:"brotli,bzip2,zip,gzip,lz4,lz,mz,sz,s2,xz,zz,zst"`
+		ArchiveType     string                `json:"ArchiveType" enums:"tar,zip"`
 		FolderUID       string                `json:"FolderUID" description:"Folder unique identifier" example:"abc-def-ghi"`
 		Pagination      pagination.Pagination `json:"Pagination" description:"Secrets pagination"`
 		Order           []ordering.Order      `json:"SOrder" description:"Secrets order"`

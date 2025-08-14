@@ -260,7 +260,7 @@ func (rq ExportSecretsRQ) Validate(ctx context.Context, secretsService *secrets.
 					TemplateData: map[string]interface{}{"Name": "CompressionType"}})
 				Errors = append(Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
 			} else {
-				_, compressionTypeExists := CompressionTypesMapInv[rq.Format]
+				_, compressionTypeExists := CompressionTypesMapInv[rq.CompressionType]
 				if !compressionTypeExists {
 					msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "BodyParamInvalidError"},
 						TemplateData: map[string]interface{}{"Name": "CompressionType", "Values": strings.Join([]string{

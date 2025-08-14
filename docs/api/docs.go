@@ -651,17 +651,38 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "ArchiveType": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "tar",
+                        "zip"
+                    ]
                 },
                 "CompressionType": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "brotli",
+                        "bzip2",
+                        "zip",
+                        "gzip",
+                        "lz4",
+                        "lz",
+                        "mz",
+                        "sz",
+                        "s2",
+                        "xz",
+                        "zz",
+                        "zst"
+                    ]
                 },
                 "FolderUID": {
                     "type": "string",
                     "example": "abc-def-ghi"
                 },
                 "Format": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "dotenv"
+                    ]
                 },
                 "Pagination": {
                     "$ref": "#/definitions/pagination.Pagination"
