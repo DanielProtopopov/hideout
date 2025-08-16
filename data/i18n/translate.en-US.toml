@@ -13,6 +13,11 @@ description = "Error"
 hash = "sha1-25e1899eb75cdf4e31000219c3da387197a3363a"
 other = "Missing required parameter {{.Name}} from request body"
 
+[CompileSecretValueRegexError]
+description = "Error"
+hash = "sha1-bf31a83b8435250998ada75315be027f2e475646"
+other = "Error compiling regular expression for secret name validation"
+
 [CopySecretsFoldersError]
 description = "Error"
 hash = "sha1-022b04fec5e78d04b7779d69f46df01b0ee1f1e5"
@@ -73,6 +78,16 @@ description = "Error"
 hash = "sha1-c9d017d51cac7fdd021edba7acae0303db6b2af4"
 other = "Error retrieving secrets"
 
+[InvalidSecretNameError]
+description = "Error"
+hash = "sha1-68bc4fa9319f6aee62f074c65b58248f36f3d6b8"
+other = "Invalid name of secret"
+
+[OnlySecretOrValueError]
+description = "Error"
+hash = "sha1-4a2fb30b0a683e103c7371b9e287ebedf93ee078"
+other = "Provide only scriptable (Script) or static value (Value)"
+
 [OrderError]
 description = "Error"
 hash = "sha1-9f341a479e71798e78d77f9570dfd38183f0012b"
@@ -123,17 +138,27 @@ description = "Error"
 hash = "sha1-b78f15a222839716614eacc0bfa31a6599854dec"
 other = "Error updating secret with UID of {{.UID}}"
 
-[CompileSecretValueRegexError]
+[CloseArchiveFileError]
 description = "Error"
-hash = "sha1-bf31a83b8435250998ada75315be027f2e475646"
-other = "Error compiling regular expression for secret name validation"
+hash = "sha1-b98252e8607a9473b4410cc29c83e77ddf8c65f2"
+other = "Error closing archive file"
 
-[InvalidSecretNameError]
+[DeleteArchiveFileError]
 description = "Error"
-hash = "sha1-68bc4fa9319f6aee62f074c65b58248f36f3d6b8"
-other = "Invalid name of secret"
+hash = "sha1-136083200d529da622e21bea18f41ca017c44cc0"
+other = "Error deleting archive file"
 
-[OnlySecretOrValueError]
+[OpenSecretsArchiveError]
 description = "Error"
-hash = "sha1-4a2fb30b0a683e103c7371b9e287ebedf93ee078"
-other = "Provide only scriptable (Script) or static value (Value)"
+hash = "sha1-51a47657e95282a8e52b8ace343a1b5f53b0a4d1"
+other = "Error opening archive file"
+
+[ReadSecretsArchiveError]
+description = "Error"
+hash = "sha1-cf13dedca7f32829cf038249e6d9d138b494503d"
+other = "Error reading archive file"
+
+[UnmarshalDotEnvError]
+description = "Error"
+hash = "sha1-4bafc1104e578b70cbf6e5e95836ffdc5bf90d0d"
+other = "Error unmarshalling dotenv string"

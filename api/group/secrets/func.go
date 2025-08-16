@@ -225,3 +225,19 @@ func ArchiveExport(ctx context.Context, data []byte, archiveType uint, compressi
 
 	return secretsArchiveTemporaryFile.Name(), nil
 }
+
+func Difference(a, b []*secrets2.Secret) []secrets2.Secret {
+	mb := make(map[string]secrets2.Secret, len(b))
+	for _, x := range b {
+		mb[x.Name] = secrets2.Secret{}
+	}
+
+	var diff []secrets2.Secret
+	for _, x := range a {
+		if _, found := mb[x.Name]; !found {
+			diff = append(diff, *x)
+		}
+	}
+
+	return diff
+}

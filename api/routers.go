@@ -55,6 +55,7 @@ func Serve() {
 	v1Secrets.DELETE("/", secrets.DeleteSecretsHandler)
 	v1Secrets.PUT("/copy-paste/", secrets.CopyPasteSecretsHandler)
 	v1Secrets.POST("/export/", secrets.ExportSecretsHandler)
+	v1Secrets.POST("/diff/", secrets.DiffSecretsHandler)
 
 	errRun := route.Run(fmt.Sprintf("%s:%d", apiconfig.Settings.Server.Host, apiconfig.Settings.Server.Port))
 	log.Panic(errRun)

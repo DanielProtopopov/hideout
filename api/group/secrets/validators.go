@@ -3,6 +3,7 @@ package secrets
 import (
 	"context"
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/joho/godotenv"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"github.com/pkg/errors"
 	"hideout/internal/common/generics"
@@ -275,6 +276,25 @@ func (rq ExportSecretsRQ) Validate(ctx context.Context, secretsService *secrets.
 				}
 			}
 		}
+	}
+
+	return Errors
+}
+
+func (rq DiffSecretsRQ) Validate(ctx context.Context, secretsService *secrets.SecretsService, Localizer *i18n.Localizer) (Errors []rqrs.Error) {
+	if rq.FolderUID != "" {
+		_, errGetFolderByUID := secretsService.GetFolderByUID(ctx, rq.FolderUID)
+		if errGetFolderByUID != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"}})
+			Errors = append(Errors, rqrs.Error{Message: msg, Description: errGetFolderByUID.Error(), Code: 0})
+		}
+	}
+
+	_, errUnmarshal := godotenv.Unmarshal(rq.Data)
+	if errUnmarshal != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "UnmarshalDotEnvError"}})
+		Errors = append(Errors, rqrs.Error{Message: msg, Description: errUnmarshal.Error(), Code: 0})
+		return Errors
 	}
 
 	return Errors

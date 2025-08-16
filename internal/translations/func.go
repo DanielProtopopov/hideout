@@ -284,3 +284,53 @@ func _() string {
 		},
 	})
 }
+
+func _() string {
+	return i18n.NewLocalizer(i18n.NewBundle(language.English)).MustLocalize(&i18n.LocalizeConfig{
+		DefaultMessage: &i18n.Message{
+			ID:          "UnmarshalDotEnvError",
+			Description: "Error",
+			Other:       "Error unmarshalling dotenv string",
+		},
+	})
+}
+
+func _() string {
+	return i18n.NewLocalizer(i18n.NewBundle(language.English)).MustLocalize(&i18n.LocalizeConfig{
+		DefaultMessage: &i18n.Message{
+			ID:          "OpenSecretsArchiveError",
+			Description: "Error",
+			Other:       "Error opening archive file",
+		},
+	})
+}
+
+func _() string {
+	return i18n.NewLocalizer(i18n.NewBundle(language.English)).MustLocalize(&i18n.LocalizeConfig{
+		DefaultMessage: &i18n.Message{
+			ID:          "ReadSecretsArchiveError",
+			Description: "Error",
+			Other:       "Error reading archive file",
+		},
+	})
+}
+
+func _() string {
+	return i18n.NewLocalizer(i18n.NewBundle(language.English)).MustLocalize(&i18n.LocalizeConfig{
+		DefaultMessage: &i18n.Message{
+			ID:          "CloseArchiveFileError",
+			Description: "Error",
+			Other:       "Error closing archive file",
+		},
+	})
+}
+
+func _() string {
+	return i18n.NewLocalizer(i18n.NewBundle(language.English)).MustLocalize(&i18n.LocalizeConfig{
+		DefaultMessage: &i18n.Message{
+			ID:          "DeleteArchiveFileError",
+			Description: "Error",
+			Other:       "Error deleting archive file",
+		},
+	})
+}

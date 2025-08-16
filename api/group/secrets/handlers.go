@@ -9,11 +9,14 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/joho/godotenv"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	apiconfig "hideout/cmd/api/config"
 	"hideout/internal/common/apperror"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
+	"hideout/internal/common/ordering"
+	"hideout/internal/common/pagination"
 	"hideout/internal/common/rqrs"
 	"hideout/internal/folders"
 	secrets2 "hideout/internal/secrets"
@@ -834,8 +837,16 @@ func ExportSecretsHandler(c *gin.Context) {
 	}
 
 	defer func() {
-		archiveFile.Close()
-		os.Remove(archiveFilename)
+		errCloseArchiveFile := archiveFile.Close()
+		if errCloseArchiveFile != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CloseArchiveFileError"}})
+			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errCloseArchiveFile.Error(), Code: 0})
+		}
+		errRemoveArchive := os.Remove(archiveFilename)
+		if errRemoveArchive != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DeleteArchiveFileError"}})
+			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errRemoveArchive.Error(), Code: 0})
+		}
 	}()
 
 	var buffer bytes.Buffer
@@ -851,4 +862,172 @@ func ExportSecretsHandler(c *gin.Context) {
 	c.Data(http.StatusOK, "application/octet-stream", buffer.Bytes())
 
 	exportSpan.Finish()
+}
+
+// DiffSecretsHandler
+// @Summary Get difference for existing and supplied secrets list
+// @Description Get difference for existing and supplied secrets list
+// @ID diff-secrets
+// @Tags Secrets
+// @Produce json
+// @Param params body DiffSecretsRQ true "Secrets request"
+// @Success 200 {object} DiffSecretsRS
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 403 {string} string "Forbidden"
+// @Failure 400 {object} DiffSecretsRS
+// @Failure 404 {object} DiffSecretsRS
+// @Failure 500 {object} DiffSecretsRS
+// @Router /secrets/diff/ [post]
+func DiffSecretsHandler(c *gin.Context) {
+	rqContext := c.Request.Context()
+	SentryHub := sentry.GetHubFromContext(rqContext)
+	if SentryHub == nil {
+		SentryHub = sentry.CurrentHub().Clone()
+		rqContext = sentry.SetHubOnContext(rqContext, SentryHub)
+	}
+
+	Language, _ := c.Get("Language")
+	Localizer := i18n.NewLocalizer(apiconfig.Settings.Bundle, Language.(string))
+
+	rqContext = context.WithValue(rqContext, "Sentry", SentryHub)
+	rqContext = context.WithValue(rqContext, "Localizer", Localizer)
+	rqContext = context.WithValue(rqContext, "Language", Language)
+
+	validationSpan := sentry.StartSpan(rqContext, "validate.get.secrets")
+	validationSpan.Description = "rq.validate"
+
+	var request DiffSecretsRQ
+	response := DiffSecretsRS{Create: []Secret{}, Update: []Secret{}, Delete: []Secret{}, ResponseRS: rqrs.ResponseRS{Errors: []rqrs.Error{}}}
+
+	secretsSvc, errCreateService := secrets.NewService(rqContext, apiconfig.Settings.SecretsRepository,
+		apiconfig.Settings.FoldersRepository, &structs.Folders, &structs.Secrets)
+	if errCreateService != nil {
+		log.Printf("Error creating secrets service: %s", errCreateService.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "CreateSecretsServiceError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errCreateService.Error(), Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	errBindBody := c.ShouldBindBodyWith(&request, binding.JSON)
+	if errBindBody != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "RequestBodyMappingError"}})
+		response.ResponseRS.Errors = append(response.ResponseRS.Errors, rqrs.Error{Message: msg, Description: errBindBody.Error(), Code: 0})
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	errValidate := request.Validate(rqContext, secretsSvc, Localizer)
+	if errValidate != nil {
+		response.Errors = errValidate
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	validationSpan.Finish()
+
+	runSpan := sentry.StartSpan(rqContext, "get.secrets")
+	runSpan.Description = "run"
+
+	folderByUID, errGetFolder := secretsSvc.GetFolderByUID(rqContext, request.FolderUID)
+	if errGetFolder != nil {
+		if errors.Is(errGetFolder, apperror.ErrRecordNotFound) {
+			log.Printf("Folder with UID of %s was not found", request.FolderUID)
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "FolderNotFoundError"},
+				TemplateData: map[string]interface{}{"UID": request.FolderUID}})
+			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: msg, Code: 0})
+			c.JSON(http.StatusNotFound, response)
+			return
+		}
+		log.Printf("Error fetching folder with UID of %s: %s", request.FolderUID, errGetFolder.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetFolderByUIDError"},
+			TemplateData: map[string]interface{}{"UID": request.FolderUID}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetFolder.Error(), Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	listSecretParams := secrets2.ListSecretParams{
+		ListParams: generics.ListParams{Deleted: model.No, Pagination: pagination.Pagination{PerPage: 0, Page: 0},
+			Order: []ordering.Order{{Order: false, OrderBy: "ID"}}}, Scriptable: model.YesOrNo, FolderIDs: []uint{folderByUID.ID},
+	}
+
+	existingSecrets, errGetSecrets := secretsSvc.GetSecrets(rqContext, listSecretParams)
+	if errGetSecrets != nil {
+		log.Printf("Error fetching secrets: %s", errGetSecrets.Error())
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "GetSecretsError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errGetSecrets.Error(), Code: 0})
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	envVars, errUmarshalSecrets := godotenv.Unmarshal(request.Data)
+	if errUmarshalSecrets != nil {
+		msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "UnmarshalDotEnvError"}})
+		response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errUmarshalSecrets.Error(), Code: 0})
+		c.JSON(http.StatusBadRequest, response)
+	}
+
+	var envVariables []*secrets2.Secret
+	for envVarName, envVarValue := range envVars {
+		envVariables = append(envVariables, &secrets2.Secret{Name: envVarName, Value: envVarValue})
+	}
+
+	// Update
+	for _, existingSecret := range existingSecrets {
+		for _, envVar := range envVariables {
+			if strings.EqualFold(existingSecret.Name, envVar.Name) {
+				if existingSecret.Script == "" && existingSecret.Value != envVar.Value {
+					secretEntry := Secret{ID: existingSecret.ID, UID: existingSecret.UID, Name: existingSecret.Name,
+						Value: existingSecret.Value, Script: existingSecret.Script}
+					response.Update = append(response.Update, secretEntry)
+				} else if existingSecret.Script != "" && existingSecret.Script != envVar.Value {
+					secretEntry := Secret{ID: existingSecret.ID, UID: existingSecret.UID, Name: existingSecret.Name,
+						Value: existingSecret.Value, Script: existingSecret.Script}
+					// If the evaluation of script for value produces same value, it means there's no script to evaluate
+					// and assign it to value instead of script
+					secretValue, _, errProcessSecret := secretEntry.Process(rqContext, secretsSvc)
+					if errProcessSecret != nil {
+						msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+						response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+					}
+					if secretValue == envVar.Value {
+						secretEntry.Value = envVar.Value
+						secretEntry.Script = ""
+					}
+
+					response.Update = append(response.Update, secretEntry)
+				}
+			}
+		}
+	}
+
+	// Create
+	secretsToCreate := Difference(envVariables, existingSecrets)
+	for _, createSecretEntry := range secretsToCreate {
+		// If the evaluation of script for value produces same value, it means there's no script to evaluate
+		// and assign it to value instead of script
+		createSecretEntryVal := Secret{Name: createSecretEntry.Name, Script: createSecretEntry.Value}
+		secretValue, _, errProcessSecret := createSecretEntryVal.Process(rqContext, secretsSvc)
+		if errProcessSecret != nil {
+			msg := Localizer.MustLocalize(&i18n.LocalizeConfig{DefaultMessage: &i18n.Message{ID: "DynamicSecretError"}})
+			response.Errors = append(response.Errors, rqrs.Error{Message: msg, Description: errProcessSecret.Error(), Code: 0})
+		}
+		if secretValue != createSecretEntryVal.Value {
+			createSecretEntry.Value = ""
+			createSecretEntry.Script = createSecretEntryVal.Script
+		}
+
+		secretEntry := Secret{Name: createSecretEntry.Name, Value: createSecretEntry.Value, Script: createSecretEntry.Script}
+		response.Create = append(response.Create, secretEntry)
+	}
+
+	// Delete
+	secretsToDelete := Difference(existingSecrets, envVariables)
+	for _, deleteSecretEntry := range secretsToDelete {
+		response.Delete = append(response.Delete, Secret{ID: deleteSecretEntry.ID, UID: deleteSecretEntry.UID, Name: deleteSecretEntry.Name,
+			Value: deleteSecretEntry.Value, Script: deleteSecretEntry.Script})
+	}
+	runSpan.Finish()
+
+	c.JSON(http.StatusOK, response)
 }
