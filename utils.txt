@@ -1,0 +1,2 @@
+rg '\{ID: \"([a-zA-Z]*)\"' -or '$1'  > results.txt
+sort -u results.txt| uniq

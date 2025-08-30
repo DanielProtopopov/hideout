@@ -1,6 +1,7 @@
 package structs
 
 import (
+	"github.com/casbin/casbin/v2"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"hideout/internal/folders"
@@ -12,4 +13,5 @@ var (
 	Secrets []secrets.Secret // Secret folder map
 	Redis   *redis.Client
 	Gorm    *gorm.DB
+	CasBin  *casbin.Enforcer
 )

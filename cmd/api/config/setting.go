@@ -29,6 +29,7 @@ type Config struct {
 	I18n              *i18n.Localizer          // I18n configuration (i18n)
 	Redis             config.RedisConfig       // Redis configuration
 	Database          config.DatabaseConfig    // Database configuration
+	CasBin            config.CasBinConfig      // CasBin enforcer
 	SecretsRepository config.RepositoryConfig  // Secrets data store (repository) configuration
 	FoldersRepository config.RepositoryConfig  // Folders data store (repository) configuration
 	Debug             bool                     // Debugging flag
@@ -82,6 +83,11 @@ func Init(ctx context.Context) {
 			Name:    config.GetEnv("DB_NAME", "hideout"),
 			Proto:   config.GetEnv("DB_PROTOCOL", "postgresql"),
 			SSLMode: config.GetEnvAsBool("DB_SSL_MODE", true),
+		},
+		CasBin: config.CasBinConfig{
+			AdapterType: config.GetEnvAsUInt("CASBIN_ADAPTER_TYPE", CasBinAdapterType_None),
+			ModelPath:   config.GetEnv("CASBIN_MODEL_PATH", ""),
+			PolicyPath:  config.GetEnv("CASBIN_POLICY_PATH", ""),
 		},
 		SecretsRepository: config.RepositoryConfig{
 			FileName:        config.GetEnv("SECRETS_REPOSITORY_FILE_NAME", ""),
@@ -178,4 +184,10 @@ func Init(ctx context.Context) {
 
 	structs.Secrets = []secrets.Secret{}
 	structs.Folders = []folders.Folder{}
+
+	casBinEnforcer, errCreateCasBinEnforcer := CreateCasBinEnforcer(ctx, Settings.CasBin)
+	if errCreateCasBinEnforcer != nil {
+		log.Panicf(errCreateCasBinEnforcer.Error())
+	}
+	structs.CasBin = casBinEnforcer
 }

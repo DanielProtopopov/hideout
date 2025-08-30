@@ -12,9 +12,6 @@ import (
 	"hideout/structs"
 )
 
-type Config struct {
-}
-
 type SecretsService struct {
 	secretsConfig config.RepositoryConfig
 	foldersConfig config.RepositoryConfig

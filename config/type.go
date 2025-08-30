@@ -37,4 +37,10 @@ type (
 		Proto   string
 		SSLMode bool
 	}
+
+	CasBinConfig struct {
+		AdapterType uint
+		ModelPath   string
+		PolicyPath  string
+	}
 )
