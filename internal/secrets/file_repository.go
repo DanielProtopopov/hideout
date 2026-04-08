@@ -6,8 +6,6 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"encoding/xml"
-	"github.com/gocarina/gocsv"
-	"github.com/pkg/errors"
 	"hideout/internal/common/apperror"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
@@ -15,6 +13,9 @@ import (
 	"hideout/internal/common/pagination"
 	"hideout/internal/pkg/extra"
 	"os"
+
+	"github.com/gocarina/gocsv"
+	"github.com/pkg/errors"
 )
 
 type FileRepository struct {
@@ -23,8 +24,8 @@ type FileRepository struct {
 	inMemoryRepository *InMemoryRepository
 }
 
-func NewFileRepository(filename string, encodingType uint, inMemoryRep *InMemoryRepository) FileRepository {
-	return FileRepository{Filename: filename, EncodingType: encodingType, inMemoryRepository: inMemoryRep}
+func NewFileRepository(filename string, encodingType uint, inMemoryRep *InMemoryRepository) *FileRepository {
+	return &FileRepository{Filename: filename, EncodingType: encodingType, inMemoryRepository: inMemoryRep}
 }
 
 func (m FileRepository) GetID(ctx context.Context) (uint, error) {

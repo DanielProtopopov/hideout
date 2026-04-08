@@ -3,14 +3,6 @@ package apiconfig
 import (
 	"context"
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"github.com/redis/go-redis/v9"
-	"golang.org/x/text/language"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"hideout/config"
 	"hideout/internal/folders"
 	"hideout/internal/pkg/extra"
@@ -20,6 +12,15 @@ import (
 	"hideout/structs"
 	"log"
 	"time"
+
+	"github.com/BurntSushi/toml"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"github.com/redis/go-redis/v9"
+	"golang.org/x/text/language"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Config struct {
@@ -106,7 +107,8 @@ func Init(ctx context.Context) {
 			secrets2.TypeMapInv[secrets2.RepositoryType_InMemory],
 			secrets2.TypeMapInv[secrets2.RepositoryType_Redis],
 			secrets2.TypeMapInv[secrets2.RepositoryType_Database],
-			secrets2.TypeMapInv[secrets2.RepositoryType_File])
+			secrets2.TypeMapInv[secrets2.RepositoryType_File],
+			secrets2.TypeMapInv[secrets2.RepositoryType_Git])
 	}
 	Settings.SecretsRepository.Type = secretsAdapterTypeVal
 	if Settings.SecretsRepository.Type == secrets2.RepositoryType_File {
@@ -127,7 +129,8 @@ func Init(ctx context.Context) {
 			secrets2.TypeMapInv[secrets2.RepositoryType_InMemory],
 			secrets2.TypeMapInv[secrets2.RepositoryType_Redis],
 			secrets2.TypeMapInv[secrets2.RepositoryType_Database],
-			secrets2.TypeMapInv[secrets2.RepositoryType_File])
+			secrets2.TypeMapInv[secrets2.RepositoryType_File],
+			secrets2.TypeMapInv[secrets2.RepositoryType_Git])
 	}
 	Settings.FoldersRepository.Type = foldersAdapterTypeVal
 	if Settings.FoldersRepository.Type == secrets2.RepositoryType_File {

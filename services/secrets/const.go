@@ -5,4 +5,5 @@ const (
 	RepositoryType_Redis    = 1
 	RepositoryType_Database = 2
 	RepositoryType_File     = 3
+	RepositoryType_Git      = 4
 )

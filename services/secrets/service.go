@@ -2,14 +2,16 @@ package secrets
 
 import (
 	"context"
-	"github.com/brianvoe/gofakeit/v7"
-	"github.com/pkg/errors"
 	"hideout/config"
 	"hideout/internal/common/generics"
 	"hideout/internal/common/model"
 	"hideout/internal/folders"
 	"hideout/internal/secrets"
 	"hideout/structs"
+
+	"github.com/brianvoe/gofakeit/v7"
+	"github.com/go-git/go-git/v6"
+	"github.com/pkg/errors"
 )
 
 type SecretsService struct {
@@ -78,6 +80,19 @@ func NewService(ctx context.Context, secretsConfig config.RepositoryConfig, fold
 			}
 			fileSecretsRep := secrets.NewFileRepository(secretsConfig.FileName, secretsConfig.FileEncoding, inMemorySecretsRep)
 			secretsService.secretsRepository = fileSecretsRep
+
+			if secretsConfig.PreloadInMemory {
+				errLoad := secretsService.LoadSecrets(ctx)
+				if errLoad != nil {
+					return nil, errors.Wrap(errLoad, "Error loading data into memory")
+				}
+			}
+		}
+	case RepositoryType_Git:
+		{
+			var gitRepository *git.Repository = nil
+			gitSecretsRep := secrets.NewGitRepository(gitRepository)
+			secretsService.secretsRepository = gitSecretsRep
 
 			if secretsConfig.PreloadInMemory {
 				errLoad := secretsService.LoadSecrets(ctx)

@@ -13,12 +13,12 @@ func NewService(ctx context.Context) (*AccessControlService, error) {
 	return accessControlService, nil
 }
 
-// CountFolder check that user has access to count entries in folder
+// CountFolder check that the user has access to count entries in the folder
 func (m *AccessControlService) CountFolder(ctx context.Context, folderUID string) error {
 	return apperror.ErrNotImplemented
 }
 
-// ListFolder check that user has access to list entries in folder (only see key names)
+// ListFolder check that the user has access to list entries in the folder (only see key names)
 func (m *AccessControlService) ListFolder(ctx context.Context, folderUID string) error {
 	return apperror.ErrNotImplemented
 }
@@ -28,12 +28,12 @@ func (m *AccessControlService) ReadSecret(ctx context.Context, folderUID string,
 	return apperror.ErrNotImplemented
 }
 
-// WriteSecret check that user has access to write secret value
+// WriteSecret check that the user has access to write secret value
 func (m *AccessControlService) WriteSecret(ctx context.Context, folderUID string, secretUID string) error {
 	return apperror.ErrNotImplemented
 }
 
-// DeleteSecret check that user has access to delete secret
+// DeleteSecret check that the user has access to delete secret
 func (m *AccessControlService) DeleteSecret(ctx context.Context, folderUID string, secretUID string) error {
 	return apperror.ErrNotImplemented
 }
