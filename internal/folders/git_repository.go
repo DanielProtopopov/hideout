@@ -13,20 +13,20 @@ type GitRepository struct {
 	conn *git.Repository
 }
 
-func NewGitRepository(repository *git.Repository) (GitRepository, error) {
-	return GitRepository{conn: repository}, nil
+func NewGitRepository(repository *git.Repository) GitRepository {
+	return GitRepository{conn: repository}
 }
 
-func (m GitRepository) GetID(ctx context.Context) (string, error) {
-	return "", apperror.ErrNotImplemented
+func (m GitRepository) GetID(ctx context.Context) (uint, error) {
+	return 0, apperror.ErrNotImplemented
 }
 
 func (m GitRepository) Load(ctx context.Context) ([]Folder, error) {
 	return []Folder{}, apperror.ErrNotImplemented
 }
 
-func (m GitRepository) GetMapByID(ctx context.Context, params ListFolderParams) (map[string]*Folder, error) {
-	return map[string]*Folder{}, apperror.ErrNotImplemented
+func (m GitRepository) GetMapByID(ctx context.Context, params ListFolderParams) (map[uint]*Folder, error) {
+	return map[uint]*Folder{}, apperror.ErrNotImplemented
 }
 
 func (m GitRepository) GetMapByUID(ctx context.Context, params ListFolderParams) (map[string]*Folder, error) {

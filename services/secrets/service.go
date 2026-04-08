@@ -164,6 +164,19 @@ func NewService(ctx context.Context, secretsConfig config.RepositoryConfig, fold
 				}
 			}
 		}
+	case RepositoryType_Git:
+		{
+			var gitRepository *git.Repository = nil
+			gitSecretsRep := folders.NewGitRepository(gitRepository)
+			secretsService.foldersRepository = gitSecretsRep
+
+			if secretsConfig.PreloadInMemory {
+				errLoad := secretsService.LoadFolders(ctx)
+				if errLoad != nil {
+					return nil, errors.Wrap(errLoad, "Error loading data into memory")
+				}
+			}
+		}
 	}
 
 	return secretsService, nil
